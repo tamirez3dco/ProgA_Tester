@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace HWs_Generator
 {
+    delegate void CreateDocFunc(int[] args, bool real_input);
+
     class HW1 : HW0
     {
         public static String get_input_integer(bool realinput, int num)
@@ -374,6 +376,20 @@ namespace HWs_Generator
 
         public override void Create_HW(int[] args, bool real_input)
         {
+            CreateDocFunc[] questionsDocCreators = new CreateDocFunc[6];
+            questionsDocCreators[0] = Create_Q1;
+            questionsDocCreators[1] = Create_Q3;
+            questionsDocCreators[2] = Create_Q4;
+            questionsDocCreators[3] = Create_Q5;
+            questionsDocCreators[4] = Create_Q6;
+            questionsDocCreators[5] = Create_Q7;
+
+            for (int i = 0; i < questionsDocCreators.Length; i++)
+            {
+                Console.WriteLine("**********{0}", i + 1);
+                questionsDocCreators[i](args, real_input);
+            }
+/*
             Create_Q1(args, real_input);
             //Create_Q2(args,real_input);
             Create_Q3(args, real_input);
@@ -381,6 +397,7 @@ namespace HWs_Generator
             Create_Q5(args, real_input);
             Create_Q6(args, real_input);
             Create_Q7(args, real_input);
+*/
         }
 
         public override void Create_DocFile(int[] args)
