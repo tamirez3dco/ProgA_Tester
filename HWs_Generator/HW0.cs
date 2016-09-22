@@ -21,6 +21,7 @@ namespace HWs_Generator
         public String pattern_file_orig = @"HW0_pattern_Orig.docx";
         public int Num_Of_Test_Tries = 10;
 
+        public static Random r = new Random();
 
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -101,7 +102,7 @@ namespace HWs_Generator
             return res;
         }
 
-        public void createRandomInputFile(String filePath)
+        public virtual void createRandomInputFile(String filePath)
         {
             using (StreamWriter sw = new StreamWriter(filePath, false))
             {
@@ -135,17 +136,27 @@ namespace HWs_Generator
             if (!realinput)
             {
                 String res = "kelet" + num;
-                Console.BackgroundColor = ConsoleColor.Blue;
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine(res);
-                Console.BackgroundColor = ConsoleColor.White;
+                Console.ForegroundColor = ConsoleColor.White;
                 return res;
             }
             else return Console.ReadLine();
         }
 
+        public static String get_input_string(bool realinput, String non_real_input)
+        {
+            if (!realinput)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine(non_real_input);
+                Console.ForegroundColor = ConsoleColor.White;
+                return non_real_input;
+            }
+            else return Console.ReadLine();
+        }
 
-        static Random r = new Random();
-        public int[] get_random_args(int id)
+        public virtual int[] get_random_args(int id)
         {
             int[] args = new int[5];
             args[0] = id;
@@ -156,7 +167,7 @@ namespace HWs_Generator
             return args;
         }
 
-        public void Create_DocFile(int[] args)
+        public virtual void Create_DocFile(int[] args)
         {
             int id = args[0];
             int shape = args[1];
@@ -192,7 +203,9 @@ namespace HWs_Generator
             return;
         }
 
-        public void Create_HW(int[] args,bool real_input)
+
+
+        public virtual void Create_HW(int[] args,bool real_input)
         {
             
             int id = args[0];

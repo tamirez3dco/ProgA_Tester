@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.Word;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace StudentsLib
                 ref replaceAll, ref missing, ref missing, ref missing, ref missing);
         }
 
-        public static void Replace_to_picture(Microsoft.Office.Interop.Word.Document doc, String what_to_replace, String picture_path)
+        public static InlineShape Replace_to_picture(Microsoft.Office.Interop.Word.Document doc, String what_to_replace, String picture_path)
         {
             Microsoft.Office.Interop.Word.Find findObject = doc.Application.Selection.Find;
             //findObject.form;
@@ -35,7 +36,8 @@ namespace StudentsLib
                 ref missing, ref missing, ref missing, ref missing, ref missing,
                 ref replaceNone, ref missing, ref missing, ref missing, ref missing);
 
-            doc.Application.Selection.InlineShapes.AddPicture(picture_path);
+            InlineShape shape = doc.Application.Selection.InlineShapes.AddPicture(picture_path);
+            return shape;
         }
 
 

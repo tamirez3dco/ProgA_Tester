@@ -13,8 +13,15 @@ namespace HWs_Generator
 
         static void Main(string[] args)
         {
-
             Students students = new Students();
+
+            HW1 hw1 = new HW1();
+            int tid = 029046117;
+            int[] thw_args = hw1.get_random_args(tid);
+            //hw1.Create_HW(thw_args, false);
+            hw1.Create_DocFile(thw_args);
+            return;
+
             foreach (int id in Students.students_dic.Keys)
             {
                 HW0 hw0 = new HW0();
