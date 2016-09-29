@@ -25,7 +25,12 @@ namespace StudentsLib
                 EnableSsl = true
             };
             var message = new MailMessage("proga.netanya@gmail.com", email, subject, Body);
-            foreach (String file in attachments) message.Attachments.Add(new Attachment(file));
+            //var message = new MailMessage("proga.netanya@gmail.com", "tamirlevi123@gmail.com", subject, Body);
+            foreach (String file in attachments)
+            {
+                if (file == null || file == String.Empty) continue;
+                message.Attachments.Add(new Attachment(file));
+            }
             client.Send(message);
         }
     }

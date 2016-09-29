@@ -15,11 +15,18 @@ namespace HWs_Generator
 {
     public class HW0
     {
-        public String Students_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs\HW0";
+        public static String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
         public String pattern_dir = @"D:\Tamir\Netanya_ProgrammingA\2017\Patterns_docs";
         public String pattern_file_copy = @"HW0_pattern_Copy.docx";
         public String pattern_file_orig = @"HW0_pattern_Orig.docx";
-        public int Num_Of_Test_Tries = 10;
+        public String Students_Hws_dirs;
+        public Size exampleRectangleSize = new Size(300, 900);
+        public int Num_Of_Test_Tries = 1;
+
+        public HW0()
+        {
+            Students_Hws_dirs = Students_All_Hws_dirs + @"\HW0";
+        }
 
         public static Random r = new Random();
 
@@ -38,17 +45,17 @@ namespace HWs_Generator
             public int Bottom { get; set; }
         }
 
-        public static String StringfromIntArray(int[] arr)
+        public static String StringfromObjArray(Object[] arr)
         {
             String res = String.Empty;
-            for (int i = 0; i < arr.Length; i++) res += arr[i] + ",";
+            for (int i = 0; i < arr.Length; i++) res += arr[i].ToString() + ",";
             return res;
         }
-        public static int[] IntArrayFromString(String s)
+        public static Object[] ObjArrayFromString(String s)
         {
             String[] tokeenizer = { "," };
             String[] tokens = s.Split(tokeenizer, StringSplitOptions.RemoveEmptyEntries);
-            int[] res = new int[tokens.Length];
+            Object[] res = new Object[tokens.Length];
             for (int i = 0; i < tokens.Length; i++)
             {
                 res[i] = int.Parse(tokens[i]);
@@ -79,18 +86,18 @@ namespace HWs_Generator
             Console.WriteLine(new String('*', size * 2));
         }
 
-        public int[] LoadArgs(int id)
+        public Object[] LoadArgs(int id)
         {
             String studentArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.txt";
-            return IntArrayFromString(File.ReadAllText(studentArgsFilePath));
+            return ObjArrayFromString(File.ReadAllText(studentArgsFilePath));
         }
 
-        public void SaveArgs(int[] args)
+        public void SaveArgs(Object[] args)
         {
-            int id = args[0];
+            int id = (int)(args[0]);
             String studentArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.txt";
             if (File.Exists(studentArgsFilePath)) File.Delete(studentArgsFilePath);
-            File.WriteAllText(studentArgsFilePath,StringfromIntArray(args));
+            File.WriteAllText(studentArgsFilePath,StringfromObjArray(args));
         }
 
         public String getRandomString()
@@ -102,7 +109,7 @@ namespace HWs_Generator
             return res;
         }
 
-        public virtual void createRandomInputFile(String filePath)
+        public virtual void createRandomInputFile(int id, String filePath)
         {
             using (StreamWriter sw = new StreamWriter(filePath, false))
             {
@@ -156,9 +163,9 @@ namespace HWs_Generator
             else return Console.ReadLine();
         }
 
-        public virtual int[] get_random_args(int id)
+        public virtual Object[] get_random_args(int id)
         {
-            int[] args = new int[5];
+            Object[] args = new Object[5];
             args[0] = id;
             args[1] = r.Next(0, 3);
             args[2] = r.Next(4, 8);
@@ -167,13 +174,13 @@ namespace HWs_Generator
             return args;
         }
 
-        public virtual void Create_DocFile(int[] args)
+        public virtual void Create_DocFile(Object[] args)
         {
-            int id = args[0];
-            int shape = args[1];
-            int shape_size = args[2];
-            int kelet_repetitions = args[3];
-            int shave_reps = args[4];
+            int id = (int)args[0];
+            int shape = (int)args[1];
+            int shape_size = (int)args[2];
+            int kelet_repetitions = (int)args[3];
+            int shave_reps = (int)args[4];
 
             String orig_file_path = pattern_dir + "//" + pattern_file_orig;
             //ADDING A NEW DOCUMENT TO THE APPLICATION
@@ -203,21 +210,42 @@ namespace HWs_Generator
             return;
         }
 
+        public void GetConsoleRectImage(Object[] args)
+        {
+            int id = (int)args[0];
+            Process lol = Process.GetCurrentProcess();
+            IntPtr ptr = lol.MainWindowHandle;
+            Rect ConsoleRect = new Rect();
+            GetWindowRect(ptr, ref ConsoleRect);
 
+            // Set the bitmap object to the size of the screen
+            Bitmap bmpScreenshot = new Bitmap(exampleRectangleSize.Width, exampleRectangleSize.Height, PixelFormat.Format32bppArgb);
+            // Create a graphics object from the bitmap
+            Graphics gfxScreenshot = Graphics.FromImage(bmpScreenshot);
+            // Take the screenshot from the upper left corner to the right bottom corner
+            gfxScreenshot.CopyFromScreen(ConsoleRect.Left + 8, ConsoleRect.Top, 0, 0, exampleRectangleSize, CopyPixelOperation.SourceCopy);
 
-        public virtual void Create_HW(int[] args,bool real_input)
+            float ratio = 0.8f;
+            Size resized_size = new Size((int)(exampleRectangleSize.Width * ratio), (int)(exampleRectangleSize.Height * ratio));
+            Bitmap output = new Bitmap(bmpScreenshot, resized_size);
+            if (!Directory.Exists(Students_Hws_dirs)) Directory.CreateDirectory(Students_Hws_dirs);
+            output.Save(Students_Hws_dirs + "\\" + id.ToString() + ".png", ImageFormat.Png);
+
+        }
+
+        public virtual void Create_HW(Object[] args,bool real_input)
         {
             
-            int id = args[0];
-            int shape = args[1];
-            int shape_size = args[2];
-            int kelet_repetitions = args[3];
-            int shave_reps = args[4];
+            int id = (int)args[0];
+            int shape = (int)args[1];
+            int shape_size = (int)args[2];
+            int kelet_repetitions = (int)args[3];
+            int shave_reps = (int)args[4];
             Console.WriteLine("{0}",id.ToString("D9"));
             Console.WriteLine("** {0} **", id.ToString("D9"));
             Console.WriteLine();
 
-            switch (args[1])
+            switch (shape)
             {
                 case 0:
                     print_square(shape_size);
@@ -247,26 +275,32 @@ namespace HWs_Generator
 
             System.Threading.Thread.Sleep(1000);
 
+            if (real_input == false)
+            {
+                Process lol = Process.GetCurrentProcess();
+                IntPtr ptr = lol.MainWindowHandle;
+                Rect ConsoleRect = new Rect();
+                GetWindowRect(ptr, ref ConsoleRect);
 
-            Process lol = Process.GetCurrentProcess();
-            IntPtr ptr = lol.MainWindowHandle;
-            Rect ConsoleRect = new Rect();
-            GetWindowRect(ptr, ref ConsoleRect);
+                // Set the bitmap object to the size of the screen
+                Size screenCaptureSize = new Size(300, 900);
+                Bitmap bmpScreenshot = new Bitmap(screenCaptureSize.Width, screenCaptureSize.Height, PixelFormat.Format32bppArgb);
+                // Create a graphics object from the bitmap
+                Graphics gfxScreenshot = Graphics.FromImage(bmpScreenshot);
+                // Take the screenshot from the upper left corner to the right bottom corner
+                gfxScreenshot.CopyFromScreen(ConsoleRect.Left + 8, ConsoleRect.Top, 0, 0, screenCaptureSize, CopyPixelOperation.SourceCopy);
 
-            // Set the bitmap object to the size of the screen
-            Size screenCaptureSize = new Size(300, 900);
-            Bitmap bmpScreenshot = new Bitmap(screenCaptureSize.Width, screenCaptureSize.Height, PixelFormat.Format32bppArgb);
-            // Create a graphics object from the bitmap
-            Graphics gfxScreenshot = Graphics.FromImage(bmpScreenshot);
-            // Take the screenshot from the upper left corner to the right bottom corner
-            gfxScreenshot.CopyFromScreen(ConsoleRect.Left + 8, ConsoleRect.Top, 0, 0, screenCaptureSize, CopyPixelOperation.SourceCopy);
+                float ratio = 0.8f;
+                Size resized_size = new Size((int)(screenCaptureSize.Width * ratio), (int)(screenCaptureSize.Height * ratio));
+                Bitmap output = new Bitmap(bmpScreenshot, resized_size);
+                output.Save(Students_Hws_dirs + "\\" + id.ToString() + ".png", ImageFormat.Png);
 
-            float ratio = 0.8f;
-            Size resized_size = new Size((int)(screenCaptureSize.Width * ratio),(int)(screenCaptureSize.Height * ratio));
-            Bitmap output = new Bitmap(bmpScreenshot, resized_size);
-            output.Save(Students_Hws_dirs+"\\"+id.ToString()+".png", ImageFormat.Png);
-            
-            System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(1000);
+
+                Create_DocFile(args);
+
+            }
+
         }
     }
 }

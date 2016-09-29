@@ -7,6 +7,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Diagnostics;
+using SharpCompress.Reader;
+using SharpCompress.Common;
 
 namespace StudentsLib
 {
@@ -22,10 +24,24 @@ namespace StudentsLib
             String extractionPath = file.FullName.Substring(0, file.FullName.Length - 4) + "_extracted";
             // unzipping
             DirectoryInfo din = Directory.CreateDirectory(extractionPath);
-            ZipFile.ExtractToDirectory(path,extractionPath);
+            //ZipFile.ExtractToDirectory(path,extractionPath);
+
+            using (Stream stream = File.OpenRead(path))
+            {
+                var reader = ReaderFactory.Open(stream);
+                while (reader.MoveToNextEntry())
+                {
+                    if (!reader.Entry.IsDirectory)
+                    {
+                        //Console.WriteLine(reader.Entry.Key);
+                        reader.WriteEntryToDirectory(extractionPath, ExtractOptions.ExtractFullPath | ExtractOptions.Overwrite);
+                    }
+                }
+            }
+
 
             // search for .sln file
-            FileInfo[] solutionFiles = din.GetFiles("*.sln");
+            FileInfo[] solutionFiles = din.GetFiles("*.sln",SearchOption.AllDirectories);
             if (solutionFiles.Length > 1) {
                 errorReason = "More then 1 solution";
                 return false;

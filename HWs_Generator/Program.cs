@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StudentsLib;
+using System.IO;
 
 namespace HWs_Generator
 {
@@ -14,22 +15,34 @@ namespace HWs_Generator
         static void Main(string[] args)
         {
             Students students = new Students();
-
-            HW1 hw1 = new HW1();
+/*
+            HW2 hww = new HW2();
             int tid = 029046117;
-            int[] thw_args = hw1.get_random_args(tid);
-            hw1.Create_HW(thw_args, false);
-            //hw1.Create_DocFile(thw_args);
+            Object[] thw_args = hww.get_random_args(tid);
+            hww.Create_HW(thw_args, false);
+            hww.SaveArgs(thw_args);
+            Console.ReadKey();
             return;
+*/
+            List<HW0> hws = new List<HW0>();
+           // hws.Add(new HW0());
+           // hws.Add(new HW1());
+            hws.Add(new HW2());
 
-            foreach (int id in Students.students_dic.Keys)
+            foreach (HW0 hw in hws)
             {
-                HW0 hw0 = new HW0();
-                int[] hw_args = hw0.get_random_args(id);
-                hw0.Create_HW(hw_args, false);
-                hw0.Create_DocFile(hw_args);
-                Console.Clear();
-                hw0.SaveArgs(hw_args);
+
+                foreach (int id in Students.students_dic.Keys)
+                {
+                    String docPath = hw.Students_Hws_dirs + "\\" + id.ToString() + ".docx";
+                    if (File.Exists(docPath)) continue;
+                    Object[] hw_args = hw.get_random_args(id);
+                    Console.Clear();
+                    hw.Create_HW(hw_args, false);
+                    //hw0.Create_DocFile(hw_args);
+                    hw.SaveArgs(hw_args);
+
+                }
 
             }
 

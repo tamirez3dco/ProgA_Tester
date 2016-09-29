@@ -2,15 +2,34 @@
 using StudentsLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace HWs_Generator
 {
-    delegate void CreateDocFunc(int[] args, bool real_input);
+    public delegate void CreateQuestionFunc(Object[] args, bool real_input);
+    public delegate String[] CreateInputFunc(Object[] args);
+    public delegate void CreateDocFunc(Object[] args, Document wordDoc, int seif);
 
-    class HW1 : HW0
+    public class Creators
+    {
+        public CreateQuestionFunc questFunc;
+        public CreateDocFunc   docFunc;
+        public CreateInputFunc inputFunc;
+
+        public Creators (CreateQuestionFunc _qf, CreateDocFunc _df, CreateInputFunc _if)
+        {
+            questFunc = _qf;
+            docFunc = _df;
+            inputFunc = _if;
+        }
+    }
+    public class HW1 : HW0
     {
         public static String get_input_integer(bool realinput, int num)
         {
@@ -25,7 +44,13 @@ namespace HWs_Generator
             else return Console.ReadLine();
         }
 
-        public void Create_Q1(int[] args, bool real_input)
+        public HW1()
+        {
+            Students_Hws_dirs = Students_All_Hws_dirs + @"\HW1";
+            exampleRectangleSize = new Size(450, 900);
+        }
+
+        public void Create_Q1(Object[] args, bool real_input)
         {
             Console.WriteLine("Please enter some integer number");
 
@@ -42,13 +67,20 @@ namespace HWs_Generator
             Console.WriteLine("Its successor is : {0}", in1 + 1);
         }
 
-        public void Create_Q1_doc(int[] args, Document wordDoc, int seif)
+        public String[] Create_Q1_Input(Object[] args)
+        {
+            String[] res = new String[1];
+            res[0] = r.Next(1, 5000).ToString();
+            return res;
+        }
+
+        public void Create_Q1_doc(Object[] args, Document wordDoc, int seif)
         {
             Paragraph par1 = wordDoc.Paragraphs.Add();
             par1.Range.Font.Name = "Ariel";
             par1.Range.Font.Size = 12;
             par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
-            par1.Range.Text = String.Format("{0}) קולטת מספר שלם מה-Console ומדפיסה אותו, את הקודם לו ואת העוקב אחריו. לדוגמא, אם המספר שהקלדתם ב-Console הוא 7 - אז על התוכנית שלכם להדפיס את 3 השורות הבאות:",seif);
+            par1.Range.Text = String.Format("{0}) קולטת מספר שלם מה-Console ומדפיסה אותו, את הקודם לו ואת העוקב אחריו. לדוגמא, אם המספר שהקלדתם ב-Console הוא 7 - אז על התוכנית שלכם להדפיס את 3 השורות הבאות:", seif);
             par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
             par1.Range.InsertParagraphAfter();
 
@@ -70,7 +102,7 @@ namespace HWs_Generator
             par1.Range.InsertParagraphAfter();
         }
 
-        public void Create_Q2(int[] args, bool real_input)
+        public void Create_Q2(Object[] args, bool real_input)
         {
             Console.WriteLine("Please enter your full name");
             String kelet_name = get_input_string(real_input, "Tamir Levy");
@@ -86,9 +118,9 @@ namespace HWs_Generator
         }
 
 
-        public void Create_Q3(int[] args, bool real_input)
+        public void Create_Q3(Object[] args, bool real_input)
         {
-            int num_of_numbers = args[1];
+            int num_of_numbers = (int)args[1];
             Console.WriteLine("Please enter {0} integer numbers", num_of_numbers);
             int sum = 0;
             for (int i = 0; i < num_of_numbers; i++)
@@ -99,10 +131,21 @@ namespace HWs_Generator
             Console.WriteLine("Average of all {0} numbers is {1}", num_of_numbers, Math.Round((double)sum / num_of_numbers, 2));
         }
 
-        public void Create_Q3_doc(int[] args, Document wordDoc, int seif)
+        public String[] Create_Q3_Input(Object[] args)
         {
-            
-            int num_of_numbers = args[1];
+            int num_of_numbers = (int)args[1];
+            String[] res = new String[num_of_numbers];
+            for (int i = 0; i < num_of_numbers; i++)
+            {
+                res[i] = r.Next(0, 100).ToString();
+            }
+            return res;
+        }
+
+        public void Create_Q3_doc(Object[] args, Document wordDoc, int seif)
+        {
+
+            int num_of_numbers = (int)args[1];
             Paragraph par1 = wordDoc.Paragraphs.Add();
             par1.Range.Font.Name = "Ariel";
             par1.Range.Font.Size = 12;
@@ -121,7 +164,7 @@ namespace HWs_Generator
             par1.Range.Text = String.Empty;
             par1.Range.InsertParagraphAfter();
 
-
+/*
             // paint Math in green...
             Find findObject = wordDoc.Application.Selection.Find;
             findObject.Text = "Math";
@@ -132,13 +175,14 @@ namespace HWs_Generator
                 ref replaceNone, ref missing, ref missing, ref missing, ref missing);
 
             wordDoc.Application.Selection.Font.Color = WdColor.wdColorBrightGreen;
+*/
             wordDoc.Application.Selection.Collapse();
 
         }
 
-        public void Create_Q4(int[] args, bool real_input)
+        public void Create_Q4(Object[] args, bool real_input)
         {
-            int up_down = args[2];
+            int up_down = (int)args[2];
             Console.WriteLine("Please enter 3 integer numbers");
             int num1 = int.Parse(get_input_integer(real_input, 16));
             int num2 = int.Parse(get_input_integer(real_input, 20));
@@ -161,10 +205,22 @@ namespace HWs_Generator
                 Console.WriteLine("minimal={0}", min);
             }
         }
-        public void Create_Q4_doc(int[] args, Document wordDoc, int seif)
+
+        public String[] Create_Q4_Input(Object[] args)
+        {
+            int num_of_numbers = 3;
+            String[] res = new String[num_of_numbers];
+            for (int i = 0; i < num_of_numbers; i++)
+            {
+                res[i] = r.Next(-100, 100).ToString();
+            }
+            return res;
+        }
+
+        public void Create_Q4_doc(Object[] args, Document wordDoc, int seif)
         {
 
-            int order = args[2];
+            int order = (int)args[2];
             Paragraph par1 = wordDoc.Paragraphs.Add();
             par1.Range.Font.Name = "Ariel";
             par1.Range.Font.Size = 12;
@@ -219,7 +275,7 @@ namespace HWs_Generator
             par1.Range.InsertParagraphAfter();
         }
 
-        public void Create_Q5(int[] args, bool real_input)
+        public void Create_Q5(Object[] args, bool real_input)
         {
             Console.WriteLine("Please enter 4 integer numbers as x1,y1,x2,y2:");
             int x1 = int.Parse(get_input_integer(real_input, r.Next(0, 10)));
@@ -230,7 +286,19 @@ namespace HWs_Generator
             Console.WriteLine("Distance from ({0},{1}) to ({2},{3}) is {4}", x1, y1, x2, y2,
                 Math.Round(distance, 2));
         }
-        public void Create_Q5_doc(int[] args, Document wordDoc, int seif)
+
+        public String[] Create_Q5_Input(Object[] args)
+        {
+            int num_of_numbers = 4;
+            String[] res = new String[num_of_numbers];
+            for (int i = 0; i < num_of_numbers; i++)
+            {
+                res[i] = r.Next(0, 100).ToString();
+            }
+            return res;
+        }
+
+        public void Create_Q5_doc(Object[] args, Document wordDoc, int seif)
         {
 
             Paragraph par1 = wordDoc.Paragraphs.Add();
@@ -255,7 +323,7 @@ namespace HWs_Generator
 
             par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
             double res = Math.Round(Math.Sqrt(49 + 13 * 13), 2);
-            par1.Range.Text = String.Format("Distance from ({0},{1}) to ({2},{3}) is {4}",9,12,16,25, res);
+            par1.Range.Text = String.Format("Distance from ({0},{1}) to ({2},{3}) is {4}", 9, 12, 16, 25, res);
             par1.Range.InsertParagraphAfter();
             par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
 
@@ -263,9 +331,9 @@ namespace HWs_Generator
             par1.Range.InsertParagraphAfter();
         }
 
-        public void Create_Q6(int[] args, bool real_input)
+        public void Create_Q6(Object[] args, bool real_input)
         {
-            int num_of_digits = args[3];
+            int num_of_digits = (int)args[3];
             Console.WriteLine("Please enter one integer number with {0} digits:", num_of_digits);
             int num;
             if (num_of_digits == 3)
@@ -288,9 +356,20 @@ namespace HWs_Generator
             Console.WriteLine(res);
             // Must give in doc file a whole set of examples...
         }
-        public void Create_Q6_doc(int[] args, Document wordDoc, int seif)
+
+        public String[] Create_Q6_Input(Object[] args)
         {
-            int num_of_digits = args[3];
+            int num_of_digits = (int)args[3];
+            int minimalNum = (int)(Math.Pow(10, num_of_digits - 1));
+            int maximalNum = (int)(Math.Pow(10, num_of_digits));
+            String[] res = new String[1];
+            res[0] = r.Next(minimalNum,maximalNum).ToString();
+            return res;
+        }
+
+        public void Create_Q6_doc(Object[] args, Document wordDoc, int seif)
+        {
+            int num_of_digits = (int)(args[3]);
 
             Paragraph par1 = wordDoc.Paragraphs.Add();
             par1.Range.Font.Name = "Ariel";
@@ -341,7 +420,7 @@ namespace HWs_Generator
             par1.Range.InsertParagraphAfter();
         }
 
-        public void Create_Q7_doc(int[] args, Document wordDoc, int seif)
+        public void Create_Q7_doc(Object[] args, Document wordDoc, int seif)
         {
             Paragraph par1 = wordDoc.Paragraphs.Add();
             par1.Range.Font.Name = "Ariel";
@@ -364,49 +443,242 @@ namespace HWs_Generator
             par1.Range.InsertParagraphAfter();
         }
 
-        public void Create_Q7(int[] args, bool real_input)
+        public String[] Create_Q7_Input(Object[] args)
+        {
+            int num_of_digits = 6;
+            int minimalNum = (int)(Math.Pow(10, num_of_digits - 1));
+            int maximalNum = (int)(Math.Pow(10, num_of_digits + 2));
+            String[] res = new String[2];
+            int chosenNum = r.Next(minimalNum, maximalNum);
+            res[0] = chosenNum.ToString();
+            int chosenNumLength = res[0].Trim().Length;
+            res[1] = r.Next(1, chosenNumLength + 1).ToString();
+            return res;
+        }
+
+        public void Create_Q7(Object[] args, bool real_input)
         {
             Console.WriteLine("Please enter one integer number:");
             int[] options = { 91134, 26145, 987654, 12, 3210 };
             int num = int.Parse(get_input_integer(real_input, options[r.Next(0, options.Length)]));
             Console.WriteLine("Please enter digit location:");
             int location = int.Parse(get_input_integer(real_input, r.Next(1, num.ToString().Length + 1)));
-            Console.WriteLine("Digit at place {0} is {1}", location, (num / Math.Pow(10, location - 1)) % 10);
+            Console.WriteLine("Digit at place {0} is {1}", location, (num / (int)(Math.Pow(10, location - 1))) % 10);
         }
 
-        public override void Create_HW(int[] args, bool real_input)
+        public override void Create_HW(Object[] args, bool real_input)
         {
-            CreateDocFunc[] questionsDocCreators = new CreateDocFunc[6];
-            questionsDocCreators[0] = Create_Q1;
-            questionsDocCreators[1] = Create_Q3;
-            questionsDocCreators[2] = Create_Q4;
-            questionsDocCreators[3] = Create_Q5;
-            questionsDocCreators[4] = Create_Q6;
-            questionsDocCreators[5] = Create_Q7;
+            int id = (int)args[0];
+            String[] funcsToExecute;
+            List<Creators> afterRandom = new List<Creators>();
+            if (real_input == false)
+            {
+                //CreateDocFunc
+                afterRandom = new List<Creators>();
+                afterRandom.Add(new Creators(Create_Q1, Create_Q1_doc, Create_Q1_Input));
 
-            for (int i = 0; i < questionsDocCreators.Length; i++)
+                List<Creators> creators = new List<Creators>();
+                creators.Add(new Creators(Create_Q3, Create_Q3_doc, Create_Q3_Input));
+                creators.Add(new Creators(Create_Q4, Create_Q4_doc, Create_Q4_Input));
+
+                while (creators.Count > 0)
+                {
+                    int rndIdx = r.Next(0, creators.Count);
+                    Debug.WriteLine("rndIdx=" + rndIdx);
+                    afterRandom.Add(creators[rndIdx]);
+                    creators.RemoveAt(rndIdx);
+                }
+
+                creators.Add(new Creators(Create_Q5, Create_Q5_doc, Create_Q5_Input));
+                creators.Add(new Creators(Create_Q6, Create_Q6_doc, Create_Q6_Input));
+                creators.Add(new Creators(Create_Q7, Create_Q7_doc, Create_Q7_Input));
+
+                while (creators.Count > 0)
+                {
+                    int rndIdx = r.Next(0, creators.Count);
+                    Debug.WriteLine("rndIdx=" + rndIdx);
+                    afterRandom.Add(creators[rndIdx]);
+                    creators.RemoveAt(rndIdx);
+                }
+
+                funcsToExecute = saveOrderFunctions(id, afterRandom);
+
+            }
+            else
+            {
+                funcsToExecute = loadOrderFunctions(id);
+            }
+
+
+            //Debug.WriteLine(afterRandom[0].questFunc.Method.Name)
+            for (int i = 0; i < funcsToExecute.Length; i++)
             {
                 Console.WriteLine("**********{0}", i + 1);
-                questionsDocCreators[i](args, real_input);
+                // Get the ItsMagic method and invoke with a parameter value of 100
+                MethodInfo magicMethod = this.GetType().GetMethod(funcsToExecute[i]);
+                magicMethod.Invoke(this, new object[] { args, real_input });
             }
-/*
-            Create_Q1(args, real_input);
-            //Create_Q2(args,real_input);
-            Create_Q3(args, real_input);
-            Create_Q4(args, real_input);
-            Create_Q5(args, real_input);
-            Create_Q6(args, real_input);
-            Create_Q7(args, real_input);
-*/
+
+            if (real_input == false)
+            {
+                GetConsoleRectImage(args);
+
+                Create_DocFile_By_Creators(args, afterRandom);
+
+            }
         }
 
-        public override void Create_DocFile(int[] args)
+        public override void createRandomInputFile(int id, String filePath)
         {
-            int id = args[0];
-            int shape = args[1];
-            int shape_size = args[2];
-            int kelet_repetitions = args[3];
-            int shave_reps = args[4];
+            String[] input_function_names = loadInputFunctions(id);
+            Object[] args = LoadArgs(id);
+            Type magicType = this.GetType();
+            ConstructorInfo magicConstructor = magicType.GetConstructor(Type.EmptyTypes);
+            object magicClassObject = magicConstructor.Invoke(new object[] { });
+
+            using (StreamWriter sw = new StreamWriter(filePath, false))
+            {
+                for (int i = 0; i < input_function_names.Length; i++)
+                {
+                    // Get the ItsMagic method and invoke with a parameter value of 100
+                    MethodInfo magicMethod = magicType.GetMethod(input_function_names[i]);
+                    String[] resultingLines = (String[])(magicMethod.Invoke(magicClassObject, new object[] { args }));
+                    for (int x = 0; x < resultingLines.Length; x++)
+                    {
+                        sw.WriteLine(resultingLines[x]);
+                    }
+                }
+            }
+
+        }
+
+        public String[] loadOrderFunctions(int id)
+        {
+            String questionsOrderFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_questions_order.txt";
+            return File.ReadAllLines(questionsOrderFilePath);
+        }
+
+        public String[] loadInputFunctions(int id)
+        {
+            String inputsOrderFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_inputs_order.txt";
+            return File.ReadAllLines(inputsOrderFilePath);
+        }
+
+        public String[] saveOrderFunctions(int id, List<Creators> list)
+        {
+            String[] res = new String[list.Count];
+            String questionsOrderFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_questions_order.txt";
+            using (StreamWriter sw = new StreamWriter(questionsOrderFilePath, false))
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    sw.WriteLine(list[i].questFunc.Method.Name);
+                    res[i] = list[i].questFunc.Method.Name;
+                }
+            }
+            String inputsOrderFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_inputs_order.txt";
+            using (StreamWriter sw = new StreamWriter(inputsOrderFilePath, false))
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    sw.WriteLine(list[i].inputFunc.Method.Name);
+                }
+            }
+            return res;
+        }
+        public virtual void Create_DocFile_By_Creators(Object[] args, List<Creators> creators)
+        {
+            int id = (int)(args[0]);
+
+            String student_full_name = Students.students_dic[id].first_name + " " + Students.students_dic[id].last_name;
+
+
+            //            String orig_file_path = pattern_dir + "//" + pattern_file_orig;
+            //ADDING A NEW DOCUMENT TO THE APPLICATION
+            Application oWord = new Application();
+            oWord.Visible = true;
+            Document wordDoc = oWord.Documents.Add();
+
+            Paragraph par1 = wordDoc.Paragraphs.Add();
+            par1.Range.Font.Name = "Ariel";
+            par1.Range.Font.Size = 12;
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = "שלום " + student_full_name;
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "ש\"ב 1 נועדו לתרגל אתכם על שימוש במשתנים ובאופרטורים כפי שנלמדו בהרצאה ובתרגול. כרגיל, עליכם לייצר בדיוק את הפלט המצופה כדי שהבודק האוטומטי לא יכשיל אתכם. ושוב כרגיל, דוגמא לפלט המצופה מופיעה בסוף המסמך הזה.";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "לפני כל סעיף אבקש להדפיס שורה של 10 כוכביות ומספר הסעיף. לדוגמא, לפני הביצוע של סעיף 3 יש להדפיס את השורה:";
+            par1.Range.InsertParagraphAfter();
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
+            par1.Range.Text = "3**********";
+            par1.Range.InsertParagraphAfter();
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = "אם לא ברור, ניתן להסתכל בדוגמת הפלט הנדרש בסוף המסמך.";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Underline = WdUnderline.wdUnderlineSingle;
+
+            par1.Range.Text = String.Format("תאריך הגשה אחרון - 27/11/2016 בשעה 23:55");
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Underline = WdUnderline.wdUnderlineNone;
+
+            par1.Range.Text = "";
+            par1.Range.InsertParagraphAfter();
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "עליך ליכתוב תוכנית אשר:";
+            par1.Range.InsertParagraphAfter();
+
+            for (int i = 0; i < 3; i++)
+            {
+                creators[i].docFunc(args, wordDoc, (i + 1));
+            }
+
+            par1.Range.InsertBreak(WdBreakType.wdPageBreak);
+
+            for (int i = 3; i < creators.Count; i++)
+            {
+                creators[i].docFunc(args, wordDoc, (i + 1));
+            }
+/*
+            Create_Q5_doc(args, wordDoc, 4);
+            Create_Q6_doc(args, wordDoc, 5);
+            Create_Q7_doc(args, wordDoc, 6);
+*/
+            par1.Range.Text = "בעמוד הבא מופיעה דוגמא לפלט המצופה מהתוכנית שלך. זיכרו כי בדוגמא זו, השורות הכחולות מציינות שורות קלט מה-Console שהוכנסו על ידי מריץ התוכנית. השורות הלבנות מסמנות שורות פלט שנכתבו על ידי התוכנית אל ה-Console.";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.InsertBreak(WdBreakType.wdPageBreak);
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            par1.Range.InsertParagraphAfter();
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+
+            wordDoc.Application.Selection.Collapse();
+            InlineShape bigExamplePicture = Worder.Replace_to_picture(wordDoc, "XXXX", Students_Hws_dirs + "\\" + id.ToString() + ".png");
+
+            object fileName = Students_Hws_dirs + "\\" + id.ToString() + ".docx";
+            object missing = Type.Missing;
+            wordDoc.SaveAs(ref fileName,
+                ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref missing, ref missing, ref missing, ref missing, ref missing);
+
+            wordDoc.Close();
+            oWord.Quit();
+            return;
+        }
+
+        public override void Create_DocFile(Object[] args)
+        {
+            int id = (int)args[0];
+            int shape = (int)args[1];
+            int shape_size = (int)args[2];
+            int kelet_repetitions = (int)args[3];
+            int shave_reps = (int)args[4];
 
             String student_full_name = Students.students_dic[id].first_name + " " + Students.students_dic[id].last_name;
 
@@ -449,7 +721,7 @@ namespace HWs_Generator
             par1.Range.Text = "עליך ליכתוב תוכנית אשר:";
             par1.Range.InsertParagraphAfter();
 
-            Create_Q1_doc(args,wordDoc,1);
+            Create_Q1_doc(args, wordDoc, 1);
             Create_Q3_doc(args, wordDoc, 2);
             Create_Q4_doc(args, wordDoc, 3);
             par1.Range.InsertBreak(WdBreakType.wdPageBreak);
@@ -457,6 +729,18 @@ namespace HWs_Generator
             Create_Q5_doc(args, wordDoc, 4);
             Create_Q6_doc(args, wordDoc, 5);
             Create_Q7_doc(args, wordDoc, 6);
+
+            par1.Range.Text = "בעמוד הבא מופיעה דוגמא לפלט המצופה מהתוכנית שלך. זיכרו כי בדוגמא זו, השורות הכחולות מציינות שורות קלט מה-Console שהוכנסו על ידי מריץ התוכנית. השורות הלבנות מסמנות שורות פלט שנכתבו על ידי התוכנית אל ה-Console.";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.InsertBreak(WdBreakType.wdPageBreak);
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            par1.Range.InsertParagraphAfter();
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+
+            wordDoc.Application.Selection.Collapse();
+            InlineShape bigExamplePicture = Worder.Replace_to_picture(wordDoc, "XXXX", Students_Hws_dirs + "\\" + id.ToString() + ".png");
 
             /*
                         wordDoc.Save();
@@ -474,9 +758,9 @@ namespace HWs_Generator
         }
 
 
-        public override int[] get_random_args(int id)
+        public override Object[] get_random_args(int id)
         {
-            int[] args = new int[5];
+            Object[] args = new Object[4];
             args[0] = id;
             args[1] = r.Next(3, 5); // Q3
             args[2] = r.Next(0, 2); // Q4
