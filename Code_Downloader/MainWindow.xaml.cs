@@ -43,11 +43,12 @@ namespace Code_Downloader
             //typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142263&action=grading";
             //typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142708&action=grading";
             typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142830&action=grading";
+            typeToLinkDict[typeof(HW3)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143026&action=grading";
 
         }
         int currectIdx = 0;
 
-        public Dictionary<Type, String> typeToLinkDict;
+        public static Dictionary<Type, String> typeToLinkDict;
         private void WebBrowser1_Navigated(object sender, NavigationEventArgs e)
         {
             Debug.WriteLine("Yofi");
@@ -78,7 +79,7 @@ namespace Code_Downloader
             if (doc.url.EndsWith(@"http://el1.netanya.ac.il/"))
             {
                 //WebBrowser1.Navigate(@"http://el1.netanya.ac.il/mod/assign/view.php?id=142263&action=grading");
-                WebBrowser1.Navigate(typeToLinkDict[typeof(HW2)]);               
+                WebBrowser1.Navigate(typeToLinkDict[typeof(HW3)]);               
             }
             if (doc.url.EndsWith(@"action=grading"))
             {
@@ -182,132 +183,148 @@ namespace Code_Downloader
                             Type type = types[j];
                             ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
                             HW0 hw = (HW0)ctor.Invoke(new object[] { });
-                            
+
                             // 1) get the specific student values...
                             Object[] args = hw.LoadArgs(stud.id);
 
-
-                            // create random input file
-                            String randomFileName = "test.txt";
-                            String studentOutputFileName = "student_output.txt";
-                            String benchmarkOutputFileName = "benchmark_output.txt";
-
-                            String randomInputFile = randomInputFilesFolder + "//" + randomFileName;
-                            if (File.Exists(randomInputFile))
+                            RunResults rr = hw.Test_HW(args, resulting_exe_path);
+                            grade_box.setAttribute("value", rr.grade.ToString());
+                            if (rr.grade == 100)
                             {
-                                File.Delete(randomInputFile);
-                                System.Threading.Thread.Sleep(500);
-                            }
-
-                            hw.createRandomInputFile(stud.id, randomInputFile);
-
-                            // run through student build and send to output
-                            ProcessStartInfo psi = new ProcessStartInfo(resulting_exe_path);
-                            psi.UseShellExecute = false;
-                            psi.RedirectStandardInput = true;
-                            psi.RedirectStandardOutput = true;
-
-                            psi.WorkingDirectory = randomInputFilesFolder;
-                            Process p = Process.Start(psi);
-                            StreamWriter inputWriter = p.StandardInput;
-                            String[] inputLines = File.ReadAllLines(randomInputFile);
-                            foreach (String line in inputLines) inputWriter.WriteLine(line);
-
-                            string output = p.StandardOutput.ReadToEnd();
-                            if (!p.WaitForExit(10000))
-                            {
-                                filesToAttach[0] = randomInputFile;
-                                filesToAttach[1] = filesToAttach[2] = String.Empty;
-                                grade_box.setAttribute("value", "50");
-                                remarks_box.setAttribute("value", "Running your program did not complete in 10 seconds. Minus 50 pts. The input I tried to feed to your program is attached to the email sent to you.");
-                                String email_body = String.Format("Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to run (hoever, it did compile succesfully). The input I tried to feed to your program is attached to this email at file \"{0}\".\n\n\n. Please check your code and upload again to Moodle!", randomFileName);
-                                stud.Send_Gmail("Your last submission failed to run.", email_body, filesToAttach);
-                                continue;
-                            }
-                            String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;
-                            File.WriteAllText(studentOutputFile, output);
-
-                            // run through official HW to get output
-                            TextReader oldInput = Console.In;
-                            TextWriter oldOutput = Console.Out;
-                            String BenchmarkOutputFile = randomInputFilesFolder + "//" + benchmarkOutputFileName;
-                            using (StreamWriter sw = new StreamWriter(BenchmarkOutputFile, false))
-                            {
-                                Console.SetIn(new StreamReader(randomInputFile));
-                                Console.SetOut(sw);
-                                hw.Create_HW(args, true);
-                            }
-                            Console.SetIn(oldInput);
-                            Console.SetOut(oldOutput);
-                            // compare and give feedback
-
-                            String studentText = File.ReadAllText(studentOutputFile);
-                            String benchmarkText = File.ReadAllText(BenchmarkOutputFile);
-
-                            SideBySideDiffBuilder diffBuilder = new SideBySideDiffBuilder(new Differ());
-                            var model = diffBuilder.BuildDiffModel(benchmarkText ?? string.Empty, studentText ?? string.Empty);
-                            int errorGrades = 0;
-                            List<String> comparisonErrors = new List<string>();
-                            for (int i = 0; i < model.NewText.Lines.Count; i++)
-                            {
-                                DiffPiece dp = model.NewText.Lines[i];
-                                switch (dp.Type)
-                                {
-                                    case ChangeType.Unchanged:
-                                        continue;
-                                    case ChangeType.Modified:
-                                        errorGrades += 5;
-                                        comparisonErrors.Add(String.Format("Diff at line # {0}. Minus 5 pts.", (int)dp.Position));
-                                        comparisonErrors.Add(String.Format("  Correct line is \"{0}\"", model.OldText.Lines[i].Text));
-                                        comparisonErrors.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
-                                        break;
-                                    case ChangeType.Inserted:
-                                        if (dp.Text == String.Empty)
-                                        {
-                                            errorGrades += 5;
-                                            comparisonErrors.Add(String.Format("Extra empty line at line # {0}. Minus 5 pts.", (int)dp.Position));
-                                        }
-                                        else if (dp.Text.Trim() == String.Empty)
-                                        {
-                                            errorGrades += 7;
-                                            comparisonErrors.Add(String.Format("Extra line of blanks at line # {0}. Minus 7 pts.", (int)dp.Position));
-                                        }
-                                        else
-                                        {
-                                            errorGrades += 10;
-                                            comparisonErrors.Add(String.Format("Extra line at line # {0}. Minus 10 pts.", (int)dp.Position));
-                                            comparisonErrors.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
-                                        }
-                                        break;
-                                    case ChangeType.Deleted:
-                                    case ChangeType.Imaginary:
-                                        errorGrades += 10;
-                                        comparisonErrors.Add(String.Format("Missing line at line # {0}. Minus 10 pts.", i + 1));
-                                        comparisonErrors.Add(String.Format("     expected Line is \"{0}\"", model.OldText.Lines[i].Text));
-                                        break;
-                                }
-                            }
-
-                            if (errorGrades == 0)
-                            {
-                                grade_box.setAttribute("value", "100");
-                                remarks_box.setAttribute("value", "OK");
+                                remarks_box.setAttribute("value", "Perfect");
                                 stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, filesToAttach);
                             }
                             else
                             {
-                                String comparisonErrorSingleString = String.Empty;
-                                foreach (String comarison_line in comparisonErrors) comparisonErrorSingleString += (comarison_line + "\n");
-                                grade_box.setAttribute("value", (100-errorGrades).ToString());
-                                remarks_box.setAttribute("value", comparisonErrorSingleString);
+                                remarks_box.setAttribute("value", rr.errorsAsSingleString());
+                                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", rr.errorsAsSingleString(), filesToAttach);
 
-                                filesToAttach[0] = randomInputFile;
-                                filesToAttach[1] = studentOutputFile;
-                                filesToAttach[2] = BenchmarkOutputFile;
-
-                                String explenationLine = String.Format("Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n {3}", randomFileName, studentOutputFileName, benchmarkOutputFileName,comparisonErrorSingleString);
-                                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", explenationLine, filesToAttach);
                             }
+
+                            /*
+                                                        // create random input file
+                                                        String randomFileName = "test.txt";
+                                                        String studentOutputFileName = "student_output.txt";
+                                                        String benchmarkOutputFileName = "benchmark_output.txt";
+
+                                                        String randomInputFile = randomInputFilesFolder + "//" + randomFileName;
+                                                        if (File.Exists(randomInputFile))
+                                                        {
+                                                            File.Delete(randomInputFile);
+                                                            System.Threading.Thread.Sleep(500);
+                                                        }
+
+                                                        hw.createRandomInputFile(stud.id, randomInputFile);
+
+                                                        // run through student build and send to output
+                                                        ProcessStartInfo psi = new ProcessStartInfo(resulting_exe_path);
+                                                        psi.UseShellExecute = false;
+                                                        psi.RedirectStandardInput = true;
+                                                        psi.RedirectStandardOutput = true;
+
+                                                        psi.WorkingDirectory = randomInputFilesFolder;
+                                                        Process p = Process.Start(psi);
+                                                        StreamWriter inputWriter = p.StandardInput;
+                                                        String[] inputLines = File.ReadAllLines(randomInputFile);
+                                                        foreach (String line in inputLines) inputWriter.WriteLine(line);
+
+                                                        string output = p.StandardOutput.ReadToEnd();
+                                                        if (!p.WaitForExit(10000))
+                                                        {
+                                                            filesToAttach[0] = randomInputFile;
+                                                            filesToAttach[1] = filesToAttach[2] = String.Empty;
+                                                            grade_box.setAttribute("value", "50");
+                                                            remarks_box.setAttribute("value", "Running your program did not complete in 10 seconds. Minus 50 pts. The input I tried to feed to your program is attached to the email sent to you.");
+                                                            String email_body = String.Format("Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to run (hoever, it did compile succesfully). The input I tried to feed to your program is attached to this email at file \"{0}\".\n\n\n. Please check your code and upload again to Moodle!", randomFileName);
+                                                            stud.Send_Gmail("Your last submission failed to run.", email_body, filesToAttach);
+                                                            continue;
+                                                        }
+                                                        String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;
+                                                        File.WriteAllText(studentOutputFile, output);
+
+                                                        // run through official HW to get output
+                                                        TextReader oldInput = Console.In;
+                                                        TextWriter oldOutput = Console.Out;
+                                                        String BenchmarkOutputFile = randomInputFilesFolder + "//" + benchmarkOutputFileName;
+                                                        using (StreamWriter sw = new StreamWriter(BenchmarkOutputFile, false))
+                                                        {
+                                                            Console.SetIn(new StreamReader(randomInputFile));
+                                                            Console.SetOut(sw);
+                                                            hw.Create_HW(args, true);
+                                                        }
+                                                        Console.SetIn(oldInput);
+                                                        Console.SetOut(oldOutput);
+                                                        // compare and give feedback
+
+                                                        String studentText = File.ReadAllText(studentOutputFile);
+                                                        String benchmarkText = File.ReadAllText(BenchmarkOutputFile);
+
+                                                        SideBySideDiffBuilder diffBuilder = new SideBySideDiffBuilder(new Differ());
+                                                        var model = diffBuilder.BuildDiffModel(benchmarkText ?? string.Empty, studentText ?? string.Empty);
+                                                        int errorGrades = 0;
+                                                        List<String> comparisonErrors = new List<string>();
+                                                        for (int i = 0; i < model.NewText.Lines.Count; i++)
+                                                        {
+                                                            DiffPiece dp = model.NewText.Lines[i];
+                                                            switch (dp.Type)
+                                                            {
+                                                                case ChangeType.Unchanged:
+                                                                    continue;
+                                                                case ChangeType.Modified:
+                                                                    errorGrades += 5;
+                                                                    comparisonErrors.Add(String.Format("Diff at line # {0}. Minus 5 pts.", (int)dp.Position));
+                                                                    comparisonErrors.Add(String.Format("  Correct line is \"{0}\"", model.OldText.Lines[i].Text));
+                                                                    comparisonErrors.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
+                                                                    break;
+                                                                case ChangeType.Inserted:
+                                                                    if (dp.Text == String.Empty)
+                                                                    {
+                                                                        errorGrades += 5;
+                                                                        comparisonErrors.Add(String.Format("Extra empty line at line # {0}. Minus 5 pts.", (int)dp.Position));
+                                                                    }
+                                                                    else if (dp.Text.Trim() == String.Empty)
+                                                                    {
+                                                                        errorGrades += 7;
+                                                                        comparisonErrors.Add(String.Format("Extra line of blanks at line # {0}. Minus 7 pts.", (int)dp.Position));
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        errorGrades += 10;
+                                                                        comparisonErrors.Add(String.Format("Extra line at line # {0}. Minus 10 pts.", (int)dp.Position));
+                                                                        comparisonErrors.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
+                                                                    }
+                                                                    break;
+                                                                case ChangeType.Deleted:
+                                                                case ChangeType.Imaginary:
+                                                                    errorGrades += 10;
+                                                                    comparisonErrors.Add(String.Format("Missing line at line # {0}. Minus 10 pts.", i + 1));
+                                                                    comparisonErrors.Add(String.Format("     expected Line is \"{0}\"", model.OldText.Lines[i].Text));
+                                                                    break;
+                                                            }
+                                                        }
+
+                                                        if (errorGrades == 0)
+                                                        {
+                                                            grade_box.setAttribute("value", "100");
+                                                            remarks_box.setAttribute("value", "OK");
+                                                            stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, filesToAttach);
+                                                        }
+                                                        else
+                                                        {
+                                                            String comparisonErrorSingleString = String.Empty;
+                                                            foreach (String comarison_line in comparisonErrors) comparisonErrorSingleString += (comarison_line + "\n");
+                                                            grade_box.setAttribute("value", (100-errorGrades).ToString());
+                                                            remarks_box.setAttribute("value", comparisonErrorSingleString);
+
+                                                            filesToAttach[0] = randomInputFile;
+                                                            filesToAttach[1] = studentOutputFile;
+                                                            filesToAttach[2] = BenchmarkOutputFile;
+
+                                                            String explenationLine = String.Format("Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n {3}", randomFileName, studentOutputFileName, benchmarkOutputFileName,comparisonErrorSingleString);
+                                                            stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", explenationLine, filesToAttach);
+                                                        }
+                            */
+
                         } // for (int r = 0; r < allTable.rows.length; r++)
 
                         doc.getElementById("id_savequickgrades").click();

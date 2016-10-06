@@ -43,5 +43,15 @@ namespace StudentsLib
         {
             students_dic = Exceler.getStudents(@"D:\Tamir\Netanya_ProgrammingA\2017\students_name_id.xlsx");
         }
+        public Students(bool b)
+        {
+            Student tl = new Student();
+            tl.first_name = "תמיר";
+            tl.last_name = "לוי";
+            tl.id = 029046117;
+            tl.email = "tamirlevi123@gmail.com";
+            students_dic = new Dictionary<int, Student>();
+            students_dic[tl.id] = tl;
+        }
     }
 }

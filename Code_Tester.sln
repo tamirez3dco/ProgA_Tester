@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HWs_Generator", "HWs_Genera
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{4A535512-D658-4DB5-9D80-19B81D331591}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StamConsoleTester", "StamConsoleTester\StamConsoleTester.csproj", "{7B76F6F3-1639-43C3-BB4B-FF6932C7F50D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{4A535512-D658-4DB5-9D80-19B81D331591}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A535512-D658-4DB5-9D80-19B81D331591}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A535512-D658-4DB5-9D80-19B81D331591}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B76F6F3-1639-43C3-BB4B-FF6932C7F50D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B76F6F3-1639-43C3-BB4B-FF6932C7F50D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B76F6F3-1639-43C3-BB4B-FF6932C7F50D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B76F6F3-1639-43C3-BB4B-FF6932C7F50D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

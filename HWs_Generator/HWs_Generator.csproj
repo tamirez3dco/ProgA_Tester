@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DiffPlex">
+      <HintPath>C:\temp\diffplex-master\WebDiffer\bin\DiffPlex.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -48,6 +51,8 @@
     <Compile Include="HW0.cs" />
     <Compile Include="HW1.cs" />
     <Compile Include="HW2.cs" />
+    <Compile Include="HW3_Arrays.cs" />
+    <Compile Include="HW4_Functions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

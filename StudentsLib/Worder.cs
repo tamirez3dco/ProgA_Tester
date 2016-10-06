@@ -41,5 +41,22 @@ namespace StudentsLib
         }
 
 
+        public static void English_Format_By_Search(Microsoft.Office.Interop.Word.Document doc, String what_to_replace)
+        {
+            doc.Application.Selection.Collapse();
+            Microsoft.Office.Interop.Word.Find findObject = doc.Application.Selection.Find;
+            //findObject.form;
+            object missing = Type.Missing;
+
+            findObject.Text = what_to_replace;
+            object replaceNone = Microsoft.Office.Interop.Word.WdReplace.wdReplaceNone;
+            findObject.Execute(ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref replaceNone, ref missing, ref missing, ref missing, ref missing);
+            doc.Application.Selection.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
+            doc.Application.Selection.ParagraphFormat.ReadingOrder = WdReadingOrder.wdReadingOrderLtr;
+            doc.Application.Selection.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
+        }
+
     }
 }

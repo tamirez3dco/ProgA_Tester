@@ -17,6 +17,7 @@ namespace WebApplication1
             DirectoryInfo din = new DirectoryInfo(path);
             DirectoryInfo[] hw_dirs = din.GetDirectories();
             HtmlTableRow tr = new HtmlTableRow();
+            
             foreach (DirectoryInfo hw_dir in hw_dirs)
             {
                 Object id = Session["myxxx"];
@@ -25,12 +26,17 @@ namespace WebApplication1
                 if (fins.Length > 0)
                 {
                     HtmlTableCell tc = new HtmlTableCell();
+                    tc.BorderColor = "Black";      
                     HyperLink hl = new HyperLink();
                     //?file = abc.txt
                     hl.NavigateUrl = "filedownload.ashx?file="+fins[0].FullName;
                     hl.Text = "Download " + hw_dir.Name;
                     tc.Controls.Add(hl);
                     tr.Cells.Add(tc);
+                    HtmlTableCell tc2 = new HtmlTableCell();
+                    tc2.InnerText = "         ";
+                    tc2.Width = "100px";
+                    tr.Cells.Add(tc2);
                     Table1.Rows.Add(tr);
                 }
                 if (tr.Cells.Count == 0) Response.Write("Could not locate any HW for id=" + num);

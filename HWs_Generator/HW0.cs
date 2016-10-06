@@ -10,6 +10,10 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using StudentsLib;
 using System.IO;
+using System.Threading;
+using DiffPlex.DiffBuilder;
+using DiffPlex;
+using DiffPlex.DiffBuilder.Model;
 
 namespace HWs_Generator
 {
@@ -174,6 +178,133 @@ namespace HWs_Generator
             return args;
         }
 
+        public virtual RunResults Test_HW(Object[] args, String resulting_exe_path)
+        {
+            RunResults rr = new RunResults();
+            String randomInputFilesFolder = new FileInfo(resulting_exe_path).DirectoryName + "//GeneratedInput";
+            if (!Directory.Exists(randomInputFilesFolder)) Directory.CreateDirectory(randomInputFilesFolder);
+
+
+            HW0 hw = (HW0)this;
+            Student stud = Students.students_dic[(int)args[0]];
+
+            // create random input file
+            String randomFileName = "test.txt";
+            String studentOutputFileName = "student_output.txt";
+            String benchmarkOutputFileName = "benchmark_output.txt";
+
+            String randomInputFile = randomInputFilesFolder + "//" + randomFileName;
+            if (File.Exists(randomInputFile))
+            {
+                File.Delete(randomInputFile);
+                System.Threading.Thread.Sleep(500);
+            }
+
+            hw.createRandomInputFile(stud.id, randomInputFile);
+
+            // run through student build and send to output
+            ProcessStartInfo psi = new ProcessStartInfo(resulting_exe_path);
+            psi.UseShellExecute = false;
+            psi.RedirectStandardInput = true;
+            psi.RedirectStandardOutput = true;
+
+            psi.WorkingDirectory = randomInputFilesFolder;
+            Process p = Process.Start(psi);
+            StreamWriter inputWriter = p.StandardInput;
+            String[] inputLines = File.ReadAllLines(randomInputFile);
+            foreach (String line in inputLines) inputWriter.WriteLine(line);
+
+            String[] filesToAttach = new String[3];
+            if (!p.WaitForExit(10000))
+            {
+                filesToAttach[0] = randomInputFile;
+                filesToAttach[1] = filesToAttach[2] = String.Empty;
+                rr.grade -= 50;
+                rr.error_lines.Add("Running your program did not complete in 10 seconds. Probably some exception was thrown or unexpected Console.ReadLine() is blocking it from completion. Minus 50 pts. The input I tried to feed to your program is attached to the email sent to you.");
+                String email_body = String.Format("Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to run (hoever, it did compile succesfully). The input I tried to feed to your program is attached to this email at file \"{0}\".\n\n\n. Please check your code and upload again to Moodle!", randomFileName);
+                stud.Send_Gmail("Your last submission failed to run.", email_body, filesToAttach);
+                return rr;
+            }
+            string output = p.StandardOutput.ReadToEnd();
+            String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;
+            File.WriteAllText(studentOutputFile, output);
+
+            // run through official HW to get output
+            TextReader oldInput = Console.In;
+            TextWriter oldOutput = Console.Out;
+            String BenchmarkOutputFile = randomInputFilesFolder + "//" + benchmarkOutputFileName;
+            using (StreamWriter sw = new StreamWriter(BenchmarkOutputFile, false))
+            {
+                Console.SetIn(new StreamReader(randomInputFile));
+                Console.SetOut(sw);
+                hw.Create_HW(args, true);
+            }
+            Console.SetIn(oldInput);
+            Console.SetOut(oldOutput);
+            // compare and give feedback
+
+            String studentText = File.ReadAllText(studentOutputFile);
+            String benchmarkText = File.ReadAllText(BenchmarkOutputFile);
+
+            SideBySideDiffBuilder diffBuilder = new SideBySideDiffBuilder(new Differ());
+            var model = diffBuilder.BuildDiffModel(benchmarkText ?? string.Empty, studentText ?? string.Empty);
+            for (int i = 0; i < model.NewText.Lines.Count; i++)
+            {
+                DiffPiece dp = model.NewText.Lines[i];
+                switch (dp.Type)
+                {
+                    case ChangeType.Unchanged:
+                        continue;
+                    case ChangeType.Modified:
+                        rr.grade -= 5;
+                        rr.error_lines.Add(String.Format("Diff at line # {0}. Minus 5 pts.", (int)dp.Position));
+                        rr.error_lines.Add(String.Format("  Correct line is \"{0}\"", model.OldText.Lines[i].Text));
+                        rr.error_lines.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
+                        break;
+                    case ChangeType.Inserted:
+                        if (dp.Text == String.Empty)
+                        {
+                            rr.grade -= 5;
+                            rr.error_lines.Add(String.Format("Extra empty line at line # {0}. Minus 5 pts.", (int)dp.Position));
+                        }
+                        else if (dp.Text.Trim() == String.Empty)
+                        {
+                            rr.grade -= 7;
+                            rr.error_lines.Add(String.Format("Extra line of blanks at line # {0}. Minus 7 pts.", (int)dp.Position));
+                        }
+                        else
+                        {
+                            rr.grade -= 10;
+                            rr.error_lines.Add(String.Format("Extra line at line # {0}. Minus 10 pts.", (int)dp.Position));
+                            rr.error_lines.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
+                        }
+                        break;
+                    case ChangeType.Deleted:
+                    case ChangeType.Imaginary:
+                        rr.grade -= 10;
+                        rr.error_lines.Add(String.Format("Missing line at line # {0}. Minus 10 pts.", i + 1));
+                        rr.error_lines.Add(String.Format("     expected Line is \"{0}\"", model.OldText.Lines[i].Text));
+                        break;
+                }
+            }
+
+            if (rr.grade == 100)
+            {
+                stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, filesToAttach);
+            }
+            else
+            {
+                filesToAttach[0] = randomInputFile;
+                filesToAttach[1] = studentOutputFile;
+                filesToAttach[2] = BenchmarkOutputFile;
+
+                String explenationLine = String.Format("Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n {3}", randomFileName, studentOutputFileName, benchmarkOutputFileName, rr.errorsAsSingleString());
+                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", explenationLine, filesToAttach);
+            }
+            return rr;
+
+        }
+
         public virtual void Create_DocFile(Object[] args)
         {
             int id = (int)args[0];
@@ -223,7 +354,9 @@ namespace HWs_Generator
             // Create a graphics object from the bitmap
             Graphics gfxScreenshot = Graphics.FromImage(bmpScreenshot);
             // Take the screenshot from the upper left corner to the right bottom corner
+            Thread.Sleep(1000);
             gfxScreenshot.CopyFromScreen(ConsoleRect.Left + 8, ConsoleRect.Top, 0, 0, exampleRectangleSize, CopyPixelOperation.SourceCopy);
+            Thread.Sleep(1000);
 
             float ratio = 0.8f;
             Size resized_size = new Size((int)(exampleRectangleSize.Width * ratio), (int)(exampleRectangleSize.Height * ratio));
@@ -232,6 +365,7 @@ namespace HWs_Generator
             output.Save(Students_Hws_dirs + "\\" + id.ToString() + ".png", ImageFormat.Png);
 
         }
+
 
         public virtual void Create_HW(Object[] args,bool real_input)
         {
