@@ -17,6 +17,7 @@ using DiffPlex.DiffBuilder.Model;
 
 namespace HWs_Generator
 {
+    // TODO : Fix output gathering to repreform task with input to get accurate output (without any ununderstandable blank lines at the end)
     public class HW0
     {
         public static String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
@@ -31,6 +32,21 @@ namespace HWs_Generator
         {
             Students_Hws_dirs = Students_All_Hws_dirs + @"\HW0";
         }
+
+        protected List<RunLine> lines = new List<RunLine>();
+        protected Process p;
+        protected bool stop = false;
+        protected void P_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            lines.Add(new RunLine(StudentsLib.Source.ERROR, e.Data));
+            stop = true;
+            p.CancelOutputRead();
+        }
+        protected void P_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            lines.Add(new RunLine(StudentsLib.Source.OUTPUT, e.Data));
+        }
+
 
         public static Random r = new Random();
 
@@ -202,30 +218,58 @@ namespace HWs_Generator
 
             hw.createRandomInputFile(stud.id, randomInputFile);
 
-            // run through student build and send to output
-            ProcessStartInfo psi = new ProcessStartInfo(resulting_exe_path);
-            psi.UseShellExecute = false;
-            psi.RedirectStandardInput = true;
-            psi.RedirectStandardOutput = true;
 
-            psi.WorkingDirectory = randomInputFilesFolder;
-            Process p = Process.Start(psi);
+            // run through student build and send to output
+            p = new Process();
+            p.StartInfo.FileName = resulting_exe_path;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.WorkingDirectory = randomInputFilesFolder;
+            p.ErrorDataReceived += P_ErrorDataReceived;
+            p.OutputDataReceived += P_OutputDataReceived;
+            p.EnableRaisingEvents = true;
+
+
+            p.Start();
+            p.BeginErrorReadLine();
+            p.BeginOutputReadLine();
+
+
             StreamWriter inputWriter = p.StandardInput;
             String[] inputLines = File.ReadAllLines(randomInputFile);
-            foreach (String line in inputLines) inputWriter.WriteLine(line);
+            int kk = 0;
+            while (kk < inputLines.Length && !stop)
+            {
+                Thread.Sleep(200);
+                String line = inputLines[kk];
+                lines.Add(new RunLine(StudentsLib.Source.INPUT, line));
+                inputWriter.WriteLine(line);
+                Thread.Sleep(200);
+                kk++;
+            }
 
-            String[] filesToAttach = new String[3];
             if (!p.WaitForExit(10000))
             {
-                filesToAttach[0] = randomInputFile;
-                filesToAttach[1] = filesToAttach[2] = String.Empty;
-                rr.grade -= 50;
-                rr.error_lines.Add("Running your program did not complete in 10 seconds. Probably some exception was thrown or unexpected Console.ReadLine() is blocking it from completion. Minus 50 pts. The input I tried to feed to your program is attached to the email sent to you.");
-                String email_body = String.Format("Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to run (hoever, it did compile succesfully). The input I tried to feed to your program is attached to this email at file \"{0}\".\n\n\n. Please check your code and upload again to Moodle!", randomFileName);
-                stud.Send_Gmail("Your last submission failed to run.", email_body, filesToAttach);
-                return rr;
+                p.Kill();
+                rr.filesToAttach.Add(randomInputFile);
+                if (RunLine.GetErrors(lines).Trim() != String.Empty)
+                {
+                    String wordTableFilePath = Worder.LinesToTable(lines, randomInputFilesFolder);
+                    rr.filesToAttach.Add(wordTableFilePath);
+                    rr.grade -= 50;
+                    rr.error_lines.Add("Running your program did not complete in 10 seconds. Probably some exception was thrown. Minus 50 pts. The input I tried to feed to your program is attached to the email sent to you. The file \"run_table.docx\" presents the input//output//error data of the running of your code.");
+                    return rr;
+                }
+                else // should be when some abnoctious ReadLine() or ReadKey() was added
+                {
+                    rr.grade -= 5;
+                    rr.error_lines.Add("Running your program did not complete in 10 seconds. Probably some unexpected Console.ReadLine() is blocking it from completion. Minus 5 pts. The input I tried to feed to your program is attached to the email sent to you.");
+                }
             }
-            string output = p.StandardOutput.ReadToEnd();
+
+            string output = RunLine.GetOutputs(lines);
             String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;
             File.WriteAllText(studentOutputFile, output);
 
@@ -288,18 +332,12 @@ namespace HWs_Generator
                 }
             }
 
-            if (rr.grade == 100)
+            if (rr.grade < 100)
             {
-                stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, filesToAttach);
-            }
-            else
-            {
-                filesToAttach[0] = randomInputFile;
-                filesToAttach[1] = studentOutputFile;
-                filesToAttach[2] = BenchmarkOutputFile;
-
-                String explenationLine = String.Format("Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n {3}", randomFileName, studentOutputFileName, benchmarkOutputFileName, rr.errorsAsSingleString());
-                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", explenationLine, filesToAttach);
+                rr.filesToAttach.Add(randomInputFile);
+                rr.filesToAttach.Add(studentOutputFile);
+                rr.filesToAttach.Add(BenchmarkOutputFile);
+                rr.error_lines.Insert(0, String.Format("Your last submission was not correct.It run but did not give exactly the desired output. Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n", randomFileName, studentOutputFileName, benchmarkOutputFileName));
             }
             return rr;
 

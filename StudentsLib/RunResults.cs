@@ -6,10 +6,52 @@ using System.Threading.Tasks;
 
 namespace StudentsLib
 {
+    public enum Source
+    {
+        INPUT = 1,
+        OUTPUT = 2,
+        ERROR = 3
+    }
+    public class RunLine
+    {
+        public Source s;
+        public String text;
+        public RunLine(Source _s, String _t)
+        {
+            s = _s;
+            text = _t;
+        }
+        public override string ToString()
+        {
+            return String.Format("{0}:{1}", s.ToString(), text);
+        }
+
+        public static string GetErrors(List<RunLine> lines)
+        {
+            String res = String.Empty;
+            foreach (RunLine line in lines)
+            {
+                if (line.s == Source.ERROR) res += (line.text + "\n");
+            }
+            return res;
+        }
+
+        public static string GetOutputs(List<RunLine> lines)
+        {
+            String res = String.Empty;
+            foreach (RunLine line in lines)
+            {
+                if (line.s == Source.OUTPUT) res += (line.text + "\n");
+            }
+            return res;
+        }
+    }
+
     public class RunResults
     {
         public int grade = 100;
         public List<String> error_lines = new List<string>();
+        public List<String> filesToAttach = new List<string>();
 
         public String errorsAsSingleString()
         {

@@ -8,6 +8,8 @@ using System.IO;
 
 namespace HWs_Generator
 {
+    // TODO: catch returning errors and handle them differently
+
     class Program
     {
 
@@ -45,8 +47,8 @@ namespace HWs_Generator
             List<HW0> hws = new List<HW0>();
             // hws.Add(new HW0());
             // hws.Add(new HW1());
-            //hws.Add(new HW2());
-            hws.Add(new HW3());
+            hws.Add(new HW2());
+            //hws.Add(new HW3());
 
             foreach (HW0 hw in hws)
             {

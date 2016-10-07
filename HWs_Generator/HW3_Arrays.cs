@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HWs_Generator
@@ -108,29 +109,57 @@ namespace HWs_Generator
             hw.createRandomInputFile(stud.id, randomInputFile);
 
             // run through student build and send to output
-            ProcessStartInfo psi = new ProcessStartInfo(resulting_exe_path);
-            psi.UseShellExecute = false;
-            psi.RedirectStandardInput = true;
-            psi.RedirectStandardOutput = true;
+            // run through student build and send to output
+            p = new Process();
+            p.StartInfo.FileName = resulting_exe_path;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.WorkingDirectory = randomInputFilesFolder;
+            p.ErrorDataReceived += P_ErrorDataReceived;
+            p.OutputDataReceived += P_OutputDataReceived;
+            p.EnableRaisingEvents = true;
 
-            psi.WorkingDirectory = randomInputFilesFolder;
-            Process p = Process.Start(psi);
+
+            p.Start();
+            p.BeginErrorReadLine();
+            p.BeginOutputReadLine();
+
+
             StreamWriter inputWriter = p.StandardInput;
             String[] inputLines = File.ReadAllLines(randomInputFile);
-            foreach (String line in inputLines) inputWriter.WriteLine(line);
+            int kk = 0;
+            while (kk < inputLines.Length && !stop)
+            {
+                Thread.Sleep(200);
+                String line = inputLines[kk];
+                lines.Add(new RunLine(StudentsLib.Source.INPUT, line));
+                inputWriter.WriteLine(line);
+                Thread.Sleep(200);
+                kk++;
+            }
 
-            String[] filesToAttach = new String[3];
             if (!p.WaitForExit(10000))
             {
-                filesToAttach[0] = randomInputFile;
-                filesToAttach[1] = filesToAttach[2] = String.Empty;
-                rr.grade -= 50;
-                rr.error_lines.Add("Running your program did not complete in 10 seconds. Probably some exception was thrown or unexpected Console.ReadLine() is blocking it from completion. Minus 50 pts. The input I tried to feed to your program is attached to the email sent to you.");
-                String email_body = String.Format("Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to run (hoever, it did compile succesfully). The input I tried to feed to your program is attached to this email at file \"{0}\".\n\n\n. Please check your code and upload again to Moodle!", randomFileName);
-                stud.Send_Gmail("Your last submission failed to run.", email_body, filesToAttach);
-                return rr;
+                p.Kill();
+                rr.filesToAttach.Add(randomInputFile);
+                if (RunLine.GetErrors(lines).Trim() != String.Empty)
+                {
+                    String wordTableFilePath = Worder.LinesToTable(lines, randomInputFilesFolder);
+                    rr.filesToAttach.Add(wordTableFilePath);
+                    rr.grade -= 50;
+                    rr.error_lines.Add("Running your program did not complete in 10 seconds. Probably some exception was thrown. Minus 50 pts. The input I tried to feed to your program is attached to the email sent to you. The file \"run_table.docx\" presents the input//output//error data of the running of your code.");
+                    return rr;
+                }
+                else // should be when some abnoctious ReadLine() or ReadKey() was added
+                {
+                    rr.grade -= 5;
+                    rr.error_lines.Add("Running your program did not complete in 10 seconds. Probably some unexpected Console.ReadLine() is blocking it from completion. Minus 5 pts. The input I tried to feed to your program is attached to the email sent to you.");
+                }
             }
-            string output = p.StandardOutput.ReadToEnd();
+
+            string output = RunLine.GetOutputs(lines);
 
             String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;
             File.WriteAllText(studentOutputFile, output);
@@ -212,74 +241,10 @@ namespace HWs_Generator
                 test3_rr.error_lines.Add(String.Format("Could not locate tokenizer \"{0}\"", tokenizer[2]));
             }
 
-            return test1_rr + test2_rr + test3_rr;
 
-            SideBySideDiffBuilder diffBuilder = new SideBySideDiffBuilder(new Differ());
-            var model = diffBuilder.BuildDiffModel(benchmarkText ?? string.Empty, studentText ?? string.Empty);
-            int errorGrades = 0;
-            List<String> comparisonErrors = new List<string>();
-            for (int i = 0; i < model.NewText.Lines.Count; i++)
-            {
-                DiffPiece dp = model.NewText.Lines[i];
-                switch (dp.Type)
-                {
-                    case ChangeType.Unchanged:
-                        continue;
-                    case ChangeType.Modified:
-                        errorGrades += 5;
-                        comparisonErrors.Add(String.Format("Diff at line # {0}. Minus 5 pts.", (int)dp.Position));
-                        comparisonErrors.Add(String.Format("  Correct line is \"{0}\"", model.OldText.Lines[i].Text));
-                        comparisonErrors.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
-                        break;
-                    case ChangeType.Inserted:
-                        if (dp.Text == String.Empty)
-                        {
-                            errorGrades += 5;
-                            comparisonErrors.Add(String.Format("Extra empty line at line # {0}. Minus 5 pts.", (int)dp.Position));
-                        }
-                        else if (dp.Text.Trim() == String.Empty)
-                        {
-                            errorGrades += 7;
-                            comparisonErrors.Add(String.Format("Extra line of blanks at line # {0}. Minus 7 pts.", (int)dp.Position));
-                        }
-                        else
-                        {
-                            errorGrades += 10;
-                            comparisonErrors.Add(String.Format("Extra line at line # {0}. Minus 10 pts.", (int)dp.Position));
-                            comparisonErrors.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
-                        }
-                        break;
-                    case ChangeType.Deleted:
-                    case ChangeType.Imaginary:
-                        errorGrades += 10;
-                        comparisonErrors.Add(String.Format("Missing line at line # {0}. Minus 10 pts.", i + 1));
-                        comparisonErrors.Add(String.Format("     expected Line is \"{0}\"", model.OldText.Lines[i].Text));
-                        break;
-                }
-            }
 
-            if (errorGrades == 0)
-            {
-                //grade_box.setAttribute("value", "100");
-                //remarks_box.setAttribute("value", "OK");
-                stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, filesToAttach);
-            }
-            else
-            {
-                String comparisonErrorSingleString = String.Empty;
-                foreach (String comarison_line in comparisonErrors) comparisonErrorSingleString += (comarison_line + "\n");
-                //grade_box.setAttribute("value", (100 - errorGrades).ToString());
-                //remarks_box.setAttribute("value", comparisonErrorSingleString);
-
-                filesToAttach[0] = randomInputFile;
-                filesToAttach[1] = studentOutputFile;
-                filesToAttach[2] = BenchmarkOutputFile;
-
-                String explenationLine = String.Format("Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n {3}", randomFileName, studentOutputFileName, benchmarkOutputFileName, comparisonErrorSingleString);
-                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", explenationLine, filesToAttach);
-            }
+            rr = rr + test1_rr + test2_rr + test3_rr;
             return rr;
-
         }
 
         public override void Create_DocFile_By_Creators(Object[] args, List<Creators> creators)

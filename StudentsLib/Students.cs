@@ -17,7 +17,7 @@ namespace StudentsLib
         public String first_name;
         public String last_name;
 
-        public void Send_Gmail(String subject, String Body, String[] attachments)
+        public void Send_Gmail(String subject, String Body, List<String> attachments)
         {
             var client = new SmtpClient("smtp.gmail.com", 587)
             {

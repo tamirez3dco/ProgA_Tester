@@ -32,7 +32,6 @@ namespace Code_Downloader
     public partial class MainWindow : Window
     {
 
-        
 
         public MainWindow()
         {
@@ -79,7 +78,7 @@ namespace Code_Downloader
             if (doc.url.EndsWith(@"http://el1.netanya.ac.il/"))
             {
                 //WebBrowser1.Navigate(@"http://el1.netanya.ac.il/mod/assign/view.php?id=142263&action=grading");
-                WebBrowser1.Navigate(typeToLinkDict[typeof(HW3)]);               
+                WebBrowser1.Navigate(typeToLinkDict[typeof(HW2)]);               
             }
             if (doc.url.EndsWith(@"action=grading"))
             {
@@ -162,15 +161,13 @@ namespace Code_Downloader
                             HTMLTableCell tc_remarks = tableRow.cells.item(11); // grade cell
                             HTMLInputTextElement remarks_box = tc_remarks.getElementsByTagName("textarea").item(0);
 
-                            String[] filesToAttach = new String[3];
 
                             String resulting_exe_path;
                             if (!Compiler.BuildZippedProject(filePath, out resulting_exe_path))
                             {
-                                filesToAttach[0] = filesToAttach[1] = filesToAttach[2] = String.Empty;
                                 grade_box.setAttribute("value", "30");
                                 remarks_box.setAttribute("value", Compiler.errorReason);
-                                stud.Send_Gmail("Your last submission failed to build!!", "Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to build. Compilation error was:\n" + Compiler.errorReason + "\n\n\n. Please check your code and upload again!", filesToAttach);
+                                stud.Send_Gmail("Your last submission failed to build!!", "Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to build. Compilation error was:\n" + Compiler.errorReason + "\n\n\n. Please check your code and upload again!", new List<String>());
                                 continue;
                             }
 
@@ -189,16 +186,16 @@ namespace Code_Downloader
 
                             RunResults rr = hw.Test_HW(args, resulting_exe_path);
                             grade_box.setAttribute("value", rr.grade.ToString());
+
                             if (rr.grade == 100)
                             {
                                 remarks_box.setAttribute("value", "Perfect");
-                                stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, filesToAttach);
+                                stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, rr.filesToAttach);
                             }
                             else
                             {
                                 remarks_box.setAttribute("value", rr.errorsAsSingleString());
-                                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", rr.errorsAsSingleString(), filesToAttach);
-
+                                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", rr.errorsAsSingleString(), rr.filesToAttach);
                             }
 
                             /*
