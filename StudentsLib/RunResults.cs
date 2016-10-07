@@ -69,6 +69,15 @@ namespace StudentsLib
             rr.error_lines.AddRange(a.error_lines);
             rr.error_lines.AddRange(b.error_lines);
 
+            foreach (String file in b.filesToAttach)
+            {
+                if (!rr.filesToAttach.Contains(file)) rr.filesToAttach.Add(file);
+            }
+            foreach (String file in a.filesToAttach)
+            {
+                if (!rr.filesToAttach.Contains(file)) rr.filesToAttach.Add(file);
+            }
+
             return rr;
         }
     }

@@ -161,8 +161,26 @@ namespace HWs_Generator
 
             string output = RunLine.GetOutputs(lines);
 
+            // run again through student build and send to output
+            ProcessStartInfo psi = new ProcessStartInfo(resulting_exe_path);
+            psi.UseShellExecute = false;
+            psi.RedirectStandardInput = true;
+            psi.RedirectStandardOutput = true;
+
+            psi.WorkingDirectory = randomInputFilesFolder;
+            p = Process.Start(psi);
+            inputWriter = p.StandardInput;
+            inputLines = File.ReadAllLines(randomInputFile);
+            foreach (String line in inputLines) inputWriter.WriteLine(line);
+
+            if (!p.WaitForExit(10000))
+            {
+                p.Kill();
+            }
+            output = p.StandardOutput.ReadToEnd();
             String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;
             File.WriteAllText(studentOutputFile, output);
+
 
             // run through official HW to get output
             TextReader oldInput = Console.In;

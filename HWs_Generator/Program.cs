@@ -45,9 +45,9 @@ namespace HWs_Generator
             */
             Students students = new Students();
             List<HW0> hws = new List<HW0>();
-            // hws.Add(new HW0());
-            // hws.Add(new HW1());
-            hws.Add(new HW2());
+             hws.Add(new HW0());
+             hws.Add(new HW1());
+            //hws.Add(new HW2());
             //hws.Add(new HW3());
 
             foreach (HW0 hw in hws)

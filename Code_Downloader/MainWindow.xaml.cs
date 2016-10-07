@@ -39,8 +39,8 @@ namespace Code_Downloader
             WebBrowser1.Navigate("http://el1.netanya.ac.il/login/index.php");
             Students students = new Students();
             typeToLinkDict = new Dictionary<Type, string>();
-            //typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142263&action=grading";
-            //typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142708&action=grading";
+            typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143049&action=grading";
+            typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143050&action=grading";
             typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142830&action=grading";
             typeToLinkDict[typeof(HW3)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143026&action=grading";
 
@@ -78,7 +78,7 @@ namespace Code_Downloader
             if (doc.url.EndsWith(@"http://el1.netanya.ac.il/"))
             {
                 //WebBrowser1.Navigate(@"http://el1.netanya.ac.il/mod/assign/view.php?id=142263&action=grading");
-                WebBrowser1.Navigate(typeToLinkDict[typeof(HW2)]);               
+                WebBrowser1.Navigate(typeToLinkDict[typeof(HW0)]);               
             }
             if (doc.url.EndsWith(@"action=grading"))
             {
@@ -120,6 +120,7 @@ namespace Code_Downloader
 
                             // check if there is a directry for this id
                             Student stud = Students.students_dic.Where(z => z.Value.email == email).FirstOrDefault().Value;
+                            if (stud == null) continue;
 
                             String folderPath = hw_path +@"\" + stud.id;
                             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
@@ -167,7 +168,7 @@ namespace Code_Downloader
                             {
                                 grade_box.setAttribute("value", "30");
                                 remarks_box.setAttribute("value", Compiler.errorReason);
-                                stud.Send_Gmail("Your last submission failed to build!!", "Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to build. Compilation error was:\n" + Compiler.errorReason + "\n\n\n. Please check your code and upload again!", new List<String>());
+                                stud.Send_Gmail(String.Format("Your last submission of {0} failed to build!!",hw_name), "Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to build. Compilation error was:\n" + Compiler.errorReason + "\n\n\n. Please check your code and upload again!", new List<String>());
                                 continue;
                             }
 
@@ -190,12 +191,12 @@ namespace Code_Downloader
                             if (rr.grade == 100)
                             {
                                 remarks_box.setAttribute("value", "Perfect");
-                                stud.Send_Gmail("Your last submission was perfect!!", "Good job - " + stud.first_name, rr.filesToAttach);
+                                stud.Send_Gmail(String.Format("Your last submission of {0} was perfect!!",hw_name), "Good job - " + stud.first_name, rr.filesToAttach);
                             }
                             else
                             {
                                 remarks_box.setAttribute("value", rr.errorsAsSingleString());
-                                stud.Send_Gmail("Your last submission was not correct. It run but did not give exactly the desired output", rr.errorsAsSingleString(), rr.filesToAttach);
+                                stud.Send_Gmail(String.Format("Your last submission of {0} was not correct. It run but did not give exactly the desired output", hw_name), rr.errorsAsSingleString(), rr.filesToAttach);
                             }
 
                             /*

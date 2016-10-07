@@ -18,6 +18,7 @@ using DiffPlex.DiffBuilder.Model;
 namespace HWs_Generator
 {
     // TODO : Fix output gathering to repreform task with input to get accurate output (without any ununderstandable blank lines at the end)
+    // TODO : Fix name of attachments in email to short version...
     public class HW0
     {
         public static String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
@@ -270,6 +271,24 @@ namespace HWs_Generator
             }
 
             string output = RunLine.GetOutputs(lines);
+
+            // run again through student build and send to output
+            ProcessStartInfo psi = new ProcessStartInfo(resulting_exe_path);
+            psi.UseShellExecute = false;
+            psi.RedirectStandardInput = true;
+            psi.RedirectStandardOutput = true;
+            
+            psi.WorkingDirectory = randomInputFilesFolder;
+            p = Process.Start(psi);
+            inputWriter = p.StandardInput;
+            inputLines = File.ReadAllLines(randomInputFile);
+            foreach (String line in inputLines) inputWriter.WriteLine(line);
+            
+            if (!p.WaitForExit(10000))
+            {
+                p.Kill();
+            }
+            output = p.StandardOutput.ReadToEnd();
             String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;
             File.WriteAllText(studentOutputFile, output);
 
@@ -290,6 +309,8 @@ namespace HWs_Generator
             String studentText = File.ReadAllText(studentOutputFile);
             String benchmarkText = File.ReadAllText(BenchmarkOutputFile);
 
+            RunResults rr_output = new RunResults();
+
             SideBySideDiffBuilder diffBuilder = new SideBySideDiffBuilder(new Differ());
             var model = diffBuilder.BuildDiffModel(benchmarkText ?? string.Empty, studentText ?? string.Empty);
             for (int i = 0; i < model.NewText.Lines.Count; i++)
@@ -300,45 +321,47 @@ namespace HWs_Generator
                     case ChangeType.Unchanged:
                         continue;
                     case ChangeType.Modified:
-                        rr.grade -= 5;
-                        rr.error_lines.Add(String.Format("Diff at line # {0}. Minus 5 pts.", (int)dp.Position));
-                        rr.error_lines.Add(String.Format("  Correct line is \"{0}\"", model.OldText.Lines[i].Text));
-                        rr.error_lines.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
+                        rr_output.grade -= 5;
+                        rr_output.error_lines.Add(String.Format("Diff at line # {0}. Minus 5 pts.", (int)dp.Position));
+                        rr_output.error_lines.Add(String.Format("  Correct line is \"{0}\"", model.OldText.Lines[i].Text));
+                        rr_output.error_lines.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
                         break;
                     case ChangeType.Inserted:
                         if (dp.Text == String.Empty)
                         {
-                            rr.grade -= 5;
-                            rr.error_lines.Add(String.Format("Extra empty line at line # {0}. Minus 5 pts.", (int)dp.Position));
+                            rr_output.grade -= 5;
+                            rr_output.error_lines.Add(String.Format("Extra empty line at line # {0}. Minus 5 pts.", (int)dp.Position));
                         }
                         else if (dp.Text.Trim() == String.Empty)
                         {
-                            rr.grade -= 7;
-                            rr.error_lines.Add(String.Format("Extra line of blanks at line # {0}. Minus 7 pts.", (int)dp.Position));
+                            rr_output.grade -= 7;
+                            rr_output.error_lines.Add(String.Format("Extra line of blanks at line # {0}. Minus 7 pts.", (int)dp.Position));
                         }
                         else
                         {
-                            rr.grade -= 10;
-                            rr.error_lines.Add(String.Format("Extra line at line # {0}. Minus 10 pts.", (int)dp.Position));
-                            rr.error_lines.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
+                            rr_output.grade -= 10;
+                            rr_output.error_lines.Add(String.Format("Extra line at line # {0}. Minus 10 pts.", (int)dp.Position));
+                            rr_output.error_lines.Add(String.Format("     Your Line is \"{0}\"", dp.Text));
                         }
                         break;
                     case ChangeType.Deleted:
                     case ChangeType.Imaginary:
-                        rr.grade -= 10;
-                        rr.error_lines.Add(String.Format("Missing line at line # {0}. Minus 10 pts.", i + 1));
-                        rr.error_lines.Add(String.Format("     expected Line is \"{0}\"", model.OldText.Lines[i].Text));
+                        rr_output.grade -= 10;
+                        rr_output.error_lines.Add(String.Format("Missing line at line # {0}. Minus 10 pts.", i + 1));
+                        rr_output.error_lines.Add(String.Format("     expected Line is \"{0}\"", model.OldText.Lines[i].Text));
                         break;
                 }
             }
 
-            if (rr.grade < 100)
+            if (rr_output.grade < 100)
             {
-                rr.filesToAttach.Add(randomInputFile);
-                rr.filesToAttach.Add(studentOutputFile);
-                rr.filesToAttach.Add(BenchmarkOutputFile);
-                rr.error_lines.Insert(0, String.Format("Your last submission was not correct.It run but did not give exactly the desired output. Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n", randomFileName, studentOutputFileName, benchmarkOutputFileName));
+                rr_output.filesToAttach.Add(randomInputFile);
+                rr_output.filesToAttach.Add(studentOutputFile);
+                rr_output.filesToAttach.Add(BenchmarkOutputFile);
+                rr_output.error_lines.Insert(0, String.Format("Your last submission was not correct.It run but did not give exactly the desired output. Follwoing are the differneces to expected output. The input used to test is attached to this email at file \"{0}\". Your output is attached at file \"{1}\". Expected output is attached at file \"{2}\". Please fix program and upload project again to Moodle. Detailed differences between your output and the expected one are:\n", randomFileName, studentOutputFileName, benchmarkOutputFileName));
             }
+
+            rr = rr + rr_output;
             return rr;
 
         }
@@ -437,7 +460,7 @@ namespace HWs_Generator
             {
                 Console.WriteLine(new String(' ', i) + kelet1);
             }
-            for (int i = kelet_repetitions - 2; i >= 0; i--)
+            for (int i = kelet_repetitions - 1; i >= 0; i--)
             {
                 Console.WriteLine(new String(' ', i) + kelet1);
             }
