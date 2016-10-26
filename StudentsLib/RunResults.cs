@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DiffPlex.DiffBuilder.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,11 +48,27 @@ namespace StudentsLib
         }
     }
 
+    public enum TextDiffs
+    {
+        No_Diff,
+        Modified_Major,
+        Modified_Minor,
+        Extra_Empty,
+        Extra_blanks,
+        Extra_line,
+        Missing
+    }
+
+
     public class RunResults
     {
         public int grade = 100;
         public List<String> error_lines = new List<string>();
         public List<String> filesToAttach = new List<string>();
+
+        public int[] changes_counter = new int[Enum.GetValues(typeof(TextDiffs)).Length];
+
+        public int Grade_Lost { get { return 100 - grade; } }
 
         public String errorsAsSingleString()
         {

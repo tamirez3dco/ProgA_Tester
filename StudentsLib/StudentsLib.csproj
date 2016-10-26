@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DiffPlex">
+      <HintPath>C:\temp\diffplex-master\WebDiffer\bin\DiffPlex.dll</HintPath>
+    </Reference>
     <Reference Include="SharpCompress">
       <HintPath>..\Code_Downloader\SharpCompress.dll</HintPath>
     </Reference>
@@ -92,6 +95,9 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

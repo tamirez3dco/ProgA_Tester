@@ -21,7 +21,7 @@ namespace HWs_Generator
     // TODO : Fix name of attachments in email to short version...
     public class HW0
     {
-        public static String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
+        public String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
         public String pattern_dir = @"D:\Tamir\Netanya_ProgrammingA\2017\Patterns_docs";
         public String pattern_file_copy = @"HW0_pattern_Copy.docx";
         public String pattern_file_orig = @"HW0_pattern_Orig.docx";
@@ -39,6 +39,7 @@ namespace HWs_Generator
         protected bool stop = false;
         protected void P_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
+            if (e.Data == null) return;
             lines.Add(new RunLine(StudentsLib.Source.ERROR, e.Data));
             stop = true;
             p.CancelOutputRead();
@@ -66,12 +67,20 @@ namespace HWs_Generator
             public int Bottom { get; set; }
         }
 
+        public static String StringfromDoubleArray(double[] arr)
+        {
+            String temp = String.Empty;
+            for (int i = 0; i < arr.Length; i++) temp += arr[i].ToString() + ",";
+            return "{" + temp.Substring(0,temp.Length-1)+"}";
+        }
+
         public static String StringfromObjArray(Object[] arr)
         {
             String res = String.Empty;
             for (int i = 0; i < arr.Length; i++) res += arr[i].ToString() + ",";
             return res;
         }
+
         public static Object[] ObjArrayFromString(String s)
         {
             String[] tokeenizer = { "," };
@@ -195,6 +204,76 @@ namespace HWs_Generator
             return args;
         }
 
+
+        public virtual RunResults Test_Text(Object[] args, String expectedText, String studentText, String prefix)
+        {
+            RunResults rr = new RunResults();
+
+            SideBySideDiffBuilder diffBuilder = new SideBySideDiffBuilder(new Differ());
+            var model = diffBuilder.BuildDiffModel(expectedText ?? string.Empty, studentText ?? string.Empty);
+            List<String> comparisonErrors = new List<string>();
+            for (int i = 0; i < model.NewText.Lines.Count; i++)
+            {
+                DiffPiece dp = model.NewText.Lines[i];
+                switch (dp.Type)
+                {
+                    case ChangeType.Unchanged:
+                        rr.changes_counter[(int)TextDiffs.No_Diff]++;
+                        continue;
+                    case ChangeType.Modified:
+                        // check if minor diff
+
+                        bool minorDiff = (dp.Text.ToLower().Trim() == model.OldText.Lines[i].Text.ToLower().Trim());
+                        if (minorDiff)
+                        {
+                            rr.error_lines.Add(String.Format("{0} - Minor Diff at line # {1}. Minus 1 pts.", prefix, (int)dp.Position));
+                            rr.grade -= 1;
+                            rr.changes_counter[(int)TextDiffs.Modified_Minor]++;
+                        }
+                        else
+                        {
+                            rr.error_lines.Add(String.Format("{0} - Major Diff at line # {1}. Minus 5 pts.", prefix, (int)dp.Position));
+                            rr.grade -= 5;
+                            rr.changes_counter[(int)TextDiffs.Modified_Major]++;
+
+                        }
+
+                        rr.error_lines.Add(String.Format("{0} -  Correct line is \"{1}\"", prefix, model.OldText.Lines[i].Text));
+                        rr.error_lines.Add(String.Format("{0} -      Your Line is \"{1}\"", prefix, dp.Text));
+                        break;
+                    case ChangeType.Inserted:
+                        if (dp.Text == String.Empty)
+                        {
+                            rr.grade -= 2;
+                            rr.error_lines.Add(String.Format("{0} - Extra empty line at line # {1}. Minus 2 pts.", prefix, (int)dp.Position));
+                            rr.changes_counter[(int)TextDiffs.Extra_Empty]++;
+                        }
+                        else if (dp.Text.Trim() == String.Empty)
+                        {
+                            rr.grade -= 4;
+                            rr.error_lines.Add(String.Format("{0} - Extra line of blanks at line # {1}. Minus 4 pts.", prefix, (int)dp.Position));
+                            rr.changes_counter[(int)TextDiffs.Extra_blanks]++;
+                        }
+                        else
+                        {
+                            rr.grade -= 7;
+                            rr.error_lines.Add(String.Format("{0} - Extra line at line # {1}. Minus 7 pts.", prefix, (int)dp.Position));
+                            rr.error_lines.Add(String.Format("{0} - Your Line is \"{1}\"", prefix, dp.Text));
+                            rr.changes_counter[(int)TextDiffs.Extra_line]++;
+                        }
+                        break;
+                    case ChangeType.Deleted:
+                    case ChangeType.Imaginary:
+                        rr.grade -= 5;
+                        rr.error_lines.Add(String.Format("{0} - Missing line at line # {1}. Minus 5 pts.", prefix, i + 1));
+                        rr.error_lines.Add(String.Format("{0} - expected Line is \"{1}\"", prefix, model.OldText.Lines[i].Text));
+                        rr.changes_counter[(int)TextDiffs.Missing]++;
+                        break;
+                }
+            }
+            return rr;
+        }
+
         public virtual RunResults Test_HW(Object[] args, String resulting_exe_path)
         {
             RunResults rr = new RunResults();
@@ -251,7 +330,7 @@ namespace HWs_Generator
                 kk++;
             }
 
-            if (!p.WaitForExit(10000))
+            if (!p.WaitForExit(15000))
             {
                 p.Kill();
                 rr.filesToAttach.Add(randomInputFile);

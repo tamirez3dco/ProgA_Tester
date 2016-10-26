@@ -104,14 +104,12 @@ namespace StudentsLib
 
         public static void Replace_in_doc(Microsoft.Office.Interop.Word.Document doc, String what_to_replace, String replace_with)
         {
-            Microsoft.Office.Interop.Word.Find findObject = doc.Application.Selection.Find;
-            //findObject.form;
+            Find findObject = doc.Application.Selection.Find;
             object missing = Type.Missing;
 
             findObject.Text = what_to_replace;
-            //findObject.Replacement.ClearFormatting();
             findObject.Replacement.Text = replace_with;
-            object replaceAll = Microsoft.Office.Interop.Word.WdReplace.wdReplaceAll;
+            object replaceAll = WdReplace.wdReplaceAll;
             findObject.Execute(ref missing, ref missing, ref missing, ref missing, ref missing,
                 ref missing, ref missing, ref missing, ref missing, ref missing,
                 ref replaceAll, ref missing, ref missing, ref missing, ref missing);

@@ -16,8 +16,10 @@ namespace HWs_Generator
 
         static void Main(string[] args)
         {
-            /*
-                        Student tl = new Student();
+            //Students allStudents = new Students();
+
+
+            Student tl = new Student();
                         tl.first_name = "תמיר";
                         tl.last_name = "לוי";
                         tl.id = 029046117;
@@ -26,24 +28,18 @@ namespace HWs_Generator
                         Students.students_dic[tl.id] = tl;
 
 
-                        HW3 hww = new HW3();
-                        int tid = 029046117;
-                        Object[] myargs = hww.LoadArgs(tid);
-                        String studentOutput = File.ReadAllText(@"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\GeneratedInput\student_output.txt");
-                        String benchmarkOutput = File.ReadAllText(@"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\GeneratedInput\benchmark_output.txt");
-                        RunResults rr = hww.Test_HW(myargs, @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\Hw3_Arrays_Mine.exe");
-                        return;
-            */
-            /*
-                        Object[] thw_args = hww.get_random_args(tid);
+            //GUI1 hww = new GUI1();
+            //Object[] myargs = hww.get_random_args(tid);
+
+            //Object[] myargs = hww.LoadArgs(tid);
+            //                        String studentOutput = File.ReadAllText(@"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\GeneratedInput\student_output.txt");
+            //                        String benchmarkOutput = File.ReadAllText(@"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\GeneratedInput\benchmark_output.txt");
+            //                        RunResults rr = hww.Test_HW(myargs, @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\Hw3_Arrays_Mine.exe");
+            //RunResults rr = hww.Test_HW(myargs, @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\029046117\GUI1_Mine\GUI1_Mine\bin\Debug\GUI1_Mine.exe");
+            //return;
 
 
-                        hww.Create_HW(thw_args, false);
-                        hww.SaveArgs(thw_args);
-                        //Console.ReadKey();
-                        return;
-            */
-            Students students = new Students();
+            //Students students = new Students();
             List<HW0> hws = new List<HW0>();
              hws.Add(new HW0());
              hws.Add(new HW1());

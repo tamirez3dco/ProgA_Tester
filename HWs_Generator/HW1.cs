@@ -548,6 +548,7 @@ namespace HWs_Generator
                         sw.WriteLine(resultingLines[x]);
                     }
                 }
+                sw.WriteLine(); // for all the Console.ReadLine() students may add at the end
             }
 
         }
