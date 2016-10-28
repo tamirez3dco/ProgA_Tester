@@ -13,7 +13,8 @@ namespace WebApplication1
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            string path = HttpContext.Current.Server.MapPath("~/App_Data");
+
+            string path = HttpContext.Current.Server.MapPath("~/App_Data/"+Session["MyClassName"]);
             DirectoryInfo din = new DirectoryInfo(path);
             DirectoryInfo[] hw_dirs = din.GetDirectories();
             HtmlTableRow tr = new HtmlTableRow();

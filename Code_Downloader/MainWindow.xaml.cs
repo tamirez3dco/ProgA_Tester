@@ -32,17 +32,35 @@ namespace Code_Downloader
     public partial class MainWindow : Window
     {
 
-
+        String ClassName;
+        String hw_entire_class_path;
         public MainWindow()
         {
             InitializeComponent();
             WebBrowser1.Navigate("http://el1.netanya.ac.il/login/index.php");
-            Students students = new Students();
+            String[] commandLineArgs = Environment.GetCommandLineArgs();
+            String excel_file_path = commandLineArgs[1];
+            ClassName = Environment.GetCommandLineArgs()[1];
+
+            Students students;
             typeToLinkDict = new Dictionary<Type, string>();
-            typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143049&action=grading";
-            typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143050&action=grading";
-            typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142830&action=grading";
-            typeToLinkDict[typeof(HW3)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143026&action=grading";
+            switch (ClassName)
+            {
+                case "ProgrammingA_2017":
+                    students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\students_name_id_Shana_B.xlsx");
+                    hw_entire_class_path = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions";
+                    typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143049&action=grading";
+                    typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143050&action=grading";
+                    typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142830&action=grading";
+                    typeToLinkDict[typeof(HW3)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143026&action=grading";
+                    break;
+                case "EDP_2017":
+                    students = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+                    hw_entire_class_path = @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions";
+                    typeToLinkDict[typeof(GUI1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143956&action=grading";
+                    break;
+            }
+
 
         }
         int currectIdx = 0;
@@ -77,8 +95,16 @@ namespace Code_Downloader
             }
             if (doc.url.EndsWith(@"http://el1.netanya.ac.il/"))
             {
-                //WebBrowser1.Navigate(@"http://el1.netanya.ac.il/mod/assign/view.php?id=142263&action=grading");
-                WebBrowser1.Navigate(typeToLinkDict[typeof(HW0)]);               
+                switch (ClassName)
+                {
+                    case "ProgrammingA_2017":
+                        WebBrowser1.Navigate(typeToLinkDict[typeof(HW0)]);
+                        break;
+                    case "EDP_2017":
+                        WebBrowser1.Navigate(typeToLinkDict[typeof(GUI1)]);
+                        break;
+                }
+
             }
             if (doc.url.EndsWith(@"action=grading"))
             {
@@ -115,7 +141,7 @@ namespace Code_Downloader
                             if (last_Update_Time.Length < 10) continue;
 
                             // check if there is a directry for this hw
-                            String hw_path = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\" + hw_name;
+                            String hw_path = hw_entire_class_path + "/" + hw_name;
                             if (!Directory.Exists(hw_path)) Directory.CreateDirectory(hw_path);
 
                             // check if there is a directry for this id

@@ -37,11 +37,10 @@ namespace StudentsLib
 
     public class Students
     {
-        public static String students_Excel_path = @"D:\Tamir\Netanya_ProgrammingA\2017\students_name_id.xlsx";
         public static Dictionary<int, Student> students_dic;
-        public Students()
+        public Students(String filePath)
         {
-            students_dic = Exceler.getStudents(@"D:\Tamir\Netanya_ProgrammingA\2017\students_name_id.xlsx");
+            students_dic = Exceler.getStudents(filePath);
         }
         public Students(bool b)
         {

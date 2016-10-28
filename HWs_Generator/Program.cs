@@ -16,9 +16,9 @@ namespace HWs_Generator
 
         static void Main(string[] args)
         {
-            //Students allStudents = new Students();
+            Students allStudents = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
 
-
+/*
             Student tl = new Student();
                         tl.first_name = "תמיר";
                         tl.last_name = "לוי";
@@ -26,10 +26,18 @@ namespace HWs_Generator
                         tl.email = "tamirlevi123@gmail.com";
                         Students.students_dic = new Dictionary<int, StudentsLib.Student>();
                         Students.students_dic[tl.id] = tl;
+*/
 
+            foreach (Student stud in Students.students_dic.Values)
+            {
+                GUI1 hww = new GUI1();
+                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                Object[] myargs = hww.get_random_args(stud.id);
+                hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                hww.SaveArgs(myargs);
 
-            //GUI1 hww = new GUI1();
-            //Object[] myargs = hww.get_random_args(tid);
+            }
+            return;
 
             //Object[] myargs = hww.LoadArgs(tid);
             //                        String studentOutput = File.ReadAllText(@"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\GeneratedInput\student_output.txt");

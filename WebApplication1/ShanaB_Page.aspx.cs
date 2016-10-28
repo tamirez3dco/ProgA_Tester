@@ -8,7 +8,7 @@ using System.Web.UI.WebControls;
 
 namespace WebApplication1
 {
-    public partial class _Default : Page
+    public partial class ShanaB_Page : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -19,7 +19,7 @@ namespace WebApplication1
         {
             Debug.WriteLine("Walla");
             Session["myxxx"] = TextBox1.Text;
-            Session["MyClassName"] = "ProgrammingA";
+            Session["MyClassName"] = "EDP";
             Response.Redirect("TableForm.aspx");
         }
     }

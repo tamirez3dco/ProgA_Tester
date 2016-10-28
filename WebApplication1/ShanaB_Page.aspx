@@ -1,9 +1,9 @@
-﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="WebApplication1._Default" %>
+﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="ShanaB_Page.aspx.cs" Inherits="WebApplication1.ShanaB_Page" %>
 
-<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <p dir="rtl">
-        ברוכים הבאים לאתר ש&quot;ב של תכנות א&#39; - תשנז (עונת 2016-2017 כאילו)</p>
+        ברוכים הבאים לאתר ש&quot;ב של &quot;תכנות מונחה ארועים&quot; - תשנז (עונת 2016-2017 כאילו)</p>
     <p>
         Please enter your id (9 digits)<br />
         <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
