@@ -86,43 +86,7 @@ namespace HWs_Generator
 
     public override RunResults Test_HW(object[] args, string resulting_exe_path)
         {
-            if (!File.Exists(resulting_exe_path))
-            {
-                throw new Exception(String.Format("resulting_exe_path={0} does not exist", resulting_exe_path));
-            }
-            FileInfo exe_fin = new FileInfo(resulting_exe_path);
-            
-            RunResults rr = new RunResults();
-            p = new Process();
-            p.StartInfo.FileName = resulting_exe_path;
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardInput = true;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.RedirectStandardError = true;
-            p.StartInfo.WorkingDirectory = exe_fin.Directory.FullName;
-            p.ErrorDataReceived += P_ErrorDataReceived;
-            p.OutputDataReceived += P_OutputDataReceived;
-            p.EnableRaisingEvents = true;
-
-
-            p.Start();
-            String mainWindowTitle = p.MainWindowTitle;
-            IntPtr mainWindowHandle = p.MainWindowHandle;
-            while (true)
-            {
-                mainWindowTitle = p.MainWindowTitle;
-                Thread.Sleep(1000);
-
-                uint colorInt = GetBkColor(mainWindowHandle);
-                Debug.WriteLine("colorInt={0}, title={1}", colorInt, mainWindowTitle);
-
-            }
-            //List<IntPtr> childrenMainWindows = GetChildWindows(mainWindowHandle);
-            //List<IntPtr> controls = new List<IntPtr>();
-            //EnumWindow(mainWindowHandle, controls);
-
-            return rr;
-
+            return test_Hw_by_assembly(args, new FileInfo(resulting_exe_path));
         }
 
 
@@ -242,14 +206,16 @@ namespace HWs_Generator
             Thread th = new Thread(ts);
             th.Start();
 
-            /*
-                        for (int j = 0; j < 50; j++)
-                        {
-                            click_control(form_to_run);
+            int tries = 10;
+            while (!form_to_run.Visible) Thread.Sleep(1000);
 
-                        }
-                        return rr;
-            */
+            if (!form_to_run.Visible)
+            {
+                int grade_lost = 50;
+                rr.grade -= grade_lost;
+                rr.error_lines.Add(String.Format("Form was never opened. Minus {0} points.", grade_lost));
+                return rr;
+            }
             Debug.WriteLine("Form title=" + form_to_run.Text);
             if (form_to_run.Text.ToLower().Trim() != stud.email.ToLower().Trim())
             {
@@ -301,10 +267,17 @@ namespace HWs_Generator
                 hidder_disabler = form_to_run;
             }
 
-
             Dictionary<Color, int> colorDicts = new Dictionary<Color, int>();
             for (int i = random_start, clicks=0; i > 0; i--)
             {
+                if (!form_to_run.Visible)
+                {
+                    int grade_lost = 20;
+                    rr.grade -= grade_lost;
+                    rr.error_lines.Add(String.Format("Form closed unexpectedly after {0} clicks. Minus {1} points.", clicks, grade_lost));
+                    return rr;
+                }
+
                 Color colorBefore;
                 if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
                 {
@@ -319,11 +292,18 @@ namespace HWs_Generator
 
 
                 clicks++;
-
-                //continue;
                 if (clicks == random_start) break;
 
-                Console.WriteLine("random_start={0}, clicks={1}, b.Text={2}, i={3}", random_start, clicks, b.Text, i);
+                if (!form_to_run.Visible)
+                {
+                    int grade_lost = 20;
+                    rr.grade -= grade_lost;
+                    rr.error_lines.Add(String.Format("Form closed unexpectedly after {0} clicks. Minus {1} points." , clicks, grade_lost));
+                    return rr;
+                }
+
+
+                Console.WriteLine("random_start={0}, clicks={1}, b.Text={2}, i={3} Visible={4}", random_start, clicks, b.Text, i, form_to_run.Visible);
                 if (b.Text.Trim() != (i - 1).ToString().Trim())
                 {
                     int grade_lost = 30;
@@ -332,6 +312,33 @@ namespace HWs_Generator
                     Console.WriteLine(rr.error_lines.Last());
                     form_to_run.Close();
                     return rr;
+                }
+                int counter_from_button = int.Parse(b.Text);
+                int last_color_start_count = (int)args[(int)GUI1_ARGS.LAST_COLOR_STARTER];
+                if (counter_from_button == last_color_start_count)
+                {
+                    Color[] temp2 = { Color.DarkBlue, Color.Yellow, Color.Violet };
+                    Color benchmark = temp2[(int)args[(int)GUI1_ARGS.LAST_COLOR]];
+                    Color color_found;
+                    String control_name = "button";
+                    if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
+                    {
+                        color_found = b.BackColor;
+                    }
+                    else
+                    {
+                        control_name = "Form";
+                        color_found = form_to_run.BackColor;
+                    }
+                    if (!(benchmark == color_found))
+                    {
+                        int grade_lost = 20;
+                        rr.grade -= grade_lost;
+                        rr.error_lines.Add(String.Format("When reaching counter={0} (after {1} clicks). {2} background color did not change to {3}. Found background to be {4}. Minus {5} points.",
+                            b.Text,clicks,control_name,benchmark.Name, color_found.ToString(), grade_lost));
+                        Console.WriteLine(rr.error_lines.Last());
+                    }
+
                 }
 
 
