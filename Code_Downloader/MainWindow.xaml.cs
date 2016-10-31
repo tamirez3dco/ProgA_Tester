@@ -46,19 +46,29 @@ namespace Code_Downloader
             typeToLinkDict = new Dictionary<Type, string>();
             switch (ClassName)
             {
-                case "ProgrammingA_2017":
+                case "ProgrammingA_2017_Summer":
+                    HW0.Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs_Summer";
                     students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\students_name_id_Shana_B.xlsx");
-                    hw_entire_class_path = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions";
+                    hw_entire_class_path = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions_Summer";
                     typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143049&action=grading";
                     typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143050&action=grading";
                     typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=142830&action=grading";
                     typeToLinkDict[typeof(HW3)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143026&action=grading";
+                    typeToLinkDict[typeof(HW4)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=144124&action=grading";                   
                     break;
                 case "EDP_2017":
+                    GUI1.Students_All_Hws_dirs = @"D:\Tamir\Netanya_Desktop_App\2017\Students_HWs";                    
                     students = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
                     hw_entire_class_path = @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions";
                     typeToLinkDict[typeof(GUI1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143956&action=grading";
                     break;
+                case "ProgrammingA_2017":
+                    students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
+                    HW0.Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
+                    hw_entire_class_path = @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions";
+                    typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=144329&action=grading";
+                    break;
+                    
             }
 
 
@@ -95,16 +105,18 @@ namespace Code_Downloader
             }
             if (doc.url.EndsWith(@"http://el1.netanya.ac.il/"))
             {
-                switch (ClassName)
-                {
-                    case "ProgrammingA_2017":
-                        WebBrowser1.Navigate(typeToLinkDict[typeof(HW0)]);
-                        break;
-                    case "EDP_2017":
-                        WebBrowser1.Navigate(typeToLinkDict[typeof(GUI1)]);
-                        break;
-                }
-
+                WebBrowser1.Navigate(typeToLinkDict[typeToLinkDict.Keys.First()]);
+                /*
+                                switch (ClassName)
+                                {
+                                    case "ProgrammingA_2017_Summer":
+                                        WebBrowser1.Navigate(typeToLinkDict[typeof(HW0)]);
+                                        break;
+                                    case "EDP_2017":
+                                        WebBrowser1.Navigate(typeToLinkDict[typeof(GUI1)]);
+                                        break;
+                                }
+                */
             }
             if (doc.url.EndsWith(@"action=grading"))
             {

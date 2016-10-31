@@ -21,7 +21,7 @@ namespace HWs_Generator
     // TODO : Fix name of attachments in email to short version...
     public class HW0
     {
-        public String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
+        public static String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
         
         public String pattern_dir = @"D:\Tamir\Netanya_ProgrammingA\2017\Patterns_docs";
         public String pattern_file_copy = @"HW0_pattern_Copy.docx";
@@ -571,7 +571,7 @@ namespace HWs_Generator
                 output.Save(Students_Hws_dirs + "\\" + id.ToString() + ".png", ImageFormat.Png);
 
                 System.Threading.Thread.Sleep(1000);
-
+                Console.Clear();
                 Create_DocFile(args);
 
             }

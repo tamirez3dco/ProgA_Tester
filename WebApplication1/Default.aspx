@@ -3,7 +3,7 @@
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
     <p dir="rtl">
-        ברוכים הבאים לאתר ש&quot;ב של תכנות א&#39; - תשנז (עונת 2016-2017 כאילו)</p>
+        ברוכים הבאים לאתר ש&quot;ב של&nbsp; &quot;מטלות קיץ&quot; (לקראת תכנות מבוסס ארועים תשנז)</p>
     <p>
         Please enter your id (9 digits)<br />
         <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>

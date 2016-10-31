@@ -19,7 +19,7 @@ namespace WebApplication1
         {
             Debug.WriteLine("Walla");
             Session["myxxx"] = TextBox1.Text;
-            Session["MyClassName"] = "ProgrammingA";
+            Session["MyClassName"] = "ProgrammingA_Summer";
             Response.Redirect("TableForm.aspx");
         }
     }

@@ -14,9 +14,31 @@ namespace HWs_Generator
     {
 
 
+        static String ClassName;
         static void Main(string[] args)
         {
-            Students allStudents = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+            String excel_file_path = args[0];
+            ClassName = Environment.GetCommandLineArgs()[1];
+
+            Students students;
+            switch (ClassName)
+            {
+                case "ProgrammingA_2017_Summer":
+                    HW0.Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs_Summer";
+                    students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\students_name_id_Shana_B.xlsx");                  
+                    break;
+                case "EDP_2017":
+                    GUI1.Students_All_Hws_dirs = @"D:\Tamir\Netanya_Desktop_App\2017\Students_HWs";
+                    students = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+                    break;
+                case "ProgrammingA_2017":
+                    students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
+                    GUI1.Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
+                    break;
+            }
+
+
+            //Students allStudents = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
 
 /*
             Student tl = new Student();
@@ -30,12 +52,12 @@ namespace HWs_Generator
 
             foreach (Student stud in Students.students_dic.Values)
             {
-                GUI1 hww = new GUI1();
+                HW0 hww = new HW0();
                 if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
                 Object[] myargs = hww.get_random_args(stud.id);
-                hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                hww.Create_HW(myargs, false);
                 hww.SaveArgs(myargs);
-
             }
             return;
 

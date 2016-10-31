@@ -18,11 +18,13 @@ namespace WebApplication1
             DirectoryInfo din = new DirectoryInfo(path);
             DirectoryInfo[] hw_dirs = din.GetDirectories();
             HtmlTableRow tr = new HtmlTableRow();
-            
+
+            Object id = Session["myxxx"];
+            int num = int.Parse((String)id);
             foreach (DirectoryInfo hw_dir in hw_dirs)
             {
-                Object id = Session["myxxx"];
-                int num = int.Parse((String)id);
+                
+               
                 FileInfo[] fins = hw_dir.GetFiles("*" + num.ToString() + "*");
                 if (fins.Length > 0)
                 {
@@ -40,8 +42,9 @@ namespace WebApplication1
                     tr.Cells.Add(tc2);
                     Table1.Rows.Add(tr);
                 }
-                if (tr.Cells.Count == 0) Response.Write("Could not locate any HW for id=" + num);
+                
             }
+            if (tr.Cells.Count == 0) Response.Write("Could not locate any HW for id=" + num);
 
         }
     }
