@@ -117,10 +117,11 @@ namespace HWs_Generator
             Console.WriteLine(new String('*', size * 2));
         }
 
-        public Object[] LoadArgs(int id)
+        public virtual Object[] LoadArgs(int id)
         {
             String studentArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.txt";
-            return ObjArrayFromString(File.ReadAllText(studentArgsFilePath));
+            String readText = File.ReadAllText(studentArgsFilePath);
+            return ObjArrayFromString(readText);
         }
 
         public void SaveArgs(Object[] args)
@@ -274,6 +275,12 @@ namespace HWs_Generator
             }
             return rr;
         }
+
+        public virtual bool BuildProject(String path, out String resulting_file_path)
+        {
+            return Compiler.BuildZippedProject(path, out resulting_file_path);
+        }
+            
 
         public virtual RunResults Test_HW(Object[] args, String resulting_exe_path)
         {

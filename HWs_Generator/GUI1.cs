@@ -86,7 +86,8 @@ namespace HWs_Generator
 
     public override RunResults Test_HW(object[] args, string resulting_exe_path)
         {
-            return test_Hw_by_assembly(args, new FileInfo(resulting_exe_path));
+            RunResults rr = test_Hw_by_assembly(args, new FileInfo(resulting_exe_path));
+            return rr;
         }
 
 
@@ -224,6 +225,7 @@ namespace HWs_Generator
                 rr.error_lines.Add(String.Format("Wrong Title on form. Expected {0} but found {1}. Minus {2} points.", stud.email, form_to_run.Text,grade_cost));
             }
 
+            Debug.WriteLine("2222");
             if (form_to_run.BackColor != SystemColors.Control)
             {
                 int grade_cost = 25;
@@ -233,6 +235,7 @@ namespace HWs_Generator
                 return rr;
             }
 
+            Debug.WriteLine("3333");
             Button b = (Button)ScreenControlsByText(form_to_run.Controls, random_start.ToString());
             if (b == null)
             {

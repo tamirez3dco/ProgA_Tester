@@ -41,7 +41,7 @@ namespace Code_Downloader
             String[] commandLineArgs = Environment.GetCommandLineArgs();
             String excel_file_path = commandLineArgs[1];
             ClassName = Environment.GetCommandLineArgs()[1];
-
+            this.WindowState = WindowState.Minimized;
             Students students;
             typeToLinkDict = new Dictionary<Type, string>();
             switch (ClassName)
@@ -68,7 +68,19 @@ namespace Code_Downloader
                     hw_entire_class_path = @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions";
                     typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=144329&action=grading";
                     break;
-                    
+                case "Java1_2017_Highschool":
+                    students = new Students(@"D:\Tamir\Netanya_Java_1\2017\Highschool\Highschool_Class.xlsx");
+                    HW0.Students_All_Hws_dirs = @"D:\Tamir\Netanya_Java_1\2017\Highschool\Students_HWs";
+                    hw_entire_class_path = @"D:\Tamir\Netanya_Java_1\2017\Highschool\Students_Submissions";
+                    typeToLinkDict[typeof(JAVA0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=146793&action=grading";
+                    break;
+                case "Java1_2017":
+                    students = new Students(@"D:\Tamir\Netanya_Java_1\2017\SemesterA\SemesterA.xlsx");
+                    HW0.Students_All_Hws_dirs = @"D:\Tamir\Netanya_Java_1\2017\SemesterA\Students_HWs";
+                    hw_entire_class_path = @"D:\Tamir\Netanya_Java_1\2017\SemesterA\Students_Submissions";
+                    typeToLinkDict[typeof(JAVA0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=147049&action=grading";
+                    break;
+
             }
 
 
@@ -106,17 +118,6 @@ namespace Code_Downloader
             if (doc.url.EndsWith(@"http://el1.netanya.ac.il/"))
             {
                 WebBrowser1.Navigate(typeToLinkDict[typeToLinkDict.Keys.First()]);
-                /*
-                                switch (ClassName)
-                                {
-                                    case "ProgrammingA_2017_Summer":
-                                        WebBrowser1.Navigate(typeToLinkDict[typeof(HW0)]);
-                                        break;
-                                    case "EDP_2017":
-                                        WebBrowser1.Navigate(typeToLinkDict[typeof(GUI1)]);
-                                        break;
-                                }
-                */
             }
             if (doc.url.EndsWith(@"action=grading"))
             {
@@ -200,9 +201,13 @@ namespace Code_Downloader
                             HTMLTableCell tc_remarks = tableRow.cells.item(11); // grade cell
                             HTMLInputTextElement remarks_box = tc_remarks.getElementsByTagName("textarea").item(0);
 
+                            // Start testing....
+                            Type type = types[j];
+                            ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
+                            HW0 hw = (HW0)ctor.Invoke(new object[] { });
 
                             String resulting_exe_path;
-                            if (!Compiler.BuildZippedProject(filePath, out resulting_exe_path))
+                            if (!hw.BuildProject(filePath, out resulting_exe_path))
                             {
                                 grade_box.setAttribute("value", "30");
                                 remarks_box.setAttribute("value", Compiler.errorReason);
@@ -215,10 +220,6 @@ namespace Code_Downloader
                             if (!Directory.Exists(randomInputFilesFolder)) Directory.CreateDirectory(randomInputFilesFolder);
 
 
-                            // Start testing....
-                            Type type = types[j];
-                            ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
-                            HW0 hw = (HW0)ctor.Invoke(new object[] { });
 
                             // 1) get the specific student values...
                             Object[] args = hw.LoadArgs(stud.id);

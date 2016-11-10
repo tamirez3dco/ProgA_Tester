@@ -35,20 +35,35 @@ namespace HWs_Generator
                     students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
                     GUI1.Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
                     break;
+                case "Java1_2017_Highschool":
+                    students = new Students(@"D:\Tamir\Netanya_Java_1\2017\Highschool\Highschool_Class.xlsx");
+                    GUI1.Students_All_Hws_dirs = @"D:\Tamir\Netanya_Java_1\2017\Highschool\Students_HWs";
+                    break;
             }
 
 
             //Students allStudents = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
 
-/*
-            Student tl = new Student();
-                        tl.first_name = "תמיר";
-                        tl.last_name = "לוי";
-                        tl.id = 029046117;
-                        tl.email = "tamirlevi123@gmail.com";
-                        Students.students_dic = new Dictionary<int, StudentsLib.Student>();
-                        Students.students_dic[tl.id] = tl;
-*/
+            /*
+                        Student tl = new Student();
+                                    tl.first_name = "תמיר";
+                                    tl.last_name = "לוי";
+                                    tl.id = 029046117;
+                                    tl.email = "tamirlevi123@gmail.com";
+                                    Students.students_dic = new Dictionary<int, StudentsLib.Student>();
+                                    Students.students_dic[tl.id] = tl;
+            */
+
+            foreach (Student stud in Students.students_dic.Values)
+            {
+                GUI1 hww = new GUI1();
+                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                Object[] myargs = hww.get_random_args(stud.id);
+                hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                //hww.Create_HW(myargs, false);
+                hww.SaveArgs(myargs);
+            }
+            return;
 
             foreach (Student stud in Students.students_dic.Values)
             {

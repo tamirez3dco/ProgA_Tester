@@ -57,6 +57,7 @@
     <Compile Include="HW2.cs" />
     <Compile Include="HW3_Arrays.cs" />
     <Compile Include="HW4_Functions.cs" />
+    <Compile Include="JAVA0.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
