@@ -407,6 +407,15 @@
     <Content Include="App_Data\ProgrammingA_2017\HW0\39400817.docx" />
     <Content Include="App_Data\ProgrammingA_2017\HW0\39783626.docx" />
     <Content Include="App_Data\EDP\GUI1\302896337.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\204626568.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\207908948.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\307743559.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\308065564.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\309473221.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\311308472.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\312969348.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\313236317.docx" />
+    <Content Include="App_Data\ProgrammingA_2017\HW0\319585360.docx" />
     <None Include="Properties\PublishProfiles\ShanaB-Summer-HWs.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />

@@ -54,16 +54,32 @@ namespace HWs_Generator
                                     Students.students_dic[tl.id] = tl;
             */
 
+            // fix all students shitty images...
+            Students allStudents = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
+            int[] shittyImagesIds = { 332270925, 315815522, 311367213, 309705119, 204578249, 204201602 };// 203599014 };
+            foreach (int id in shittyImagesIds)
+            {
+                Student stud = Students.students_dic[id];
+                HW0 hww = new HW0();
+                //if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                Object[] myargs = hww.LoadArgs(id);
+                hww.SaveArgs(myargs);
+                hww.Create_HW(myargs, false);
+            }
+
+            return;
             foreach (Student stud in Students.students_dic.Values)
             {
-                GUI1 hww = new GUI1();
+                HW0 hww = new HW0();
                 if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
                 Object[] myargs = hww.get_random_args(stud.id);
-                hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
-                //hww.Create_HW(myargs, false);
+                //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                hww.Create_HW(myargs, false);
                 hww.SaveArgs(myargs);
             }
-            return;
+
+
 
             foreach (Student stud in Students.students_dic.Values)
             {
@@ -75,6 +91,19 @@ namespace HWs_Generator
                 hww.SaveArgs(myargs);
             }
             return;
+
+
+            foreach (Student stud in Students.students_dic.Values)
+            {
+                GUI1 hww = new GUI1();
+                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                Object[] myargs = hww.get_random_args(stud.id);
+                hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                //hww.Create_HW(myargs, false);
+                hww.SaveArgs(myargs);
+            }
+            return;
+
 
             //Object[] myargs = hww.LoadArgs(tid);
             //                        String studentOutput = File.ReadAllText(@"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\GeneratedInput\student_output.txt");

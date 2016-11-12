@@ -65,7 +65,7 @@ namespace Code_Downloader
                 case "ProgrammingA_2017":
                     students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
                     HW0.Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
-                    hw_entire_class_path = @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions";
+                    hw_entire_class_path = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions";
                     typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=144329&action=grading";
                     break;
                 case "Java1_2017_Highschool":

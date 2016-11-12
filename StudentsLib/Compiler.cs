@@ -9,6 +9,7 @@ using System.Threading;
 using System.Diagnostics;
 using SharpCompress.Reader;
 using SharpCompress.Common;
+using System.Windows.Forms;
 
 namespace StudentsLib
 {
@@ -46,6 +47,8 @@ namespace StudentsLib
                 Directory.Delete(objDins[0].FullName, true);
                 Thread.Sleep(1000);
             }
+
+
 
 
             // search for .sln file
@@ -101,6 +104,54 @@ namespace StudentsLib
             if (!buildPathFound)
             {
                 errorReason = "Build Maybe Succeeded but no build path found";
+                return false;
+            }
+
+            // next remove all Console.ReadKey() instructions from source and recompile...
+            FileInfo[] csFiles = din.GetFiles("*.cs", SearchOption.AllDirectories);
+            foreach (FileInfo csFile in csFiles)
+            {
+                String source = File.ReadAllText(csFile.FullName);
+                String changedCode = source.Replace("Console.ReadKey()", "//Console.ReadKey()");
+                File.WriteAllText(csFile.FullName, changedCode);
+            }
+
+            p = Process.Start(psi);
+
+            output = p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+            File.WriteAllText(buildLogPath, output);
+
+            // 
+            if (output.Contains(buildFailed))
+            {
+                MessageBox.Show("Rebuild failed while orig Build succeeded!!");
+                int lastLocation = output.LastIndexOf(buildFailed);
+                errorReason = "BuildFailed" + "\n" + output.Substring(lastLocation);
+                return false;
+            }
+            allBuildLines = File.ReadAllLines(buildLogPath);
+            buildPathFound = false;
+            for (int lineNum = allBuildLines.Length - 1; lineNum >= 0; lineNum--)
+            {
+                String line = allBuildLines[lineNum];
+                String bingo = "->";
+                if (!line.Contains(bingo)) continue;
+                int location = line.LastIndexOf(bingo);
+                String exePath = line.Substring(location + 2).Trim();
+                if (!File.Exists(exePath)) continue;
+                else
+                {
+                    buildPathFound = true;
+                    resulting_exe_file_path = exePath;
+                    break;
+                }
+            }
+
+            if (!buildPathFound)
+            {
+                errorReason = "Build Maybe Succeeded but no build path found";
+                MessageBox.Show("Rebuild succeeded but no buildPathFound. " + errorReason);
                 return false;
             }
 
