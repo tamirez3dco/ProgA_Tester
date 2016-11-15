@@ -21,6 +21,14 @@ namespace StudentsLib
         public static bool BuildZippedProject(String path, out String resulting_exe_file_path)
         {
             resulting_exe_file_path = null;
+            bool isRarArchive = SharpCompress.Archive.Rar.RarArchive.IsRarFile(path);
+            bool isZipArchive = SharpCompress.Archive.Zip.ZipArchive.IsZipFile(path);
+            if (!(isRarArchive || isZipArchive))
+            {
+                errorReason = "What was uploaded is neither a Zip archive nor a Rar archive. Maybe you did not upload the entire Solution directory ?";
+                return false;
+            }
+            
             FileInfo file = new FileInfo(path);
             String extractionPath = file.FullName.Substring(0, file.FullName.Length - 4) + "_extracted";
             // unzipping
@@ -48,6 +56,13 @@ namespace StudentsLib
                 Thread.Sleep(1000);
             }
 
+            // clean the bin directory...
+            DirectoryInfo[] binDins = din.GetDirectories("bin", SearchOption.AllDirectories);
+            if (objDins.Length == 1)
+            {
+                Directory.Delete(binDins[0].FullName, true);
+                Thread.Sleep(1000);
+            }
 
 
 
@@ -161,6 +176,14 @@ namespace StudentsLib
         public static bool BuildJavaZippedProject(String path, out String resulting_exe_file_path)
         {
             resulting_exe_file_path = null;
+            bool isRarArchive = SharpCompress.Archive.Rar.RarArchive.IsRarFile(path);
+            bool isZipArchive = SharpCompress.Archive.Zip.ZipArchive.IsZipFile(path);
+            if (!(isRarArchive || isZipArchive))
+            {
+                errorReason = "What was uploaded is neither a Zip archive nor a Rar archive. Maybe you did not upload the entire Solution directory ?";
+                return false;
+            }
+
             FileInfo file = new FileInfo(path);
             String extractionPath = file.FullName.Substring(0, file.FullName.Length - 4) + "_extracted";
             // unzipping

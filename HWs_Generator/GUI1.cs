@@ -21,6 +21,11 @@ namespace HWs_Generator
     public class GUI1 : HW4
     {
         //[DllImport("user32")]
+        [DllImport("user32.dll")]
+        static extern int SendMessage(int hWnd, uint Msg, int wParam, int lParam);
+        public const int WM_SYSCOMMAND = 0x0112;
+        public const int SC_CLOSE = 0xF060;
+
 
         [DllImport("gdi32.dll")]
         static extern uint GetBkColor(IntPtr hdc);
@@ -273,6 +278,16 @@ namespace HWs_Generator
             Dictionary<Color, int> colorDicts = new Dictionary<Color, int>();
             for (int i = random_start, clicks=0; i > 0; i--)
             {
+
+
+                // Some crazy shit code to Close down some MessageBox over ununderstandable exception...
+                IntPtr window = FindWindow(null, "Microsoft .NET Framework");
+                if (window != IntPtr.Zero)
+                {
+                   Debug.WriteLine("Window found, closing...");
+                   SendMessage((int) window, WM_SYSCOMMAND, SC_CLOSE, 0);  
+                }
+
                 if (!form_to_run.Visible)
                 {
                     int grade_lost = 20;
@@ -468,7 +483,7 @@ namespace HWs_Generator
                                 return rr;
                             }
 
-                            //click_method.Invoke(form_to_run, click_objects);
+                            click_control(form_to_run);
                             MySleep(1000);
 
                             if (b.Visible == false)

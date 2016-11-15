@@ -144,8 +144,11 @@ namespace Code_Downloader
                             Debug.WriteLine("name=" + name);
 
                             HTMLTableCell tc_email = tableRow.cells.item(3); // email cell
+                            if (tc_email == null) continue;
+                            if (tc_email.innerText == null) continue;
                             String email = tc_email.innerText.Trim();
                             Debug.WriteLine("email=" + email);
+                            if (email == null) continue;
 
                             HTMLTableCell tc_last_update = tableRow.cells.item(7); // last upload time
                             String last_Update_Time = tc_last_update.innerText.Trim();

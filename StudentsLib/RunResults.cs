@@ -70,6 +70,11 @@ namespace StudentsLib
 
         public int Grade_Lost { get { return 100 - grade; } }
 
+        public override string ToString()
+        {
+            String res = String.Format("RunResults:{0}. ErrorLines={1}", this.grade, this.errorsAsSingleString());
+            return res;
+        }
         public String errorsAsSingleString()
         {
             String res = String.Empty;
