@@ -201,11 +201,19 @@ namespace HWs_Generator
             }
 
             Type[] constructor_param_types = { typeof(int) };
-            ConstructorInfo form_empty_constructor = son_form.GetConstructor(constructor_param_types);
+            ConstructorInfo desired_constructor = son_form.GetConstructor(constructor_param_types);
+
+            if (desired_constructor == null)
+            {
+                int grade_lost = 50;
+                rr.grade -= grade_lost;
+                rr.error_lines.Add(String.Format("Could not find the constructor with single int param in the Form class. Minus {0} points.", grade_lost));
+                return rr;
+            }
 
             int random_start = r.Next(130, 150);
             Object[] constructor_params = { random_start };
-            form_to_run = (Form)form_empty_constructor.Invoke(constructor_params);
+            form_to_run = (Form)desired_constructor.Invoke(constructor_params);
 
 
             ThreadStart ts = new ThreadStart(run_form_to_run);
@@ -937,7 +945,7 @@ namespace HWs_Generator
             return destImage;
         }
 
-        private void MySleep(int millis)
+        protected void MySleep(int millis)
         {
             for (int i = 0; i < millis ; i++)
             {

@@ -180,9 +180,21 @@ namespace Code_Downloader
                                 continue;
                             }
 
+                            HTMLTableCell tc_grade = tableRow.cells.item(5); // grade table cell
+                            HTMLInputTextElement grade_box = tc_grade.getElementsByTagName("input").item(0);
+                            HTMLTableCell tc_remarks = tableRow.cells.item(11); // grade cell
+                            HTMLInputTextElement remarks_box = tc_remarks.getElementsByTagName("textarea").item(0);
+
                             HTMLTableCell tc_file = tableRow.cells.item(8); // last upload time
                             HTMLAnchorElement link_to_file = tc_file.getElementsByTagName("a").item(0);
 
+                            if (link_to_file == null)
+                            {
+                                grade_box.setAttribute("value", "30");
+                                remarks_box.setAttribute("value", "There was no ZIP file in your submission");
+                                stud.Send_Gmail(String.Format("Your last submission of {0} could not build!!", hw_name), "Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle could not build. You probably forgot to attach the zipped code. Please check your submission and upload (including the zipped code)!", new List<String>());
+                                continue;
+                            }
                             CookieContainer cc = new CookieContainer();
                             String[] cookies = doc.cookie.Split(';');
                             foreach (String cokie in cookies)
@@ -199,10 +211,6 @@ namespace Code_Downloader
                             wbc.CookieContainer = cc;
                             wbc.DownloadFile(link_to_file.href, filePath);
 
-                            HTMLTableCell tc_grade = tableRow.cells.item(5); // grade table cell
-                            HTMLInputTextElement grade_box = tc_grade.getElementsByTagName("input").item(0);
-                            HTMLTableCell tc_remarks = tableRow.cells.item(11); // grade cell
-                            HTMLInputTextElement remarks_box = tc_remarks.getElementsByTagName("textarea").item(0);
 
                             // Start testing....
                             Type type = types[j];

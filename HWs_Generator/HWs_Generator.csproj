@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GUI1.cs" />
+    <Compile Include="GUI2.cs" />
     <Compile Include="HW0.cs" />
     <Compile Include="HW1.cs" />
     <Compile Include="HW2.cs" />
