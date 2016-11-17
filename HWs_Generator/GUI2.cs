@@ -8,11 +8,492 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace HWs_Generator
 {
-    class GUI2 : GUI1
+    public class GUI2 : GUI1
     {
+        [DllImport("user32.dll")]
+        static extern int SendMessage(int hWnd, uint Msg, int wParam, int lParam);
+        public const int WM_SYSCOMMAND = 0x0112;
+        public const int SC_CLOSE = 0xF060;
+
+
+        [DllImport("gdi32.dll")]
+        static extern uint GetBkColor(IntPtr hdc);
+
+        public enum GUI2_ARGS
+        {
+            ID,
+        }
+        public override Object[] get_random_args(int id)
+        {
+            Object[] args = new Object[Enum.GetNames(typeof(GUI2_ARGS)).Length];
+            args[(int)GUI2_ARGS.ID] = id;
+            return args;
+
+        }
+
+        public override RunResults test_Hw_by_assembly(object[] args, FileInfo executable)
+        {
+            int stud_id = (int)args[0];
+            Student stud = Students.students_dic[stud_id];
+            RunResults rr = new RunResults();
+            Assembly studentApp = Assembly.LoadFile(executable.FullName);
+            Type[] appTypes = studentApp.GetTypes();
+            //studentApp.get
+            if (appTypes.Length < 1)
+            {
+                rr.grade = 30;
+                rr.error_lines.Add("No classes in code");
+                return rr;
+            }
+
+            Type son_form = null;
+            foreach (Type t in appTypes)
+            {
+                Type parent_form = t.BaseType;
+                while (parent_form != null && parent_form != typeof(Object))
+                {
+                    if (parent_form == typeof(System.Windows.Forms.Form))
+                    {
+                        son_form = t;
+                        break;
+                    }
+                    parent_form = parent_form.BaseType;
+                }
+            }
+
+
+            if (son_form == null)
+            {
+                rr.grade = 30;
+                rr.error_lines.Add("No Form derivitive available in code");
+                return rr;
+            }
+
+            Type[] constructor_param_types = { };
+            ConstructorInfo desired_constructor = son_form.GetConstructor(constructor_param_types);
+
+            if (desired_constructor == null)
+            {
+                int grade_lost = 50;
+                rr.grade -= grade_lost;
+                rr.error_lines.Add(String.Format("Could not find the empty constructor. Minus {0} points.", grade_lost));
+                return rr;
+            }
+
+            Directory.SetCurrentDirectory(executable.Directory.FullName);
+            //Application.cu
+            Object[] constructor_params = { };
+            form_to_run = (Form)desired_constructor.Invoke(constructor_params);
+
+
+            ThreadStart ts = new ThreadStart(run_form_to_run);
+            Thread th = new Thread(ts);
+            th.Start();
+
+            int tries = 10;
+            while (!form_to_run.Visible) Thread.Sleep(1000);
+
+            if (!form_to_run.Visible)
+            {
+                int grade_lost = 50;
+                rr.grade -= grade_lost;
+                rr.error_lines.Add(String.Format("Form was never opened. Minus {0} points.", grade_lost));
+                return rr;
+            }
+
+            if (form_to_run.BackColor != SystemColors.Control)
+            {
+                int grade_cost = 25;
+                rr.grade -= grade_cost;
+                rr.error_lines.Add(String.Format("Wrong Background Color on initial state on form. Expected {0} but found {1}. Minus {2} points.", "SystemColors.Control", form_to_run.BackColor.ToString(), grade_cost));
+                form_to_run.Close();
+                return rr;
+            }
+
+            // check that labels are not seen or non existent or that text is empty
+            String labelsText = getAllLabeShowingText();
+            if (labelsText != String.Empty)
+            {
+                int grade_lost = 30;
+                rr.grade -= grade_lost;
+                rr.error_lines.Add(String.Format("When form started found text \"{0}\" in Labels that were supposed to be not showing. Minus {1} points.", labelsText, grade_lost));
+            }
+            // check that combo box shows "Choose a country...";
+            List<Control> comboBoxes = ScreenControlsByType(typeof(ComboBox));
+            if (comboBoxes.Count < 1)
+            {
+                int grade_cost = 35;
+                rr.grade -= grade_cost;
+                rr.error_lines.Add(String.Format("Could not find any ComboBox in your Form. Minus {0} points.", grade_cost));
+                form_to_run.Close();
+                return rr;
+            }
+            if (comboBoxes.Count > 1)
+            {
+                int grade_cost = 35;
+                rr.grade -= grade_cost;
+                rr.error_lines.Add(String.Format("Found more then one ComboBox in your Form. Minus {0} points.", grade_cost));
+                form_to_run.Close();
+                return rr;
+            }
+            ComboBox cb = (ComboBox)comboBoxes[0];
+            if (!cb.Visible)
+            {
+                int grade_cost = 35;
+                rr.grade -= grade_cost;
+                rr.error_lines.Add(String.Format("Your ComboBox is not Visible when Form launches. Minus {0} points.", grade_cost));
+                form_to_run.Close();
+                return rr;
+            }
+            if (!cb.Enabled)
+            {
+                int grade_cost = 35;
+                rr.grade -= grade_cost;
+                rr.error_lines.Add(String.Format("Your ComboBox is not Enabled when Form launches. Minus {0} points.", grade_cost));
+                form_to_run.Close();
+                return rr;
+            }
+            // check items in combobox
+            ComboBox.ObjectCollection items = cb.Items;
+            // get flags from file system
+            String baseStr = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            String flagsPath = baseStr + @"\Flags";
+            DirectoryInfo flagsDin = new DirectoryInfo(flagsPath);
+            FileInfo[] files = flagsDin.GetFiles("*.png");
+            if (files.Length != items.Count)
+            {
+                int grade_cost = 25;
+                rr.grade -= grade_cost;
+                rr.error_lines.Add(String.Format("Number of .png files in Flags directory = {1} != {2} = number of items in ComboBox. Minus {0} points.", grade_cost, files.Length , items.Count));
+                form_to_run.Close();
+                return rr;
+            }
+            foreach (FileInfo f in files)
+            {
+                String name = f.Name.Substring(0, f.Name.Length - f.Extension.Length);
+                if (!items.Contains(name)){
+                    int grade_cost = 25;
+                    rr.grade -= grade_cost;
+                    rr.error_lines.Add(String.Format("Your ComboBox did not have the expected item \"{0}\". Minus {1} points.", name,grade_cost));
+                    form_to_run.Close();
+                    return rr;
+                }
+            }
+
+            /*
+                        Debug.WriteLine("3333");
+                        Button b = (Button)ScreenControlsByText(form_to_run.Controls, random_start.ToString());
+                        if (b == null)
+                        {
+                            int grade_lost = 30;
+                            rr.grade -= grade_lost;
+                            rr.error_lines.Add(String.Format("No \"counter\" button with text=random_start={0} found !!! Minus {1} points.", random_start, grade_lost));
+                            form_to_run.Close();
+                            return rr;
+                        }
+
+                        b.BackColor = SystemColors.Control;
+
+
+                        Control hidder_disabler = null;
+                        if ((int)args[(int)GUI1_ARGS.EXTRA_BUTTON_FORM] == 0)
+                        {
+                            String button_text;
+                            if ((int)args[(int)GUI1_ARGS.EXTRA_DISABLE_HIDE] == 0) button_text = "Eraser";
+                            else button_text = "Disabler";
+                            hidder_disabler = ScreenControlsByText(form_to_run.Controls, button_text);
+                            if (hidder_disabler == null)
+                            {
+                                int grade_lost = 30;
+                                rr.grade -= grade_lost;
+                                rr.error_lines.Add(String.Format("Could not find {0} button. Minus {1} points.", button_text, grade_lost));
+                                form_to_run.Close();
+                                return rr;
+                            }
+                        }
+                        else
+                        {
+                            hidder_disabler = form_to_run;
+                        }
+
+                        Dictionary<Color, int> colorDicts = new Dictionary<Color, int>();
+                        for (int i = random_start, clicks = 0; i > 0; i--)
+                        {
+
+
+                            // Some crazy shit code to Close down some MessageBox over ununderstandable exception...
+                            IntPtr window = FindWindow(null, "Microsoft .NET Framework");
+                            if (window != IntPtr.Zero)
+                            {
+                                MessageBox.Show("walla");
+                                Debug.WriteLine("Window found, closing...");
+                                SendMessage((int)window, WM_SYSCOMMAND, SC_CLOSE, 0);
+                            }
+
+                            if (!form_to_run.Visible)
+                            {
+                                int grade_lost = 20;
+                                rr.grade -= grade_lost;
+                                rr.error_lines.Add(String.Format("Form closed unexpectedly after {0} clicks. Minus {1} points.", clicks, grade_lost));
+                                return rr;
+                            }
+
+                            Color colorBefore;
+                            if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
+                            {
+                                colorBefore = form_to_run.BackColor;
+                            }
+                            else
+                            {
+                                colorBefore = b.BackColor;
+                            }
+                            //MessageBox.Show("1");
+                            click_control(b);
+                            mouseClick_control(b);
+                            //MessageBox.Show("2");
+
+
+                            clicks++;
+                            if (clicks == random_start) break;
+
+                            if (!form_to_run.Visible)
+                            {
+                                int grade_lost = 20;
+                                rr.grade -= grade_lost;
+                                rr.error_lines.Add(String.Format("Form closed unexpectedly after {0} clicks. Minus {1} points.", clicks, grade_lost));
+                                return rr;
+                            }
+
+
+                            Console.WriteLine("random_start={0}, clicks={1}, b.Text={2}, i={3} Visible={4}", random_start, clicks, b.Text, i, form_to_run.Visible);
+                            if (b.Text.Trim() != (i - 1).ToString().Trim())
+                            {
+                                int grade_lost = 30;
+                                rr.grade -= grade_lost;
+                                rr.error_lines.Add(String.Format("\"counter\" button with wrong text after {0} clicks. Expected : {1} but found {2}. Minus {3} points.", clicks, random_start - clicks, b.Text, grade_lost));
+                                Console.WriteLine(rr.error_lines.Last());
+                                form_to_run.Close();
+                                return rr;
+                            }
+                            int counter_from_button = int.Parse(b.Text);
+                            int last_color_start_count = (int)args[(int)GUI1_ARGS.LAST_COLOR_STARTER];
+                            if (counter_from_button == last_color_start_count)
+                            {
+                                Color[] temp2 = { Color.DarkBlue, Color.Yellow, Color.Violet };
+                                Color benchmark = temp2[(int)args[(int)GUI1_ARGS.LAST_COLOR]];
+                                Color color_found;
+                                String control_name = "button";
+                                if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
+                                {
+                                    color_found = b.BackColor;
+                                }
+                                else
+                                {
+                                    control_name = "Form";
+                                    color_found = form_to_run.BackColor;
+                                }
+                                if (!(benchmark == color_found))
+                                {
+                                    int grade_lost = 20;
+                                    rr.grade -= grade_lost;
+                                    rr.error_lines.Add(String.Format("When reaching counter={0} (after {1} clicks). {2} background color did not change to {3}. Found background to be {4}. Minus {5} points.",
+                                        b.Text, clicks, control_name, benchmark.Name, color_found.ToString(), grade_lost));
+                                    Console.WriteLine(rr.error_lines.Last());
+                                }
+
+                            }
+
+
+                            Color colorAfter;
+                            String changer;
+                            if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
+                            {
+                                changer = "Form";
+                                colorAfter = form_to_run.BackColor;
+                            }
+                            else
+                            {
+                                changer = "Button";
+                                colorAfter = b.BackColor;
+                            }
+
+                            Console.WriteLine("changer={0}, colorBefore={1}, ColorAfter={2}, b.Back={3}, form.Back={4}", changer, colorBefore.ToString(), colorAfter.ToString(), b.BackColor.ToString(), form_to_run.BackColor.ToString());
+
+                            Debug.WriteLine("b.color=" + b.BackColor);
+                            if ((i - 1) % 10 == 9)
+                            {
+                                if (colorBefore == colorAfter)
+                                {
+                                    int grade_lost = 30;
+                                    rr.grade -= grade_lost;
+                                    rr.error_lines.Add(String.Format("{0} background Color did not change when counter got to {1}.", changer, b.Text, grade_lost));
+                                    Console.WriteLine(rr.error_lines.Last());
+                                    form_to_run.Close();
+                                    return rr;
+                                }
+                                if (!colorDicts.ContainsKey(colorAfter)) colorDicts[colorAfter] = 0;
+                                colorDicts[colorAfter]++;
+                                if (colorDicts[colorAfter] > 2)
+                                {
+                                    int grade_lost = 20;
+                                    rr.grade -= grade_lost;
+                                    rr.error_lines.Add(String.Format("Same color ({3}) appeared in background of {0} already for 3'rd time - Not random like!!! when counter got to {1}. Minus {2} points.", changer, b.Text, grade_lost, colorAfter.ToString()));
+                                    Console.WriteLine(rr.error_lines.Last());
+                                    form_to_run.Close();
+                                    return rr;
+                                }
+                            }
+                            else
+                            {
+                                if (colorBefore != colorAfter)
+                                {
+                                    int grade_lost = 30;
+                                    rr.grade -= grade_lost;
+                                    rr.error_lines.Add(String.Format("{0} background Color changed unexpectedly when counter got to {1}.", changer, b.Text, grade_lost));
+                                    Console.WriteLine(rr.error_lines.Last());
+                                    form_to_run.Close();
+                                    return rr;
+                                }
+                            }
+
+
+                            bool test_seif_9 = (r.Next(0, 10) < 6);
+                            if (test_seif_9)
+                            {
+                                if (hidder_disabler == form_to_run)
+                                {
+                                    click_control(form_to_run);
+                                    mouseClick_control(form_to_run);
+
+                                    if ((int)args[(int)GUI1_ARGS.EXTRA_DISABLE_HIDE] == 0)
+                                    {
+                                        if (b.Visible == true)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button did not disaapear as expected. Minus {0} points.", grade_lost));
+                                            Console.WriteLine(rr.error_lines.Last());
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+                                        if (b.Enabled == false)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button was unexpectedly Disabled. Minus {0} points.", grade_lost));
+                                            Console.WriteLine(rr.error_lines.Last());
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+
+                                        //MessageBox.Show("1");
+                                        click_control(form_to_run);
+                                        mouseClick_control(form_to_run);
+
+                                        //MessageBox.Show("2");
+
+                                        if (b.Visible == false)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button did not resaapear as expected. Minus {0} points.", grade_lost));
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+                                        if (b.Enabled == false)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button was not ReEnabled. Minus {0} points.", grade_lost));
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        if (b.Visible == false)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button disaapeared unexpectedly. Minus {0} points.", grade_lost));
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+                                        if (b.Enabled == true)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button did not Disable as expected. Minus {0} points.", grade_lost));
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+
+                                        click_control(form_to_run);
+                                        mouseClick_control(form_to_run);
+
+                                        MySleep(1000);
+
+                                        if (b.Visible == false)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button did not resaapear as expected. Minus {0} points.", grade_lost));
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+                                        if (b.Enabled == false)
+                                        {
+                                            int grade_lost = 20;
+                                            rr.grade -= grade_lost;
+                                            rr.error_lines.Add(String.Format("Counter button was not ReEnabled. Minus {0} points.", grade_lost));
+                                            form_to_run.Close();
+                                            return rr;
+                                        }
+                                    }
+
+                                }
+                                else
+                                {
+                                    ((Button)hidder_disabler).PerformClick();
+                                }
+                            }
+                        }
+
+
+                        MySleep(1000);
+                        Debug.WriteLine(form_to_run.Visible.ToString());
+                        if (form_to_run.Visible)
+                        {
+                            int grade_lost = 20;
+                            rr.grade -= grade_lost;
+                            rr.error_lines.Add(String.Format("Form did ont close as expected although counter reached 0. Minus {0} points.", grade_lost));
+                        }
+
+            */
+            form_to_run.Close();
+            return rr;
+        }
+
+        private string getAllLabeShowingText()
+        {
+            String res = String.Empty;
+            List<Control> ctrls = ScreenControlsByType(typeof(Label));
+            foreach (Control c in ctrls)
+            {
+                if (c.Visible == false) continue;
+                res += c.Text.Trim();
+            }
+            return res;
+        }
+
         public override void Create_DocFile_By_Creators(object[] args, List<Creators> creators)
         {
             int id = (int)(args[0]);

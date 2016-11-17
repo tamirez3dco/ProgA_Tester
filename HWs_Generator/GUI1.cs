@@ -96,10 +96,10 @@ namespace HWs_Generator
         }
 
 
-        public List<Control> ScreenControlsByType(Control.ControlCollection ctrls, Type x)
+        public List<Control> ScreenControlsByType(Type x)
         {
             List<Control> res = new List<Control>();
-            foreach (Control c in ctrls)
+            foreach (Control c in form_to_run.Controls)
             {
                 if (c.GetType() == x) res.Add(c);
             }
@@ -148,7 +148,9 @@ namespace HWs_Generator
             // Retrieve the click event
             PropertyInfo eventsProp = typeof(Component).GetProperty("Events", BindingFlags.NonPublic | BindingFlags.Instance);
             EventHandlerList events = (EventHandlerList)eventsProp.GetValue(c, null);
+            //if (events.)
             Delegate click = events[secret];
+            if (click == null) return;
             MethodInfo click_method = click.GetMethodInfo();
             //click.Method.Invoke(form_to_run,)
             ParameterInfo[] click_params = click_method.GetParameters();
@@ -162,6 +164,32 @@ namespace HWs_Generator
             //                MessageBox.Show("2");
 
         }
+
+        public void mouseClick_control(Control c)
+        {
+            EventInfo evClick = c.GetType().GetEvent("MouseClick");
+            FieldInfo eventClick = typeof(Control).GetField("EventMouseClick", BindingFlags.NonPublic | BindingFlags.Static);
+            object secret = eventClick.GetValue(null);
+            // Retrieve the click event
+            PropertyInfo eventsProp = typeof(Component).GetProperty("Events", BindingFlags.NonPublic | BindingFlags.Instance);
+            EventHandlerList events = (EventHandlerList)eventsProp.GetValue(c, null);
+            //if (events.)
+            Delegate click = events[secret];
+            if (click == null) return;
+            MethodInfo click_method = click.GetMethodInfo();
+            //click.Method.Invoke(form_to_run,)
+            ParameterInfo[] click_params = click_method.GetParameters();
+
+            MouseEventArgs ea = new MouseEventArgs(MouseButtons.Left,1,1,1,0);
+            Object[] click_objects = { c, ea };
+            //MessageBox.Show("1");
+            click_method.Invoke(form_to_run, click_objects);
+
+            MySleep(20000);
+            //                MessageBox.Show("2");
+
+        }
+
         public override RunResults test_Hw_by_assembly(object[] args, FileInfo executable)
         {
             int stud_id = (int)args[0];
@@ -292,6 +320,7 @@ namespace HWs_Generator
                 IntPtr window = FindWindow(null, "Microsoft .NET Framework");
                 if (window != IntPtr.Zero)
                 {
+                    MessageBox.Show("walla");
                    Debug.WriteLine("Window found, closing...");
                    SendMessage((int) window, WM_SYSCOMMAND, SC_CLOSE, 0);  
                 }
@@ -313,8 +342,10 @@ namespace HWs_Generator
                 {
                     colorBefore = b.BackColor;
                 }
-
+                //MessageBox.Show("1");
                 click_control(b);
+                mouseClick_control(b);
+                //MessageBox.Show("2");
 
 
                 clicks++;
@@ -427,6 +458,7 @@ namespace HWs_Generator
                    if (hidder_disabler == form_to_run)
                     {
                         click_control(form_to_run);
+                        mouseClick_control(form_to_run);
 
                         if ((int)args[(int)GUI1_ARGS.EXTRA_DISABLE_HIDE] == 0)
                         {
@@ -451,6 +483,7 @@ namespace HWs_Generator
 
                             //MessageBox.Show("1");
                             click_control(form_to_run);
+                            mouseClick_control(form_to_run);
 
                             //MessageBox.Show("2");
 
@@ -492,6 +525,8 @@ namespace HWs_Generator
                             }
 
                             click_control(form_to_run);
+                            mouseClick_control(form_to_run);
+
                             MySleep(1000);
 
                             if (b.Visible == false)

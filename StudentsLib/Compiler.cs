@@ -25,7 +25,7 @@ namespace StudentsLib
             bool isZipArchive = SharpCompress.Archive.Zip.ZipArchive.IsZipFile(path);
             if (!(isRarArchive || isZipArchive))
             {
-                errorReason = "What was uploaded is neither a Zip archive nor a Rar archive. Maybe you did not upload the entire Solution directory ?";
+                errorReason = "What was uploaded is neither a Zip archive nor a Rar archive. Currently only these formats are supported";
                 return false;
             }
             
@@ -180,7 +180,7 @@ namespace StudentsLib
             bool isZipArchive = SharpCompress.Archive.Zip.ZipArchive.IsZipFile(path);
             if (!(isRarArchive || isZipArchive))
             {
-                errorReason = "What was uploaded is neither a Zip archive nor a Rar archive. Maybe you did not upload the entire Solution directory ?";
+                errorReason = "What was uploaded is neither a Zip archive nor a Rar archive. Currently only these formats are supported";
                 return false;
             }
 

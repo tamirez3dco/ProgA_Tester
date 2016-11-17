@@ -193,6 +193,7 @@ namespace Code_Downloader
                                 grade_box.setAttribute("value", "30");
                                 remarks_box.setAttribute("value", "There was no ZIP file in your submission");
                                 stud.Send_Gmail(String.Format("Your last submission of {0} could not build!!", hw_name), "Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle could not build. You probably forgot to attach the zipped code. Please check your submission and upload (including the zipped code)!", new List<String>());
+                                File.WriteAllText(filePath,"This is an empty file to indicate to stop checking this line.");
                                 continue;
                             }
                             CookieContainer cc = new CookieContainer();

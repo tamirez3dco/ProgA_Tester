@@ -1,5 +1,7 @@
 ﻿using HWs_Generator;
 using Microsoft.Office.Interop.Word;
+using SharpCompress.Common;
+using SharpCompress.Reader;
 using StudentsLib;
 using System;
 using System.Collections.Generic;
@@ -163,6 +165,12 @@ namespace StamConsoleTester
         }
         static void Main(string[] args)
         {
+
+            //String res_path;
+            //Compiler.BuildZippedProject(@"D:\Tamir\Temp\WindowsFormsApplication1.7z", out res_path);
+
+
+
             /*
                         Console.ReadKey();
                         test3();
@@ -181,13 +189,13 @@ namespace StamConsoleTester
             }
             */
             new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
-            GUI1 hww = new GUI1();
-            int tid = 312441710;
+            GUI2 hww = new GUI2();
+            int tid = 029046117;
             //String resulting_exe_path;
             //Compiler.BuildZippedProject(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\312441710\13_11_2016_14_37.zip", out resulting_exe_path);
-            //Object[] thw_args = hww.get_random_args(tid);
-            Object[] thw_args = hww.LoadArgs(tid);
-            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\312441710\13_11_2016_14_37_extracted\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe"));
+            Object[] thw_args = hww.get_random_args(tid);
+            //Object[] thw_args = hww.LoadArgs(tid);
+            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\GUI2_Mine.exe"));
             MessageBox.Show(rr.ToString());
             return;
 
