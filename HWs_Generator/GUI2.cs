@@ -187,6 +187,30 @@ namespace HWs_Generator
                 }
             }
 
+            // check state of all relevant components...
+            // here only the ComboBox should be visible
+            foreach (Control c in form_to_run.Controls)
+            {
+                if (c == cb)
+                {
+                    String expectedCBText = "Choose a country...";
+                    if (c.Text != expectedCBText)
+                    {
+                        int grade_cost = 10;
+                        rr.grade -= grade_cost;
+                        rr.error_lines.Add(String.Format("Your ComboBox did not have the expected text \"{1}\". Instead it was showing \"{2}\". Minus {0} points.", grade_cost, expectedCBText, c.Text));
+                    }
+                }
+                else
+                {
+                    if (isReallyVisible(c))
+                    {
+                        int grade_cost = 15;
+                        rr.grade -= grade_cost;
+                        rr.error_lines.Add(String.Format("At Form first show you had an unexpected visible Control of type \"{1}\".. Minus {0} points.", grade_cost, c.GetType().ToString()));
+                    }
+                }
+            }
             /*
                         Debug.WriteLine("3333");
                         Button b = (Button)ScreenControlsByText(form_to_run.Controls, random_start.ToString());
@@ -480,6 +504,32 @@ namespace HWs_Generator
             */
             form_to_run.Close();
             return rr;
+        }
+
+        // really visible means Visible and 
+        // whose bitmap pixels are not all the Form background
+        private bool isReallyVisible(Control ctrl)
+        {
+            if (!ctrl.Visible) return false;
+            Bitmap bmp = new Bitmap(ctrl.Width, ctrl.Height);
+            ctrl.DrawToBitmap(bmp, ctrl.ClientRectangle);
+            bmp.Save(ctrl.GetType().ToString() + ".png");
+            if (ctrl.GetType() == typeof(PictureBox))
+            {
+                MessageBox.Show("Baasa");
+            }
+            for (int r = 0; r < bmp.Height; r++)
+            {
+                for (int c = 0; c < bmp.Width; c++)
+                {
+                    Color pixel = bmp.GetPixel(c, r);
+                    if (pixel != form_to_run.BackColor)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private string getAllLabeShowingText()
