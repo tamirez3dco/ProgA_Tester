@@ -468,6 +468,7 @@ namespace HWs_Generator
 
         public override void Create_HW(Object[] args, bool real_input)
         {
+            Console.Clear();
             int id = (int)args[0];
             String[] funcsToExecute;
             List<Creators> afterRandom = new List<Creators>();
@@ -622,7 +623,7 @@ namespace HWs_Generator
 
             par1.Range.Underline = WdUnderline.wdUnderlineSingle;
 
-            par1.Range.Text = String.Format("תאריך הגשה אחרון - 27/11/2016 בשעה 23:55");
+            par1.Range.Text = String.Format("תאריך הגשה אחרון - 30/11/2016 בשעה 23:55");
             par1.Range.InsertParagraphAfter();
             par1.Range.Underline = WdUnderline.wdUnderlineNone;
 

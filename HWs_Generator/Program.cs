@@ -41,6 +41,16 @@ namespace HWs_Generator
                     break;
             }
 
+            foreach (Student stud in Students.students_dic.Values)
+            {
+                HW1 hww = new HW1();
+                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                Object[] myargs = hww.get_random_args(stud.id);
+                //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                hww.Create_HW(myargs, false);
+                hww.SaveArgs(myargs);
+            }
+            return;
 
             //Students allStudents = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
 
@@ -54,21 +64,23 @@ namespace HWs_Generator
                                     Students.students_dic[tl.id] = tl;
             */
 
-            // fix all students shitty images...
-            Students allStudents = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
-            int[] shittyImagesIds = { 332270925, 315815522, 311367213, 309705119, 204578249, 204201602 };// 203599014 };
-            foreach (int id in shittyImagesIds)
-            {
-                Student stud = Students.students_dic[id];
-                HW0 hww = new HW0();
-                //if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
-                //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
-                Object[] myargs = hww.LoadArgs(id);
-                hww.SaveArgs(myargs);
-                hww.Create_HW(myargs, false);
-            }
+            /*
+                        // fix all students shitty images...
+                        Students allStudents = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
+                        int[] shittyImagesIds = { 332270925, 315815522, 311367213, 309705119, 204578249, 204201602 };// 203599014 };
+                        foreach (int id in shittyImagesIds)
+                        {
+                            Student stud = Students.students_dic[id];
+                            HW0 hww = new HW0();
+                            //if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                            //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                            Object[] myargs = hww.LoadArgs(id);
+                            hww.SaveArgs(myargs);
+                            hww.Create_HW(myargs, false);
+                        }
 
-            return;
+                        return;
+            */
             foreach (Student stud in Students.students_dic.Values)
             {
                 HW0 hww = new HW0();
