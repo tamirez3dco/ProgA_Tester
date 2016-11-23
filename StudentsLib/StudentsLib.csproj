@@ -38,6 +38,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -48,8 +49,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BlockerForm.Designer.cs">
+      <DependentUpon>BlockerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Compiler.cs" />
     <Compile Include="Exceler.cs" />
+    <Compile Include="Imaging.cs" />
     <Compile Include="LevenshteinDistance.cs" />
     <Compile Include="RunResults.cs" />
     <Compile Include="Students.cs" />
@@ -100,6 +108,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BlockerForm.resx">
+      <DependentUpon>BlockerForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

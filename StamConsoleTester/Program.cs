@@ -6,6 +6,7 @@ using StudentsLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -165,7 +166,29 @@ namespace StamConsoleTester
         }
         static void Main(string[] args)
         {
-
+/*
+            double simi = Imaging.getSimilarity(
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Sweeden.png")));
+            simi = Imaging.getSimilarity(
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Spain.png")));
+            simi = Imaging.getSimilarity(
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Brasil.png")));
+            simi = Imaging.getSimilarity(
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Canada.png")));
+            simi = Imaging.getSimilarity(
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Great Britain.png")));
+            simi = Imaging.getSimilarity(
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\United States.png")));
+            simi = Imaging.getSimilarity(
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
+                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Israel.png")));
+*/
             //String res_path;
             //Compiler.BuildZippedProject(@"D:\Tamir\Temp\WindowsFormsApplication1.7z", out res_path);
 
@@ -196,6 +219,7 @@ namespace StamConsoleTester
             Object[] thw_args = hww.get_random_args(tid);
             //Object[] thw_args = hww.LoadArgs(tid);
             RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\GUI2_Mine.exe"));
+            MessageBox.Show(rr.ToString());
             MessageBox.Show(rr.ToString());
             return;
 

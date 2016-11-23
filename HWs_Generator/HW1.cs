@@ -468,7 +468,7 @@ namespace HWs_Generator
 
         public override void Create_HW(Object[] args, bool real_input)
         {
-            Console.Clear();
+            if (!real_input) Console.Clear();
             int id = (int)args[0];
             String[] funcsToExecute;
             List<Creators> afterRandom = new List<Creators>();

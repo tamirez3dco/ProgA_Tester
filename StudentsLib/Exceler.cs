@@ -26,6 +26,7 @@ namespace StudentsLib
                     var studentFirstName = (string)(exWks.Cells[row, 1] as Microsoft.Office.Interop.Excel.Range).Value;
                     var studentLastName = (string)(exWks.Cells[row, 2] as Microsoft.Office.Interop.Excel.Range).Value;
                     var studentId_str = (string)(exWks.Cells[row, 3] as Microsoft.Office.Interop.Excel.Range).Value;
+                    if (studentId_str == null) break;
                     var student_email_str = (string)(exWks.Cells[row, 6] as Microsoft.Office.Interop.Excel.Range).Value;
                     int studentId = int.Parse((String)studentId_str);
 

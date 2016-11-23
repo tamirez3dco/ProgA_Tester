@@ -29,13 +29,438 @@ namespace HWs_Generator
         public enum GUI2_ARGS
         {
             ID,
+            HIDE_DIS_CHOP_BUTTON,
+            HIDE_DIS_TEXTBOX,
+            HIDE_DIS_COMBOBOX,
+            USE_PICTUREBOX
         }
+
         public override Object[] get_random_args(int id)
         {
             Object[] args = new Object[Enum.GetNames(typeof(GUI2_ARGS)).Length];
             args[(int)GUI2_ARGS.ID] = id;
+            args[(int)GUI2_ARGS.HIDE_DIS_CHOP_BUTTON] = Convert.ToBoolean(r.Next(0,2));
+            args[(int)GUI2_ARGS.HIDE_DIS_COMBOBOX] = Convert.ToBoolean(r.Next(0, 2));
+            args[(int)GUI2_ARGS.HIDE_DIS_TEXTBOX] = Convert.ToBoolean(r.Next(0, 2));
+            args[(int)GUI2_ARGS.USE_PICTUREBOX] = Convert.ToBoolean(r.Next(0, 2));
             return args;
 
+        }
+
+
+        public override void Create_DocFile_By_Creators(Object[] args, List<Creators> creators)
+        {
+            int id = (int)(args[0]);
+
+            Student stud = Students.students_dic[id];
+            String student_full_name = stud.first_name + " " + stud.last_name;
+
+
+            Microsoft.Office.Interop.Word.Application oWord = new Microsoft.Office.Interop.Word.Application();
+            oWord.Visible = true;
+            Document wordDoc = oWord.Documents.Add();
+
+            Paragraph par1 = wordDoc.Paragraphs.Add();
+            par1.Range.Font.Name = "Ariel";
+            par1.Range.Font.Size = 12;
+            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = "שלום " + student_full_name;
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
+            par1.Range.InsertParagraphAfter();
+
+            bool usePictureBox = (bool)args[(int)GUI2_ARGS.USE_PICTUREBOX];
+            String str1 = usePictureBox?"PictureBox,":"";
+
+            par1.Range.Text = String.Format("ש\"ב 2 נועדו לתרגל אתכם על כתיבת GUI שכולל כמה מהפקדים שפגשתם, לדוגמא -  ComboBox, {0} TextBox, Label, Button  וכמובן Form. ", str1);
+           //..על הפתרון שלכם לעמוד בדיוק(ואני מתכוון בדיוק - כמעט כל סטייה ברווח או אות קטנה\\גדולה נחשבת סטייה) בדרישות כדי שהבודק האוטומטי לא יכשיל אתכם.בהמשך התיאור מצורפים צילומי מסך של התוכנה המצופה מכם.התוכנה שלכם יכולה להיות שונה במיקומי הפקדים ובגודל ה - Font אבל לא מעבר לזה.
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "הפעם אני שולח לכם פרויקט מותחל. הפרויקט הוא בעצם סתם פרויקט WindowsFormApplication שהוספתי לו תיקייה שמכילה תמונות של דגלים של מדינות. עליכם להשלים את הפרויקט ולפתח את הקוד שלו כך שיענה לדרישות המפורטות.";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "כרגיל, יש להכין את הפרויקט, לכווץ ולהעלות אותו לאתר הקורס. ושוב, כרגיל - עם שאלות על הש\"ב הללו תפנו אליי. בשאלות כלליות לגבי C# תיפנו אליי או אל אמיר.";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "הבודק האוטמטי אמור לענות לכם עם ציון בתוך דקות ספורות מההגשה (האמת שבתרגיל זה התשובה יכולה לקחת קצת יותר דקות - בגלל השימוש בTimer הבדיקה לוקחת יותר זמן אבל לא הרבה דקות). אם לא חזרה תשובה או לא ברורה התשובה או כל שאלה - תודיעו לי שאוכל לבדוק מה \"נתקע\".";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "המלצתי האישית היא לבדוק (ואם צריך לתקן) את תוכניתכם לאחר ביצוע של כל אחד מהסעיפים הבאים:";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "0) שנו את תכונת הטופס ControlBox ל-false כך שהמשתמש לא יוכל להגדיל\\להקטין\\לסגור הטופס מהפינה הימנית העליונה של הטופס. את  ";
+            par1.Range.InsertParagraphAfter();
+
+
+            par1.Range.Text = "1) הוסיפו ComboBox לטופס Form1. שנו את תכונת ה-Text של ה-ComboBox ל-\"...Choose a country\"";
+            par1.Range.InsertParagraphAfter();
+
+
+            ComboBox cb = new ComboBox();
+            cb.Text = "Choose a country...";
+            cb.Location = new System.Drawing.Point(275, 75);
+            pictures_form = new Form();
+            pictures_form.ControlBox = false;
+            pictures_form.Text = "Form1";
+            pictures_form.Size = new Size(450, 350);
+            pictures_form.Controls.Add(cb);
+
+            /*
+                        ThreadStart ts = new ThreadStart(run_picture_form);
+                        Thread t = new Thread(ts);
+                        t.Start();
+            */
+            pictures_form.Show();
+            MySleep(1000);
+
+            par1.Range.Text = "בשלב הזה הטופס אמור להראות דומה לתמונה הבאה (כמו שאמרתי, אין חשיבות לגודל הטופס ולמיקום ה ComboBox  כל עוד רואים אותו כמובן.!)";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "XXXX";
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.InsertParagraphAfter();
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+
+            par1.Range.Text = "2) את הפריטים שיציג ה-ComboBox אתם תוסיפו באמצעות קוד שיסרוק את תיקיית Flags שהוספתי לכם ולכל תמונה שתימצאו שם תוסיפו את הפריט המתאים. כלומר, אם בתיקיה Flags ששלחתי לכם בפרויקט מופיעים הקבצים:";
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "Israel.png";
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "United States.png";
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "Brasil.png";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.Text = "אז כאשר תיפתחו את ה-ComboBox הטופס צריך להיראות בערך ככה:";
+            par1.Range.InsertParagraphAfter();
+
+            cb.Items.Add("Israel");
+            cb.Items.Add("United States");
+            cb.Items.Add("Brasil");
+
+
+            par1.Range.Text = "XXXX";
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.InsertParagraphAfter();
+            Thread.Sleep(1000);
+            Worder.Replace_to_picture(wordDoc, "XXXX", @"D:\Tamir\Netanya_Desktop_App\2017\Patterns_docs\GUI2-combobox_open.png");
+
+
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "מספר נקודות לגבי הפריטים:";
+            par1.Range.InsertParagraphAfter();
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "על התוכנה שלכם לסרוק את התיקיה Flags בזמן הריצה ולפי הקבצים שהיא מוצאת להכניס איברים ל-ComboBox. הרעיון הוא שבזמן התכנות עוד לא ידוע לכם בדיוק אילו קבצים יהיו בתיקיה. אני אבדוק את זה ע\"י הכנסת קבצי דגלים אחרים לתיקיה בזמן הבדיקה.";
+
+            Worder.Underline_in_doc(wordDoc, "בזמן הריצה");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "חשוב מאד! - הגישה אל התיקייה Flags ואל הקבצים שבה חייבת להיות יחסית למיקום של קובץ ה-executable שלכם (כדי שהבודק יוכל למצוא את הקבצים הללו). כלומר, כיון שה-executable שלכם נמצא בתיקיה bin//Debug ומכיון ששמתי לכם את התיקיה Flags בתוך התיקיה המרכזית של הפרויקט - הגישה אל התיקיה Flags תהייה ע\"י הנתיב (path)";
+
+            par1.Range.InsertParagraphAfter();
+            String text = "/../..\"Flags\"";
+            par1.Range.Text = text;
+            Worder.English_Format_By_Search(wordDoc, text);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "והגישה(לדוגמא) אל הקובץ Brasil.png תהייה דרך הנתיב";
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
+            //par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+
+
+            par1.Range.InsertParagraphAfter();
+            String text2 = "/../..\"Flags/Brasil.png\"";
+            par1.Range.Text = text2;
+            Worder.English_Format_By_Search(wordDoc, text2);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "אין חשיבות לסדר האיברים ב-ComboBox.";
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "האיברים ב-ComboBox מכילים רק את שם המדינה (ללא הסיומת של הקובץ שמכיל את התמונה).";
+
+            par1.Range.InsertParagraphAfter();
+            cb.SelectedItem = "Brasil";
+
+            par1.Range.InsertParagraphAfter();
+            PictureBox pb = new PictureBox();
+            if (usePictureBox)
+            {
+                par1.Range.Text = "2) בואו נשתמש בתמונות. הוסיפו PictureBox לטופס. כוונו את תכונת ה-SizeMode ל-StretchImage. בהתחלה (כשהטופס רק עלה ולפני שהמשתמש בחר מדינה כשלהיא מה-ComboBox) ה-PictureBox יהיה ריק כי לא תציגו בו אף תמונה. אולם לאחר שהמשתמש בחר מדינה כלשהיא על ה-PictureBox להציג את התמונה של הדגל המתאים שקיבלתם בתיקיה Flags. כך ש(לדוגמא) אם המשתמש בחר ב-ComboBox ב-Brasil אז על הטופס להיראות כמו בתמונה הבאה:";
+                pb.Location = new System.Drawing.Point(40, 40);
+                pb.Size = new Size(150, 150);
+                pb.SizeMode = PictureBoxSizeMode.StretchImage;
+                pb.Image = Image.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Brasil.png");
+                pictures_form.Controls.Add(pb);
+                
+            }
+            else
+            {
+                par1.Range.Text = "2) בואו נשתמש בתמונות. לאחר שהמשתמש בחר מדינה כלשהיא על ה-ConboBox עליכם להציג את התמונה של הדגל המתאים שקיבלתם בתיקיה Flags כתמונת הרקע של הטופס. שנו את התכונה BackgroundImage לתמונה הרצויה וכוונו את התכונה BackgroundImageLayout לערך Stretch כדי שהתמונה תיכנס במלואה לתוך הטופס. כך ש(לדוגמא) אם המשתמש בחר ב-ComboBox ב-Brasil אז על הטופס להיראות כמו בתמונה הבאה:";
+                pictures_form.BackgroundImageLayout = ImageLayout.Stretch;
+                pictures_form.BackgroundImage = Image.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Brasil.png");
+            }
+            MySleep(1000);
+            //MessageBox.Show("111");
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "XXXX";
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.InsertParagraphAfter();
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "בשלב הזה תוכלו לבדוק שאם תיבחרו מדינות אחרות ב-ConboBox, אז גם התמונה תתחלף. יותר מאוחר בתרגיל לא תוכלו לבצע את הבדיקה הזו כי ה-ComboBox לא יהיה מאופשר או שיהיה חבוי.";
+
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.InsertParagraphAfter();
+            String hebrewName = "חבוי";
+            String propName = "Visible";
+            String propValueDis = "false";
+            String propValueEn = "true";
+            bool hide_dis_textBox = (bool)args[(int)GUI2_ARGS.HIDE_DIS_TEXTBOX];
+            if (hide_dis_textBox)
+            {
+                hebrewName = "לא מאופשר (disabled)";
+                propName = "Enabled";
+            }
+            String comboStateInRiddle = "חבוי";
+            String comboStatePropName = "Visible";
+            bool hide_dis_combobox = (bool)args[(int)GUI2_ARGS.HIDE_DIS_COMBOBOX];
+            if (hide_dis_combobox)
+            {
+                comboStateInRiddle = "לא מאופשר";
+                comboStatePropName = "Enabled";
+            }
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("3) עכשיו נהפוך את הטופס שלנו ל-חידה. נוסיף לטופס TextBox שבו המשתמש ייצטרך להקליד את שם המדינה. לפני שהמשתמש בחר מדינה ב-ComboBox ה-TextBox יהיה {0} כלומר - תכונת ה-{1} תהיה {2}. לאחר שהמשתמש בחר מדינה והתמונה מוצגת נאפשר לו לכתוב ב-TextBox ע\"י שינוי התכונה {1} לערך {3}. מרגע שהמשתמש בחר המדינה כלשהיא ב-ComboBox והחידה התחילה (היפעלנו את ה-TextBox) יש להעביר את ה-ComboBox למצב {4} (כלומר לשנות את תכונת {5} של ה-ComboBox לערך false) כדי שהמשתמש לא יוכל להחליף חידה עד שלא סיים לפתור את זאת שכבר בחר.",
+                hebrewName, propName, propValueDis, propValueEn, comboStateInRiddle, comboStatePropName);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("עכשיו הטופס שלכם (אחרי בחירה של מדינה ב-ComboBox)  ייראה בערך כך:");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = "XXXX";
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+
+            if (hide_dis_combobox) cb.Enabled = false;
+            else cb.Visible = false;
+
+            TextBox tb = new TextBox();
+            tb.Location = new System.Drawing.Point(100,210);
+            tb.Width = 250;
+            tb.Text = String.Empty;
+            pictures_form.Controls.Add(tb);
+            Thread.Sleep(1000);
+
+            add_form_picture(wordDoc, pictures_form);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("4) הוסיפו Event_Handler ל-TextBox שייטפל בארוע של TextChanged. ב-Event Handler שתכתבו עליכם להחליט האם מה שכתב המשתמש ב-TextBox הוא התחלה של שם המדינה (כפי שהוא מופיע ב-ComboBox).");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("ההשוואה לא צריכה לקחת בחשבון האם המשתמש כתב באותיות קטנות או גדולות או במעורבב קטנות וגדולות.");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("אם המשתמש כתב התחלה שגויה - יש לשנות את הרקע של ה-TextBox לאדום. הרקע יישאר אדום כל עוד המשתמש לא תיקן את הכתוב ב-TextBox להתחלה של שם המדינה.");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("לדוגמא, אם המשתמש בחר ב-CheckBox במדינה Brasil והכניס ל-TextBox את ההתחלה bRA - ה-TextBox יישאר לבן כי זו באמת ההתחלה של המילה Brasil בהתעלמות מאותיות קטנות\\גדולות. אבל אם המשתמש הוסיף את האות U ועכשיו ב-TextBox מופיע המילה bRAU, אז הרקע של ה-TextBox יהפוך לאדום, כמו בתמונות הבאות:");
+
+            tb.Text = "bRA";
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+            tb.BackColor = Color.Red;
+            tb.Text = "bRAU";
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("5) נוסיף מונה זמן שיודיע למשתמש כמה זמן עבר מתחילת החידה (תחילת החידה נחשבת מהזמן שבו המשתמש בחר באיזושהיא מדינה ב-ComboBox). לצורך תזדקקו ל-Timer שיעזור לכם לספור את הזמן ולפקד מסוג Label שבו תדווחו על הזמן שעבר. אני מצפה שבכל שנייה שעוברת תשנו את הכתוב ב-Label. לדוגמא, אחרי 5 שניות מתחילת החידה יופיע ב-Label הכיתוב הבא: Your time is:5 seconds. כמובן שלפני שהחידה \"התחילה\" ה-Label שמציג את הזמן לא צריך להופיע כלל (כנראה ע\"י קביעת תכונת Visible שלו ל-false).");
+
+
+            Label labelTimer = new Label();
+            labelTimer.Location = new System.Drawing.Point(10, 10);
+            labelTimer.Text = "Your time is:5 seconds";
+            //labelTimer.Width = 300;
+            labelTimer.AutoSize = true;
+            pictures_form.Controls.Add(labelTimer);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("ספירת הזמן לא עוצרת גם כשהרקע של ה-TextBox הוא אדום וגם כאשר הרקע הוא לבן.המונה ימשיך לספור את הזמן עד שהמשתמש יסיים לכתוב את המילה הנדרשת. מה שמביא אותנו לסעיף הבא.");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("6) כאשר סוף סוף המשתמש סיים לכתוב את המילה נכון נעצור את מונה הזמן ובנוסף נודיע לו ע\"י Label חדש שהוא סיים לפתור את החידה וכמה טוב הוא עשה. ההודעה שנכתוב לו ב-Label החדש תהיה תלויה בכמה זמן לקח לו לפתור את החידה. ההודעה ב-Label תהיה מנוסחת באופן הבא:");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format(" ,(מילת תואר) you solved the word (המילה שנפתרה) in (הזמן שעבר) seconds");
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderLtr;
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("כאשר (הזמן שעבר) מציין את מספר השניות שעברו מתחילת החידה");
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("כאשר (המילה שנפתרה) מציין את שם המדינה שהמשתמש בחר ב-ComboBox");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("כאשר (מילת תואר) תהייה:");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("Horrey - אם המשתמש סיים בתוך פחות מ-10 שניות");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("OK - אם המשתמש סיים ב10 עד 19 שניות");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("Baasa - אם המשתמש סיים ב 20 שניות או יותר");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("לדוגמא, אם המשתמש סיים את החידה Brasil ב-24 שניות, הטופס ייראה בערך כך:");
+
+            labelTimer.Text = "Your time is:24 seconds";
+            pictures_form.Controls.Add(labelTimer);
+
+            Label labelSolved = new Label();
+            labelSolved.AutoSize = true;
+            labelSolved.Location = new System.Drawing.Point(10, 270);
+            labelSolved.Text = "Baasa, you solved the word Brasil in 24 seconds";
+            labelSolved.Width = 1500;
+            tb.Text = "bRaSiL";
+            tb.BackColor = Color.White;
+            pictures_form.Controls.Add(labelSolved);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+            String whereMouseDown = "Form";
+            if (usePictureBox) whereMouseDown = "PictureBox";
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("7) רמז ראשון למשתמש - הוסיפו קוד שכאשר מבצעים MouseDown על ה-{0} ה-TextBox יציג את המילה הנכונה (זו שכתובה ב-ComboBox) וכאשר המשתמש יבצע MouseUp על ה-{0} תחזור המילה שהופיעה ב-TextBox לפני ה-MouseDown.", whereMouseDown);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Range.Text = String.Format("חשוב מאד מאד מאד !!! - לחיצת MouseDown שכזו לא צריכה לגרום לחידה להיפתר. לכן עליכם לדאוג שבמקרה של MouseDown, אפילו שהמילה הנכונה כתובה ב-TextBox עליכם להתעלם ממנה ולא להגיד למשתמש שהוא פתר נכון את החידה. אחת האפשרויות לעשות זאת (יש כמה וכמה כאלה) היא להוריד את ה-Event Handler שמטפל ב-TextChanged של ה-TextBox כאשר רוצים התעלמות שכזו. הורדת ה-Event Handler מתבצעת ע\"י:", whereMouseDown);
+
+            par1.Range.InsertParagraphAfter();
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderLtr;
+            par1.Range.Text = String.Format("textBox1.TextChanged -= textBox1_TextChanged;");
+
+            par1.Range.InsertParagraphAfter();
+            par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
+            par1.Range.Text = String.Format("וכמובן להוסיף את ה-Event Handler מחדש אחרי שהחזרתם את המילה הנוכחית של המשתמש בסיום ה-MouseUp על ה-{0}.",whereMouseDown);
+            //  Horrey, you solved the word " + comboBox1.SelectedItem.ToString() + " in " + seconds_passed + " seconds"
+
+            bool hide_dis_chop_button = (bool)args[(int)GUI2_ARGS.HIDE_DIS_CHOP_BUTTON];
+            String chop_state_correct = "חבוי";
+            String propChop = "Visible";
+            if (hide_dis_chop_button)
+            {
+                chop_state_correct = "לא מאופשר";
+                propChop = "Enabled";
+            }
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("8) רמז שני למשתמש - הוסיפו כפתור חדש שהטקסט עליו יהיה \"Chop To Correct\". כל עוד המשתמש לא טועה (כל עוד הרקע של ה-TextBox הוא לבן), הכפתור החדש יהיה במצב {0}, כלומר תכונת {1} של הכפתור החדש תקבל ערך false.",chop_state_correct,propChop);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("הוסיפו קוד שדואג שבכל פעם שהמשתמש טועה (הרקע של ה-TextBox הוא אדום) הכפתור החדש עם הטקסט  \"Chop To Correct\") מופיע ומאופשר (Enabled). כאשר המשתמש לוחץ על הכפתור הזה, המילה שב-TextBox מתקצצת (יורדות אותיות מהסוף שלה) עד שהיא נהיית נכונה (עד שהיא נהיית באמת התחלה של המילה שב-ComboBox). לדוגמא, בתמונה הבאה מופיע הטופס במצב של טעות של המשתמש עם הכפתור החדש:");
+
+            Button chopButton = new Button();
+            chopButton.Location = new System.Drawing.Point(100, 240);
+            chopButton.Text = "Chop To Correct";
+            chopButton.Width = 100;
+            tb.Text = "bRaUOSiL";
+            tb.BackColor = Color.Red;
+            labelSolved.Visible = false;
+            labelTimer.Text = "Your time is:12 seconds";
+            pictures_form.Controls.Add(chopButton);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("לאחר שהמשתמש ילחץ על הכפתור המילה שב-TextBox תתקצץ ל-bRa, הרקע של ה-TextBox יחזור להיות לבן וכפתור ה-Chop To Correct יחזור להיות {0} כמו בתמונה הבאה:",chop_state_correct);
+
+            if (hide_dis_chop_button) chopButton.Enabled = false;
+            else chopButton.Visible = false;
+            tb.Text = "bRa";
+            tb.BackColor = Color.White;
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+            par1.Range.Text = "XXXX";
+            Thread.Sleep(1000);
+            add_form_picture(wordDoc, pictures_form);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("לסיכום מספר הבהרות:");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("1) כאשר החידה פועלת (המונה פועל) על ה-TextBox להיות כמובן גלוי ומאופשר. כאשר המשתמש סיים לפתור את החידה - על ה-TextBox לחזור למצב {0}.", hebrewName);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("2) כאשר החידה פועלת (המונה פועל) והמשתמש שוגה (הרקע של ה-TextBox הוא אדום) על כפתור ה-Chop To Correct להיות במצב גלוי ומאופשר (Visible and Enabled). בכל מצב אחר עליו להיות במצב {0}.", chop_state_correct );
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("3) כאשר החידה פועלת (המונה פועל) על ה-ComboBox להיות במצב {0}. רק כאשר המתשתמש סיים לפתור את החידה ה-ComboBox חוזר להיות גלוי ומאופשר כדי לאפשר למשתמש להתחיל בחידה חדשה.", comboStateInRiddle);
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("4) כאשר המשתמש בוחר להתחיל חידה חדשה (לאחר שסיים לפתור את הקודמת) יש להעלים את ה-Label מסעיף 6 שמבשר על סיום החידה (כי התחלנו חידה חדשה) ויש לאפס את מונה הזמן ל-0 לפני שמתחילים שוב את ספירת הזמן.");
+
+            par1.Range.InsertParagraphAfter();
+            par1.Format.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
+            par1.Range.Text = String.Format("זהו, מספיק, לא?");
+
+
+            object fileName = Students_Hws_dirs + "\\" + id.ToString() + ".docx";
+            object missing = Type.Missing;
+            wordDoc.SaveAs(ref fileName,
+                ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref missing, ref missing, ref missing, ref missing, ref missing);
+
+            wordDoc.Close();
+            oWord.Quit();
         }
 
         public override RunResults test_Hw_by_assembly(object[] args, FileInfo executable)
@@ -186,6 +611,14 @@ namespace HWs_Generator
                     return rr;
                 }
             }
+            // make sure that control box is off in the form
+            if (form_to_run.ControlBox)
+            {
+                int grade_cost = 10;
+                rr.grade -= grade_cost;
+                rr.error_lines.Add(String.Format("There should be no ControlBox in the form (Minimize//Maximize//Close). Minus {0} points.", grade_cost));
+            }
+
 
             // check state of all relevant components...
             // here only the ComboBox should be visible
@@ -211,299 +644,352 @@ namespace HWs_Generator
                     }
                 }
             }
-            /*
-                        Debug.WriteLine("3333");
-                        Button b = (Button)ScreenControlsByText(form_to_run.Controls, random_start.ToString());
-                        if (b == null)
+
+            for (tries = 0; tries < 10; tries++)
+            {
+                FileInfo selectedFile;
+                String item;
+                do
+                {
+                    selectedFile = files[r.Next(0, files.Length)];
+                    item = selectedFile.Name.Substring(0, selectedFile.Name.Length - selectedFile.Extension.Length);
+                } while (cb.SelectedItem != null && item == cb.SelectedItem.ToString());
+                
+                cb.SelectedItem = item;
+                DateTime timeBefore = DateTime.Now;
+
+                BlockerForm bf = new BlockerForm(200);
+                bf.ShowDialog();
+
+                String allLabelsText = getAllLabeShowingText();
+                if (allLabelsText != "Your time is:" + 0 + " seconds")
+                {
+                    int grade_cost = 10;
+                    rr.grade -= grade_cost;
+                    rr.error_lines.Add(String.Format("After clicking on item {1} expected Label to have Text=\"Your time is:0 seconds\". Instead found labels having combined text \"{2}\". Minus {0} points.", grade_cost, item, allLabelsText));
+                }
+
+                // check image
+                Image image;
+                bool usePictureBox = (bool)args[(int)GUI2_ARGS.USE_PICTUREBOX];
+                if (usePictureBox)
+                {
+                    List<Control> optionalPictureBoxes = ScreenControlsByType(typeof(PictureBox));
+                    List<Control> visiblePBs = new List<Control>();
+                    foreach (Control c in optionalPictureBoxes)
+                    {
+                        if (!isReallyVisible(c)) continue;
+                        visiblePBs.Add(c);
+                    }
+                    PictureBox correctPB = null;
+                    if (visiblePBs.Count < 1)
+                    {
+                        int grade_cost = 25;
+                        rr.grade -= grade_cost;
+                        rr.error_lines.Add(String.Format("After clicking on item {1} expected some visible PictureBox but found none. Minus {0} points.", grade_cost, item));
+                        form_to_run.Close();
+                        return rr;
+                    }
+                    if (visiblePBs.Count > 1)
+                    {
+                        int grade_cost = 25;
+                        rr.grade -= grade_cost;
+                        rr.error_lines.Add(String.Format("After clicking on item {1} expected only single visible PictureBox but found {2}. Minus {0} points.", grade_cost, item, visiblePBs.Count));
+                        form_to_run.Close();
+                        return rr;
+                    }
+                    correctPB = (PictureBox)visiblePBs[0];
+                    image = correctPB.Image;
+                }
+                else
+                {
+                    image = form_to_run.BackgroundImage;
+                }
+
+                //MessageBox.Show(String.Format("use_pb={0}, image.size={1}", usePictureBox, image.Size.ToString()));
+                FileInfo origFile = flagsDin.GetFiles(item + ".png")[0];
+                Image origBitmap = Image.FromFile(origFile.FullName);
+                double similarity = StudentsLib.Imaging.getSimilarity(new Bitmap(image), new Bitmap(origBitmap));
+                if (similarity > 5)
+                {
+                    image.Save("imageFound.png");
+                    FileInfo fin = new FileInfo("imageFound.png");
+                    rr.filesToAttach.Add(fin.FullName);
+                    rr.filesToAttach.Add(selectedFile.FullName);
+
+                    int grade_cost = 20;
+                    rr.grade -= grade_cost;
+                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" expected different image then found. Expected image is attached in file \"{2}\", image found attached in the file \"{3}\". Minus {0} points.", grade_cost, item, selectedFile.Name, fin.Name));
+                    form_to_run.Close();
+                    return rr;
+                }
+
+                // check empty textbox
+                List<Control> visibleTextBoxes = getVisibleControlsByType(typeof(TextBox));
+                if (visibleTextBoxes.Count > 1)
+                {
+                    int grade_cost = 20;
+                    rr.grade -= grade_cost;
+                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found more then one TextBox. Found {2} text boxes. Minus {0} points.", grade_cost, item, visibleTextBoxes.Count));
+                    form_to_run.Close();
+                    return rr;
+                }
+                if (visibleTextBoxes.Count < 1)
+                {
+                    int grade_cost = 20;
+                    rr.grade -= grade_cost;
+                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found no TextBox. Minus {0} points.", grade_cost, item));
+                    form_to_run.Close();
+                    return rr;
+                }
+                TextBox correctTextBox = (TextBox)visibleTextBoxes[0];
+                if (!correctTextBox.Enabled)
+                {
+                    int grade_cost = 15;
+                    rr.grade -= grade_cost;
+                    rr.error_lines.Add(String.Format("After choosing riddle \"{1}\" in round {2}, Text box found unexpectedly disabled with text=\"{3}\". Minus {0} points.", grade_cost, 
+                        item, tries, correctTextBox.Text));
+                    form_to_run.Close();
+                    return rr;
+                }
+
+                if (correctTextBox.Text != String.Empty)
+                {
+                    int grade_cost = 20;
+                    rr.grade -= grade_cost;
+                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found TextBox to be not empty. Had the text \"{2}\" Minus {0} points.", grade_cost, item, correctTextBox.Text));
+                    form_to_run.Close();
+                    return rr;
+                }
+
+                correctTextBox.Select();
+                // start keyboarding
+                while (correctTextBox.Text.ToLower() != item.ToLower())
+                {
+                    TimeSpan ts_till_now1 = DateTime.Now - timeBefore;
+                    int randomWait;
+                    if (ts_till_now1.Milliseconds < 400)
+                    {
+                        randomWait = r.Next(0, 2) * 1000 + (500 - ts_till_now1.Milliseconds);
+                    }else if (ts_till_now1.Milliseconds > 600)
+                    {
+                        randomWait = 1400 - ts_till_now1.Milliseconds + r.Next(0,200);
+                    }
+                    else
+                    {
+                        randomWait = r.Next(0, 2) * 1000 + r.Next(0, 200);
+                    }
+
+                    bf = new BlockerForm(randomWait);
+                    bf.ShowDialog();
+
+                    TimeSpan ts_till_now = DateTime.Now - timeBefore;
+                    labelsText = getAllLabeShowingText();
+                    String expectedLabelText = String.Format("Your time is:{0} seconds", (int)ts_till_now.TotalSeconds);
+                    if (labelsText.Trim().ToLower() != expectedLabelText.ToLower())
+                    {
+                        MessageBox.Show(ts_till_now.Milliseconds.ToString());
+                        int grade_cost = 15;
+                        rr.grade -= grade_cost;
+                        rr.error_lines.Add(String.Format("After waiting {3} seconds, expected a single label with the text \"{1}\". Instead found labels (maybe more then one) with text \"{2}\". Minus {0} points.", grade_cost, labelsText, expectedLabelText, (int)ts_till_now.TotalSeconds));
+                        form_to_run.Close();
+                        return rr;
+                    }
+
+                    if (!correctTextBox.Enabled)
+                    {
+                        int grade_cost = 15;
+                        rr.grade -= grade_cost;
+                        rr.error_lines.Add(String.Format("After waiting {2} seconds, Text box found unexpectedly disabled with text=\"{1}\". Minus {0} points.", grade_cost, correctTextBox.Text, (int)ts_till_now.TotalSeconds));
+                        form_to_run.Close();
+                        return rr;
+                    }
+                    char nextLetter = getRandomChar(); ;
+                    if (r.Next(0, 10) > 0 && correctTextBox.Text.Length < item.Length)
+                    {
+                        char nextCorrectLetter = item[correctTextBox.Text.Length];
+                        nextLetter = nextCorrectLetter;
+                    }
+                    if (r.Next(0, 2) == 0)
+                    {
+                        nextLetter = nextLetter.ToString().ToUpper()[0];
+                    }
+                    String beforeText = correctTextBox.Text;
+                    String expectedText = beforeText + nextLetter;
+                    if (beforeText.Length > 0 && r.Next(0, 10) == 0)
+                    {
+                        expectedText = beforeText.Substring(0, beforeText.Length - 1);
+                        correctTextBox.Text = expectedText;
+                    }
+                    else
+                    {
+                        correctTextBox.Text += nextLetter;
+                    }
+
+                    MySleep(1000);
+                    DateTime timeAfter = DateTime.Now;
+
+                    // check if textBox has the expected text
+                    if (correctTextBox.Text != expectedText)
+                    {
+                        int grade_cost = 20;
+                        rr.grade -= grade_cost;
+                        rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with textBox.Text={2} after clicking {3} found incorrect text to be {4}. Minus {0} points.", grade_cost, item, beforeText, nextLetter, correctTextBox.Text));
+                        form_to_run.Close();
+                        return rr;
+                    }
+
+                    if (correctTextBox.Text.ToLower() == item.ToLower())
+                    {
+                        // check that riddler is in after solution state
+                        TimeSpan timeDiff = timeAfter - timeBefore;
+                        // check labels strings...
+                        int seconds_passed = timeDiff.Seconds;
+                        String expectedlabel1 = "Your time is:" + seconds_passed + " seconds";
+                        String expectedlabel2;
+                        if (seconds_passed < 10) expectedlabel2 = "Horrey, you solved the word " + item + " in " + seconds_passed + " seconds";
+                        else if (seconds_passed < 20) expectedlabel2 = "OK, you solved the word " + item + " in " + seconds_passed + " seconds";
+                        else expectedlabel2 = "Baasa, you solved the word " + item + " in " + seconds_passed + " seconds";
+
+                        String labelsString = getAllLabeShowingText();
+                        if (!labelsString.Contains(expectedlabel1))
                         {
-                            int grade_lost = 30;
-                            rr.grade -= grade_lost;
-                            rr.error_lines.Add(String.Format("No \"counter\" button with text=random_start={0} found !!! Minus {1} points.", random_start, grade_lost));
+                            int grade_cost = 15;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - could not find timer label with text \"{2}\". Combined text on visible labels found is {3}. Minus {0} points.", grade_cost, item, expectedlabel1, getAllLabeShowingText()));
+                            form_to_run.Close();
+                            return rr;
+                        }
+                        if (!labelsString.Contains(expectedlabel2))
+                        {
+                            int grade_cost = 15;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - could not find anouncement label with text \"{2}\". Combined text on visible labels found is {3}. Minus {0} points.", grade_cost, item, expectedlabel2, getAllLabeShowingText()));
+                            form_to_run.Close();
+                            return rr;
+                        }
+                        labelsString = labelsString.Replace(expectedlabel2, String.Empty);
+                        labelsString = labelsString.Replace(expectedlabel1, String.Empty);
+                        if (labelsString.Trim() != String.Empty)
+                        {
+                            int grade_cost = 15;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - found unexpected labels text = \"{2}\". Minus {0} points.", grade_cost, item, labelsString));
+                            form_to_run.Close();
+                            return rr;
+                        }
+                        if (!cb.Enabled || !cb.Visible)
+                        {
+                            int grade_cost = 15;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - found ComboBox not showing or not enabled. Minus {0} points.", grade_cost, item));
+                            form_to_run.Close();
+                            return rr;
+                        }
+                        if (!correctTextBox.Visible || correctTextBox.Enabled)
+                        {
+                            int grade_cost = 15;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - found textbox not showing or not disabled. Minus {0} points.", grade_cost, item));
                             form_to_run.Close();
                             return rr;
                         }
 
-                        b.BackColor = SystemColors.Control;
+                    }
 
+                    //MessageBox.Show("111");
 
-                        Control hidder_disabler = null;
-                        if ((int)args[(int)GUI1_ARGS.EXTRA_BUTTON_FORM] == 0)
+                    //correct - check that textBox background is white, that correction is enabled/shown
+                    if (item.ToLower().StartsWith(correctTextBox.Text.ToLower()))
+                    {
+                        if (correctTextBox.BackColor != Color.White)
                         {
-                            String button_text;
-                            if ((int)args[(int)GUI1_ARGS.EXTRA_DISABLE_HIDE] == 0) button_text = "Eraser";
-                            else button_text = "Disabler";
-                            hidder_disabler = ScreenControlsByText(form_to_run.Controls, button_text);
-                            if (hidder_disabler == null)
+                            int grade_cost = 20;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with correct textBox.Text=\"{2}\" found TextBox background to be not White - but {3}. Minus {0} points.", grade_cost, item, correctTextBox.Text, correctTextBox.BackColor.ToString()));
+                            form_to_run.Close();
+                            return rr;
+
+                        }
+                        Control chopButton = ScreenControlsByText(form_to_run.Controls, "Chop To Correct");
+                        if (chopButton != null && chopButton.Visible)
+                        {
+                            int grade_cost = 20;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with correct textBox.Text=\"{2}\" found chopButton to be Visible !. Minus {0} points.", grade_cost, item, correctTextBox.Text));
+                            form_to_run.Close();
+                            return rr;
+                        }
+                    }
+                    else // not correct - check that textBox background is red, that correction is enabled/shown
+                    {
+                        if (correctTextBox.BackColor != Color.Red)
+                        {
+                            int grade_cost = 20;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with incorrect textBox.Text=\"{2}\" found TextBox background to be not Red - but {3}. Minus {0} points.", grade_cost, item, correctTextBox.Text, correctTextBox.BackColor.ToString()));
+                            form_to_run.Close();
+                            return rr;
+
+                        }
+                        Control chopButton = ScreenControlsByText(form_to_run.Controls, "Chop To Correct");
+                        if (chopButton == null || !chopButton.Visible)
+                        {
+                            int grade_cost = 20;
+                            rr.grade -= grade_cost;
+                            rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with incorrect textBox.Text=\"{2}\" found chopButton to be not Visible !. Minus {0} points.", grade_cost, item, correctTextBox.Text));
+                            form_to_run.Close();
+                            return rr;
+                        }
+
+                        String textBeforeClick = correctTextBox.Text;
+                        if (r.Next(0, 4) == 0)
+                        {
+                            click_control(chopButton);
+                            MySleep(1000);
+
+                            if (!item.ToLower().StartsWith(correctTextBox.Text.ToLower()))
                             {
-                                int grade_lost = 30;
-                                rr.grade -= grade_lost;
-                                rr.error_lines.Add(String.Format("Could not find {0} button. Minus {1} points.", button_text, grade_lost));
+                                int grade_cost = 20;
+                                rr.grade -= grade_cost;
+                                rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with incorrect textBox.Text=\"{2}\" and then after clicking the chop button found unexpected text in text box=\"{3}\". Minus {0} points.", grade_cost, item, textBeforeClick, correctTextBox.Text));
                                 form_to_run.Close();
                                 return rr;
                             }
                         }
-                        else
-                        {
-                            hidder_disabler = form_to_run;
-                        }
+                    }
+                }
 
-                        Dictionary<Color, int> colorDicts = new Dictionary<Color, int>();
-                        for (int i = random_start, clicks = 0; i > 0; i--)
-                        {
-
-
-                            // Some crazy shit code to Close down some MessageBox over ununderstandable exception...
-                            IntPtr window = FindWindow(null, "Microsoft .NET Framework");
-                            if (window != IntPtr.Zero)
-                            {
-                                MessageBox.Show("walla");
-                                Debug.WriteLine("Window found, closing...");
-                                SendMessage((int)window, WM_SYSCOMMAND, SC_CLOSE, 0);
-                            }
-
-                            if (!form_to_run.Visible)
-                            {
-                                int grade_lost = 20;
-                                rr.grade -= grade_lost;
-                                rr.error_lines.Add(String.Format("Form closed unexpectedly after {0} clicks. Minus {1} points.", clicks, grade_lost));
-                                return rr;
-                            }
-
-                            Color colorBefore;
-                            if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
-                            {
-                                colorBefore = form_to_run.BackColor;
-                            }
-                            else
-                            {
-                                colorBefore = b.BackColor;
-                            }
-                            //MessageBox.Show("1");
-                            click_control(b);
-                            mouseClick_control(b);
-                            //MessageBox.Show("2");
-
-
-                            clicks++;
-                            if (clicks == random_start) break;
-
-                            if (!form_to_run.Visible)
-                            {
-                                int grade_lost = 20;
-                                rr.grade -= grade_lost;
-                                rr.error_lines.Add(String.Format("Form closed unexpectedly after {0} clicks. Minus {1} points.", clicks, grade_lost));
-                                return rr;
-                            }
-
-
-                            Console.WriteLine("random_start={0}, clicks={1}, b.Text={2}, i={3} Visible={4}", random_start, clicks, b.Text, i, form_to_run.Visible);
-                            if (b.Text.Trim() != (i - 1).ToString().Trim())
-                            {
-                                int grade_lost = 30;
-                                rr.grade -= grade_lost;
-                                rr.error_lines.Add(String.Format("\"counter\" button with wrong text after {0} clicks. Expected : {1} but found {2}. Minus {3} points.", clicks, random_start - clicks, b.Text, grade_lost));
-                                Console.WriteLine(rr.error_lines.Last());
-                                form_to_run.Close();
-                                return rr;
-                            }
-                            int counter_from_button = int.Parse(b.Text);
-                            int last_color_start_count = (int)args[(int)GUI1_ARGS.LAST_COLOR_STARTER];
-                            if (counter_from_button == last_color_start_count)
-                            {
-                                Color[] temp2 = { Color.DarkBlue, Color.Yellow, Color.Violet };
-                                Color benchmark = temp2[(int)args[(int)GUI1_ARGS.LAST_COLOR]];
-                                Color color_found;
-                                String control_name = "button";
-                                if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
-                                {
-                                    color_found = b.BackColor;
-                                }
-                                else
-                                {
-                                    control_name = "Form";
-                                    color_found = form_to_run.BackColor;
-                                }
-                                if (!(benchmark == color_found))
-                                {
-                                    int grade_lost = 20;
-                                    rr.grade -= grade_lost;
-                                    rr.error_lines.Add(String.Format("When reaching counter={0} (after {1} clicks). {2} background color did not change to {3}. Found background to be {4}. Minus {5} points.",
-                                        b.Text, clicks, control_name, benchmark.Name, color_found.ToString(), grade_lost));
-                                    Console.WriteLine(rr.error_lines.Last());
-                                }
-
-                            }
-
-
-                            Color colorAfter;
-                            String changer;
-                            if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
-                            {
-                                changer = "Form";
-                                colorAfter = form_to_run.BackColor;
-                            }
-                            else
-                            {
-                                changer = "Button";
-                                colorAfter = b.BackColor;
-                            }
-
-                            Console.WriteLine("changer={0}, colorBefore={1}, ColorAfter={2}, b.Back={3}, form.Back={4}", changer, colorBefore.ToString(), colorAfter.ToString(), b.BackColor.ToString(), form_to_run.BackColor.ToString());
-
-                            Debug.WriteLine("b.color=" + b.BackColor);
-                            if ((i - 1) % 10 == 9)
-                            {
-                                if (colorBefore == colorAfter)
-                                {
-                                    int grade_lost = 30;
-                                    rr.grade -= grade_lost;
-                                    rr.error_lines.Add(String.Format("{0} background Color did not change when counter got to {1}.", changer, b.Text, grade_lost));
-                                    Console.WriteLine(rr.error_lines.Last());
-                                    form_to_run.Close();
-                                    return rr;
-                                }
-                                if (!colorDicts.ContainsKey(colorAfter)) colorDicts[colorAfter] = 0;
-                                colorDicts[colorAfter]++;
-                                if (colorDicts[colorAfter] > 2)
-                                {
-                                    int grade_lost = 20;
-                                    rr.grade -= grade_lost;
-                                    rr.error_lines.Add(String.Format("Same color ({3}) appeared in background of {0} already for 3'rd time - Not random like!!! when counter got to {1}. Minus {2} points.", changer, b.Text, grade_lost, colorAfter.ToString()));
-                                    Console.WriteLine(rr.error_lines.Last());
-                                    form_to_run.Close();
-                                    return rr;
-                                }
-                            }
-                            else
-                            {
-                                if (colorBefore != colorAfter)
-                                {
-                                    int grade_lost = 30;
-                                    rr.grade -= grade_lost;
-                                    rr.error_lines.Add(String.Format("{0} background Color changed unexpectedly when counter got to {1}.", changer, b.Text, grade_lost));
-                                    Console.WriteLine(rr.error_lines.Last());
-                                    form_to_run.Close();
-                                    return rr;
-                                }
-                            }
-
-
-                            bool test_seif_9 = (r.Next(0, 10) < 6);
-                            if (test_seif_9)
-                            {
-                                if (hidder_disabler == form_to_run)
-                                {
-                                    click_control(form_to_run);
-                                    mouseClick_control(form_to_run);
-
-                                    if ((int)args[(int)GUI1_ARGS.EXTRA_DISABLE_HIDE] == 0)
-                                    {
-                                        if (b.Visible == true)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button did not disaapear as expected. Minus {0} points.", grade_lost));
-                                            Console.WriteLine(rr.error_lines.Last());
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-                                        if (b.Enabled == false)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button was unexpectedly Disabled. Minus {0} points.", grade_lost));
-                                            Console.WriteLine(rr.error_lines.Last());
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-
-                                        //MessageBox.Show("1");
-                                        click_control(form_to_run);
-                                        mouseClick_control(form_to_run);
-
-                                        //MessageBox.Show("2");
-
-                                        if (b.Visible == false)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button did not resaapear as expected. Minus {0} points.", grade_lost));
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-                                        if (b.Enabled == false)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button was not ReEnabled. Minus {0} points.", grade_lost));
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-
-                                    }
-                                    else
-                                    {
-                                        if (b.Visible == false)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button disaapeared unexpectedly. Minus {0} points.", grade_lost));
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-                                        if (b.Enabled == true)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button did not Disable as expected. Minus {0} points.", grade_lost));
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-
-                                        click_control(form_to_run);
-                                        mouseClick_control(form_to_run);
-
-                                        MySleep(1000);
-
-                                        if (b.Visible == false)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button did not resaapear as expected. Minus {0} points.", grade_lost));
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-                                        if (b.Enabled == false)
-                                        {
-                                            int grade_lost = 20;
-                                            rr.grade -= grade_lost;
-                                            rr.error_lines.Add(String.Format("Counter button was not ReEnabled. Minus {0} points.", grade_lost));
-                                            form_to_run.Close();
-                                            return rr;
-                                        }
-                                    }
-
-                                }
-                                else
-                                {
-                                    ((Button)hidder_disabler).PerformClick();
-                                }
-                            }
-                        }
-
-
-                        MySleep(1000);
-                        Debug.WriteLine(form_to_run.Visible.ToString());
-                        if (form_to_run.Visible)
-                        {
-                            int grade_lost = 20;
-                            rr.grade -= grade_lost;
-                            rr.error_lines.Add(String.Format("Form did ont close as expected although counter reached 0. Minus {0} points.", grade_lost));
-                        }
-
-            */
+            }
             form_to_run.Close();
             return rr;
+        }
+
+        private char getRandomChar()
+        {
+            return (char)('a' + r.Next(0, 'z' - 'a' + 1));
+        }
+
+        private List<Control> getVisibleControlsByType(Type type)
+        {
+            List<Control> res = new List<Control>();
+            List<Control> optionals = ScreenControlsByType(type);
+            foreach(Control c in optionals)
+            {
+                if (c.Visible) res.Add(c);
+            }
+            return res;
+        }
+
+        private List<Control> getEnabledControlsByType(Type type)
+        {
+            List<Control> res = new List<Control>();
+            List<Control> optionals = getVisibleControlsByType(type);
+            foreach (Control c in optionals)
+            {
+                if (c.Enabled) res.Add(c);
+            }
+            return res;
         }
 
         // really visible means Visible and 
@@ -514,16 +1000,18 @@ namespace HWs_Generator
             Bitmap bmp = new Bitmap(ctrl.Width, ctrl.Height);
             ctrl.DrawToBitmap(bmp, ctrl.ClientRectangle);
             bmp.Save(ctrl.GetType().ToString() + ".png");
+/*
             if (ctrl.GetType() == typeof(PictureBox))
             {
                 MessageBox.Show("Baasa");
             }
+*/
             for (int r = 0; r < bmp.Height; r++)
             {
                 for (int c = 0; c < bmp.Width; c++)
                 {
                     Color pixel = bmp.GetPixel(c, r);
-                    if (pixel != form_to_run.BackColor)
+                    if (pixel.ToArgb() != form_to_run.BackColor.ToArgb())
                     {
                         return true;
                     }
@@ -544,328 +1032,5 @@ namespace HWs_Generator
             return res;
         }
 
-        public override void Create_DocFile_By_Creators(object[] args, List<Creators> creators)
-        {
-            int id = (int)(args[0]);
-
-            Student stud = Students.students_dic[id];
-            String student_full_name = stud.first_name + " " + stud.last_name;
-
-
-            Microsoft.Office.Interop.Word.Application oWord = new Microsoft.Office.Interop.Word.Application();
-            oWord.Visible = true;
-            Document wordDoc = oWord.Documents.Add();
-
-            Paragraph par1 = wordDoc.Paragraphs.Add();
-            par1.Range.Font.Name = "Ariel";
-            par1.Range.Font.Size = 12;
-            par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
-            par1.Range.Text = "שלום " + student_full_name;
-            par1.ReadingOrder = WdReadingOrder.wdReadingOrderRtl;
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "ש\"ב 2 נועדו לתרגל אתכם על שימוש בפקדים שלמדנו בהרצאה ובתרגול. על הפתרון שלכם לעמוד בדיוק בדרישות כדי שהבודק האוטומטי לא יכשיל אתכם.";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "הפרויקט שתגישו יהיה כמובן Windows Forms Application כמו שהיה בש\"ב 1. ";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "כרגיל, יש להכין את הפרויקט, לכווץ ולהעלות אותו לאתר הקורס. ושוב, כרגיל - עם שאלות וכאלה תפנו אליי או אל אמיר.";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "הבודק האוטמטי אמור לענות לכם עם ציון בתוך דקות ספורות מההגשה. אם לא חזרה תשובה או לא ברורה התשובה או כל שאלה - תודיעו לי שאוכל לבדוק מה \"נתקע\".";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "המלצתי האישית היא לבדוק (ואם צריך לתקן) את תוכניתכם לאחר ביצוע של כל אחד מהסעיפים הבאים:";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "1) שנו את הכותרת (Title) של הטופס ל-email שלכם (לפני השינוי הוא בטח יהיה Form1).";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "2) הוסיפו כפתור לטופס. אין דרישה מיוחדת לגבי המיקום של הכפתור או לגבי השם שתתנו לו (אם לא תשנו את שמו - הוא יהיה button1). בשלב זה גם אין חשיבות לטקסט שיופיע על הכפתור (ואם לא תשנו אותו הוא גם יהיה button1 - אבל בהמשך התרגיל הזה נשנה את הטקסט שעל הכפתור.).";
-            par1.Range.InsertParagraphAfter();
-
-            Button b = new Button();
-            b.Text = "button1";
-            b.Location = new System.Drawing.Point(75, 75);
-            pictures_form = new Form();
-            pictures_form.Size = new Size(300, 200);
-            pictures_form.Text = stud.email;
-            pictures_form.Controls.Add(b);
-
-            /*
-                        ThreadStart ts = new ThreadStart(run_picture_form);
-                        Thread t = new Thread(ts);
-                        t.Start();
-            */
-            pictures_form.Show();
-            MySleep(1000);
-
-            par1.Range.Text = ", .בשלב הזה הטופס אמור להראות דומה לתמונה הבאה (כמו שאמרתי, אין חשיבות לגודל הטופס ולמיקום הכפתור כל עוד רואים אותו כמובן!)";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "XXXX";
-            par1.Range.InsertParagraphAfter();
-            Thread.Sleep(1000);
-            add_form_picture(wordDoc, pictures_form);
-
-            //par1.Range.InsertParagraphAfter();
-            par1.Range.Text = "3) הוסיפו בנאי (constructor) נוסף לטופס שלכם. אם לא שיניתם את שם הטופס - ההוספה צריכה להיות בקובץ Form1.cs . הוסיפו למחלקת הטופס בנאי (בנוסף לבנאי הריק ש-Visual Studio ייצר עבורכם) גם בנאי שמקבל פרמטר יחיד מסוג int.";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "4) שנו את הפונקציה Main שבקובץ Program.cs כך שתקרא לבנאי החדש שלכם (במקום לבנאי הריק שנקרא עכשיו). שילחו לבנאי שמצפה לפרמטר int איזשהוא מספר אקראי בתחום שבין 20 ל 50.";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "5) בתוך הבנאי החדש שהוספתם - כיתבו קוד שמשנה את הטקסט שעל הכפתור למספר שנשלח לבנאי. כלומר על הכפתור בטופס יופיע המספר שאותו הגרלתם בפונקציה Main שבקובץ Program.cs .";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "עכשיו הטופס שלכם ייראה ככה אחרי ההפעלה (זיכרו כי המספר בכפתור הוא אקראי ובכל הפעלה של התוכנית יופיע מספר אחר)...";
-            par1.Range.InsertParagraphAfter();
-
-            int random_start = r.Next(30, 51);
-            while (random_start % 10 == 9 || random_start % 10 == 0)
-            {
-                random_start = r.Next(30, 51);
-            }
-            b.Text = random_start.ToString();
-
-
-            par1.Range.Text = "XXXX";
-            par1.Range.InsertParagraphAfter();
-            add_form_picture(wordDoc, pictures_form);
-
-            par1.Range.Text = "6) הוסיפו קוד לטופס כך שבכל לחיצה על הכפתור המספר שמופיע עליו ירד ב-1. כאשר המספר מגיע ל-0, על הטופס להיסגר. אתם יכולים לסגור את הטופס בעזרת הפונקציה ()Close של המחלקה Form. - כלומר, פשוט ע\"י כתיבת ()Close;";
-            par1.Range.InsertParagraphAfter();
-
-            String[] temp1 = { "הטופס", "הכפתור" };
-            String bgrd1 = temp1[(int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND]];
-            String bgrd2 = temp1[1 - (int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND]];
-
-            par1.Range.Text = String.Format("7) הוסיפו קוד לטופס כך שאם אחרי לחיצה על הכפתור המספר על הכפתור מסתיים ב-9 (לדוגמא 9,19,29,39 וכו) {0} ישנה את צבע הרקע שלו לצבע אקראי כלשהוא. שימו לב שכדי ליצור צבע אקראי עליכם רק להגריל ערכים בתחום 0-255 למרכיבי האדום\\ירוק\\כחול של הצבע ולהשתמש בפונקציה Color.FromArgb. הרקע יישאר בצבעו החדש עד הפעם הבאה שהמספר על הכפתור יסתיים ב-9.", bgrd1);
-            par1.Range.InsertParagraphAfter();
-
-
-            int num_of_clicks = random_start % 10 + 1;
-            par1.Range.Text = String.Format("כך שאחרי {0} הקלקות על הכפתור - הטופס יכול להראות בערך ככה: (זיכרו כי רקע של {1} התחלף לצבע אקראי)", num_of_clicks, bgrd1);
-            par1.Range.InsertParagraphAfter();
-            b.Text = (random_start - num_of_clicks).ToString();
-            if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
-            {
-                pictures_form.BackColor = Color.Orange;
-                b.BackColor = SystemColors.Control;
-            }
-            else
-            {
-                b.BackColor = Color.Orange;
-            }
-
-            MySleep(2000);
-
-            par1.Range.Text = "XXXX";
-            par1.Range.InsertParagraphAfter();
-            add_form_picture(wordDoc, pictures_form);
-
-
-            Color[] temp2 = { Color.DarkBlue, Color.Yellow, Color.Violet };
-            Color clr = temp2[(int)args[(int)GUI1_ARGS.LAST_COLOR]];
-            String color_name = "Color." + clr.Name;
-            int starter = (int)args[(int)GUI1_ARGS.LAST_COLOR_STARTER];
-            par1.Range.Text = String.Format("8) הוסיפו קוד לטופס כך שכאשר המספר על הכפתור ירד ל-{0},{1} יישנה את צבעו ל-{2}. שימו לב שמעבר לכך לא צפויים שינויי צבע נוספים עד שהטופס צפוי להיסגר.", starter, bgrd2, color_name);
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = String.Format("כך שכאשר המספר על הכפתור יגיע ל-{0} הטופס ייראה בערך ככה. (שימו לב כי בשלב הזה {1} שינה את צבעו כבר מספר פעמים - לפי סעיף 7).", starter, bgrd1);
-            par1.Range.InsertParagraphAfter();
-
-            Color anotherRandomColor = Color.Green;
-            b.Text = starter.ToString();
-            if ((int)args[(int)GUI1_ARGS.CHANGE_FORM_BUTTON_BACKGROUND] == 0)
-            {
-                b.BackColor = clr;
-                pictures_form.BackColor = anotherRandomColor;
-            }
-            else
-            {
-                b.BackColor = anotherRandomColor;
-                pictures_form.BackColor = clr;
-            }
-
-            MySleep(2000);
-            par1.Range.Text = "XXXX";
-            par1.Range.InsertParagraphAfter();
-            add_form_picture(wordDoc, pictures_form);
-
-            pictures_form.BackColor = b.BackColor = SystemColors.Control;
-            b.Text = random_start.ToString();
-            MySleep(2000);
-
-            if ((int)args[(int)GUI1_ARGS.EXTRA_BUTTON_FORM] == 0)
-            {
-                if ((int)args[(int)GUI1_ARGS.EXTRA_DISABLE_HIDE] == 0)
-                {
-                    par1.Range.Text = String.Format("9) הוסיפו כפתור נוסף איפושהוא בטופס. (שוב-אין חשיבות לגודלו\\מיקומו\\שמו). על הטקסט בכפתור להיות \"Eraser\" בכל פעם שלוחצים על הכפתור החדש - יש להעלים את הכפתור הראשון. בלחיצה הבאה על כפתור \"Eraser\" יש להחזיר את הכפתור הראשון להופעה. ושוב כל כלחיצה על כפתור \"Eraser\" מעליה או מחזירה את הכפתור הראשון. לידיעתכם - העלמה\\הופעה של Control ניתנים לביצוע ע\"י התכונה Visible של ה-Control.");
-                    par1.Range.InsertParagraphAfter();
-
-                    par1.Range.Text = String.Format("אז יחד עם הכפתור החדש הטופס יכול להיראות בהתחלה:");
-                    par1.Range.InsertParagraphAfter();
-
-
-                    Button eraser_button = new Button();
-                    eraser_button.Location = new System.Drawing.Point(200, 130);
-                    eraser_button.Text = "Eraser";
-
-                    pictures_form.Controls.Add(eraser_button);
-
-
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-
-                    par1.Range.Text = String.Format("ואחרי לחיצה על כפתור \"Eraser\" הוא ייראה כך");
-                    par1.Range.InsertParagraphAfter();
-
-
-                    b.Visible = false;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-
-                    par1.Range.Text = String.Format("ואחרי עוד לחיצה על כפתור \"Eraser\" הוא שוב ייראה כך");
-                    par1.Range.InsertParagraphAfter();
-
-                    b.Visible = true;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-                }
-                else
-                {
-                    par1.Range.Text = String.Format("9) הוסיפו כפתור נוסף איפושהוא בטופס. (שוב-אין חשיבות לגודלו\\מיקומו\\שמו). על הטקסט בכפתור להיות \"Disabler\" בכל פעם שלוחצים על הכפתור החדש - יש לשנות את הכפתור הראשון למצב - Disabled. בלחיצה הבאה על כפתור \"Disabler\" יש להחזיר את הכפתור הראשון למצב - Enabled. ושוב  כל לחיצה על כפתור \"Disabler\" הופכת את המצב של הכפתור הראשון מ-Enabled ל-Disabled וההפך. ניתן לעשות זאת ע\"י שליטה על התכונה  Enabled של הכפתור הראשון..");
-                    par1.Range.InsertParagraphAfter();
-
-                    par1.Range.Text = String.Format("אז יחד עם הכפתור החדש הטופס יכול להיראות בהתחלה:");
-                    par1.Range.InsertParagraphAfter();
-
-                    Button disabler_button = new Button();
-                    disabler_button.Location = new System.Drawing.Point(200, 130);
-                    disabler_button.Text = "Disabler";
-
-                    pictures_form.Controls.Add(disabler_button);
-
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-
-                    par1.Range.Text = String.Format("ואחרי לחיצה על כפתור \"Disabler\" הוא ייראה כך");
-                    par1.Range.InsertParagraphAfter();
-
-
-                    b.Enabled = false;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-
-                    par1.Range.Text = String.Format("ואחרי עוד לחיצה על כפתור \"Disabler\" הטופס שוב ייראה כך");
-                    par1.Range.InsertParagraphAfter();
-
-                    b.Enabled = true;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-                }
-                par1.Range.Text = "כמובן שהכפתור החדש נשאר פעיל לאורך כל חיי התוכנית (ולא רק במצב ההתחלתי כפי שהדגמתי בציורים)";
-                par1.Range.InsertParagraphAfter();
-
-            }
-            else
-            {
-                if ((int)args[(int)GUI1_ARGS.EXTRA_DISABLE_HIDE] == 0)
-                {
-                    par1.Range.Text = String.Format("9) הוסיפו קוד לטופס כך שבכל פעם שלוחצים על הטופס (לא על הכפתור ! - על הטופס מחוץ לכפתור) - יש להעלים את הכפתור עם המספרים. בלחיצה הבאה על הטופס יש להחזיר את הכפתור להופעה. ושוב - לחיצה אחת מעלימה והלחיצה הבאה מחזירה וכן הלאה... לידיעתכם - העלמה\\הופעה של Control ניתנים לביצוע ע\"י התכונה Visible של ה-Control.");
-                    par1.Range.InsertParagraphAfter();
-
-                    par1.Range.Text = String.Format("כך שאחרי לחיצה על הטופס (מהמצב ההתחלתי) הטופס ייראה");
-                    par1.Range.InsertParagraphAfter();
-
-
-                    b.Visible = false;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-
-                    par1.Range.Text = String.Format("ואחרי עוד לחיצה על הטופס הוא שוב ייראה כך");
-                    par1.Range.InsertParagraphAfter();
-
-                    b.Visible = true;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-                }
-                else
-                {
-                    par1.Range.Text = String.Format("9) הוסיפו קוד לטופס כך שבכל פעם שלוחצים על הטופס (לא על הכפתור ! - על הטופס מחוץ לכפתור) - יש לשנות את הכפתור עם המספרים למצב Disabled. בלחיצה הבאה על הטופס יש להחזיר את הכפתור למצב Enabled. ושוב - אם נלחץ על הטופס הכפתור ייעלם ואם שוב נלחץ - הכפתור יחזור וכן הלאה. ניתן לעשות זאת ע\"י שליטה על התכונה  Enabled של הכפתור.");
-                    par1.Range.InsertParagraphAfter();
-
-                    par1.Range.Text = String.Format("כך שאחרי לחיצה על הטופס (מהמצב ההתחלתי) הטופס ייראה");
-                    par1.Range.InsertParagraphAfter();
-
-                    b.Enabled = false;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-
-                    par1.Range.Text = String.Format("ואחרי עוד לחיצה על הטופס הוא שוב ייראה כך");
-                    par1.Range.InsertParagraphAfter();
-
-                    b.Enabled = true;
-                    MySleep(2000);
-
-                    par1.Range.Text = "XXXX";
-                    par1.Range.InsertParagraphAfter();
-                    add_form_picture(wordDoc, pictures_form);
-                }
-
-            }
-
-            par1.Range.Text = "זהו.";
-            par1.Range.InsertParagraphAfter();
-
-            par1.Range.Text = "סיימתם כבר ?";
-            par1.Range.InsertParagraphAfter();
-
-            pictures_form.Close();
-            MySleep(2000);
-
-
-            object fileName = Students_Hws_dirs + "\\" + id.ToString() + ".docx";
-            object missing = Type.Missing;
-            wordDoc.SaveAs(ref fileName,
-                ref missing, ref missing, ref missing, ref missing, ref missing,
-                ref missing, ref missing, ref missing, ref missing, ref missing,
-                ref missing, ref missing, ref missing, ref missing, ref missing);
-
-            wordDoc.Close();
-            oWord.Quit();
-
-
-
-        }
     }
 }

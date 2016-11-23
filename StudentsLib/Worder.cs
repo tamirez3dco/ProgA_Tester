@@ -102,6 +102,22 @@ namespace StudentsLib
             return wordTableFilePath;
         }
 
+        public static void Underline_in_doc(Microsoft.Office.Interop.Word.Document doc, String what_to_replace)
+        {
+            Find findObject = doc.Application.Selection.Find;
+            object missing = Type.Missing;
+
+            findObject.Text = what_to_replace;
+            object replaceAll = WdReplace.wdReplaceNone;
+            findObject.Execute(ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref missing, ref missing, ref missing, ref missing, ref missing,
+                ref replaceAll, ref missing, ref missing, ref missing, ref missing);
+            doc.Application.Selection.Font.Underline = WdUnderline.wdUnderlineSingle;
+            doc.Application.Selection.Font.UnderlineColor = WdColor.wdColorBlack;
+            doc.Application.Selection.Collapse();
+        }
+
+
         public static void Replace_in_doc(Microsoft.Office.Interop.Word.Document doc, String what_to_replace, String replace_with)
         {
             Find findObject = doc.Application.Selection.Find;
@@ -147,6 +163,7 @@ namespace StudentsLib
             doc.Application.Selection.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
             doc.Application.Selection.ParagraphFormat.ReadingOrder = WdReadingOrder.wdReadingOrderLtr;
             doc.Application.Selection.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
+            doc.Application.Selection.Collapse();
         }
 
     }
