@@ -61,6 +61,7 @@ namespace Code_Downloader
                     students = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
                     hw_entire_class_path = @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions";
                     typeToLinkDict[typeof(GUI1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143956&action=grading";
+                    typeToLinkDict[typeof(GUI2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=148559&action=grading";
                     break;
                 case "ProgrammingA_2017":
                     students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
@@ -68,6 +69,8 @@ namespace Code_Downloader
                     hw_entire_class_path = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions";
                     typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=144329&action=grading";
                     typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=148355&action=grading";
+                    typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=149318&action=grading";
+                    
                     break;
                 case "Java1_2017_Highschool":
                     students = new Students(@"D:\Tamir\Netanya_Java_1\2017\Highschool\Highschool_Class.xlsx");
@@ -150,7 +153,7 @@ namespace Code_Downloader
                             String email = tc_email.innerText.Trim();
                             Debug.WriteLine("email=" + email);
                             if (email == null) continue;
-
+                            //if (email != "tamirlevi123@gmail.com") continue;
                             HTMLTableCell tc_last_update = tableRow.cells.item(7); // last upload time
                             String last_Update_Time = tc_last_update.innerText.Trim();
                             Debug.WriteLine("last update time=" + last_Update_Time);
@@ -164,7 +167,7 @@ namespace Code_Downloader
                             // check if there is a directry for this id
                             Student stud = Students.students_dic.Where(z => z.Value.email == email).FirstOrDefault().Value;
                             if (stud == null) continue;
-
+                            if (stud.id != 302840558) continue;
                             String folderPath = hw_path +@"\" + stud.id;
                             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 

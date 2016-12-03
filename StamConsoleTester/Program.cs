@@ -213,12 +213,12 @@ namespace StamConsoleTester
             */
             new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
             GUI2 hww = new GUI2();
-            int tid = 029046117;
+            int tid = 66117466;
             //String resulting_exe_path;
             //Compiler.BuildZippedProject(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\312441710\13_11_2016_14_37.zip", out resulting_exe_path);
-            Object[] thw_args = hww.get_random_args(tid);
-            //Object[] thw_args = hww.LoadArgs(tid);
-            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\GUI2_Mine.exe"));
+            //Object[] thw_args = hww.get_random_args(tid);
+            Object[] thw_args = hww.LoadArgs(tid);
+            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Temp\temp3\1_12_2016_05_15_extracted\HW2\HW2\bin\Debug\HW2.exe"));
             MessageBox.Show(rr.ToString());
             MessageBox.Show(rr.ToString());
             return;

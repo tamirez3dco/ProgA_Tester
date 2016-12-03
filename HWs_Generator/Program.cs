@@ -8,7 +8,6 @@ using System.IO;
 
 namespace HWs_Generator
 {
-    // TODO: catch returning errors and handle them differently
 
     class Program
     {
@@ -61,11 +60,11 @@ namespace HWs_Generator
 
             foreach (Student stud in Students.students_dic.Values)
             {
-                GUI2 hww = new GUI2();
+                HW2 hww = new HW2();
                 if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
                 Object[] myargs = hww.get_random_args(stud.id);
-                hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
-                //hww.Create_HW(myargs, false);
+                //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
+                hww.Create_HW(myargs, false);
                 hww.SaveArgs(myargs);
             }
             return;

@@ -17,8 +17,6 @@ using DiffPlex.DiffBuilder.Model;
 
 namespace HWs_Generator
 {
-    // TODO : Fix output gathering to repreform task with input to get accurate output (without any ununderstandable blank lines at the end)
-    // TODO : Fix name of attachments in email to short version...
     public class HW0
     {
         public static String Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
@@ -89,7 +87,14 @@ namespace HWs_Generator
             Object[] res = new Object[tokens.Length];
             for (int i = 0; i < tokens.Length; i++)
             {
-                res[i] = int.Parse(tokens[i]);
+                try
+                {
+                    res[i] = int.Parse(tokens[i]);
+                }
+                catch (FormatException fe)
+                {
+                    res[i] = bool.Parse(tokens[i]);
+                }
             }
             return res;
         }

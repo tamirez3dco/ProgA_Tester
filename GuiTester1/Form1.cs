@@ -1,9 +1,14 @@
-﻿using System;
+﻿using HWs_Generator;
+using StudentsLib;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,5 +50,49 @@ namespace GuiTester1
             mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)X, (uint)Y, 0, 0);
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+            GUI2 hww = new GUI2();
+            int tid = 029046117;
+            //String resulting_exe_path;
+            //Compiler.BuildZippedProject(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\312441710\13_11_2016_14_37.zip", out resulting_exe_path);
+            //Object[] thw_args = hww.get_random_args(tid);
+            Object[] thw_args = hww.LoadArgs(tid);
+            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\GUI2_Mine.exe"));
+            MessageBox.Show(rr.ToString());
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Control c = GUI2.myPb;
+            EventInfo evClick = c.GetType().GetEvent("MouseDown");
+            FieldInfo eventClick = typeof(Control).GetField("EventMouseDown", BindingFlags.NonPublic | BindingFlags.Static);
+            object secret = eventClick.GetValue(null);
+            // Retrieve the click event
+            PropertyInfo eventsProp = typeof(Component).GetProperty("Events", BindingFlags.NonPublic | BindingFlags.Instance);
+            EventHandlerList events = (EventHandlerList)eventsProp.GetValue(c, null);
+            //if (events.)
+            Delegate click = events[secret];
+            if (click == null) return;
+            MethodInfo click_method = click.GetMethodInfo();
+            //click.Method.Invoke(form_to_run,)
+            ParameterInfo[] click_params = click_method.GetParameters();
+
+            MouseEventArgs ea = new MouseEventArgs(MouseButtons.Left, 1, 1, 1, 0);
+            Object[] click_objects = { c, ea };
+            //MessageBox.Show("1");
+            click_method.Invoke(GUI2.myForm, click_objects);
+
+            for (int i = 0; i < 20000; i++)
+            {
+                Debug.Write(" ");
+            }
+            Debug.WriteLine("");
+
+            //                MessageBox.Show("2");
+
+        }
     }
 }

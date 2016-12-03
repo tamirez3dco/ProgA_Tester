@@ -190,6 +190,31 @@ namespace HWs_Generator
 
         }
 
+        public void do_event_control(String event_name, Control c)
+        {
+            EventInfo evClick = c.GetType().GetEvent(event_name);
+            FieldInfo eventClick = typeof(Control).GetField("Event"+event_name, BindingFlags.NonPublic | BindingFlags.Static);
+            object secret = eventClick.GetValue(null);
+            // Retrieve the click event
+            PropertyInfo eventsProp = typeof(Component).GetProperty("Events", BindingFlags.NonPublic | BindingFlags.Instance);
+            EventHandlerList events = (EventHandlerList)eventsProp.GetValue(c, null);
+            //if (events.)
+            Delegate click = events[secret];
+            if (click == null) return;
+            MethodInfo click_method = click.GetMethodInfo();
+            //click.Method.Invoke(form_to_run,)
+            ParameterInfo[] click_params = click_method.GetParameters();
+
+            MouseEventArgs ea = new MouseEventArgs(MouseButtons.Left, 1, 1, 1, 0);
+            Object[] click_objects = { c, ea };
+            //MessageBox.Show("1");
+            click_method.Invoke(form_to_run, click_objects);
+
+            MySleep(20000);
+            //                MessageBox.Show("2");
+
+        }
+
         public override RunResults test_Hw_by_assembly(object[] args, FileInfo executable)
         {
             int stud_id = (int)args[0];
