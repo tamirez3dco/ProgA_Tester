@@ -346,6 +346,11 @@ namespace HWs_Generator
             if (!p.WaitForExit(15000))
             {
                 p.Kill();
+                do
+                {
+                    Thread.Sleep(500);
+                } while (!p.HasExited);
+
                 rr.filesToAttach.Add(randomInputFile);
                 if (RunLine.GetErrors(lines).Trim() != String.Empty)
                 {
@@ -379,6 +384,10 @@ namespace HWs_Generator
             if (!p.WaitForExit(10000))
             {
                 p.Kill();
+                do
+                {
+                    Thread.Sleep(500);
+                } while (!p.HasExited);
             }
             output = p.StandardOutput.ReadToEnd();
             String studentOutputFile = randomInputFilesFolder + "//" + studentOutputFileName;

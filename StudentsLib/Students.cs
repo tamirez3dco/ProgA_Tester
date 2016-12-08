@@ -33,6 +33,11 @@ namespace StudentsLib
             }
             client.Send(message);
         }
+
+        public override string ToString()
+        {
+            return String.Format("[{0},{1} {2},{3}]",id,last_name,first_name,email);
+        }
     }
 
     public class Students

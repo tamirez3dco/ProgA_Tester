@@ -59,6 +59,7 @@
     <Compile Include="Exceler.cs" />
     <Compile Include="Imaging.cs" />
     <Compile Include="LevenshteinDistance.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="RunResults.cs" />
     <Compile Include="Students.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

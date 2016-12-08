@@ -33,17 +33,25 @@ namespace Code_Downloader
     {
 
         String ClassName;
+        String onlyStudent;
         String hw_entire_class_path;
         public MainWindow()
         {
+            //Logger.Log("Starting...","***");
             InitializeComponent();
             WebBrowser1.Navigate("http://el1.netanya.ac.il/login/index.php");
             String[] commandLineArgs = Environment.GetCommandLineArgs();
             String excel_file_path = commandLineArgs[1];
             ClassName = Environment.GetCommandLineArgs()[1];
+            if (Environment.GetCommandLineArgs().Length > 2)
+            {
+                onlyStudent = Environment.GetCommandLineArgs()[2];
+            }
+            
             this.WindowState = WindowState.Minimized;
             Students students;
             typeToLinkDict = new Dictionary<Type, string>();
+            //Logger.Log("Before switch:className=" + ClassName, "***");
             switch (ClassName)
             {
                 case "ProgrammingA_2017_Summer":
@@ -64,13 +72,13 @@ namespace Code_Downloader
                     typeToLinkDict[typeof(GUI2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=148559&action=grading";
                     break;
                 case "ProgrammingA_2017":
+                    //Logger.Log("Into ProgrammingA_2017","***");
                     students = new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
                     HW0.Students_All_Hws_dirs = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_HWs";
                     hw_entire_class_path = @"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions";
                     typeToLinkDict[typeof(HW0)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=144329&action=grading";
                     typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=148355&action=grading";
                     typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=149318&action=grading";
-                    
                     break;
                 case "Java1_2017_Highschool":
                     students = new Students(@"D:\Tamir\Netanya_Java_1\2017\Highschool\Highschool_Class.xlsx");
@@ -95,12 +103,14 @@ namespace Code_Downloader
         private void WebBrowser1_Navigated(object sender, NavigationEventArgs e)
         {
             Debug.WriteLine("Yofi");
+            //Logger.Log("WebBrowser1_Navigated"+e.Uri.ToString(), "---");
         }
 
         private void WebBrowser1_LoadCompleted(object sender, NavigationEventArgs e)
         {
             HTMLDocument doc = WebBrowser1.Document as HTMLDocument;
-            Debug.WriteLine("Completed:url=" + doc.url);
+            //Debug.WriteLine("WebBrowser1_LoadCompleted:url=" + doc.url);
+            //Logger.Log("WebBrowser1_LoadCompleted:url=" + doc.url, "---");
             if (doc.url.EndsWith(@"login/index.php"))
             {
                 doc.getElementById("username").setAttribute("value", "levytami");
@@ -135,6 +145,7 @@ namespace Code_Downloader
                     if (doc.url.EndsWith(last_20_letters))
                     {
                         Debug.WriteLine("Grading...");
+                        Logger.Log("Starting grading loop", hw_name);
                         HTMLTable allTable = (doc.getElementsByClassName("flexible generaltable generalbox")).item(0);
                         for (int r = 0; r < allTable.rows.length; r++)
                         {
@@ -167,7 +178,13 @@ namespace Code_Downloader
                             // check if there is a directry for this id
                             Student stud = Students.students_dic.Where(z => z.Value.email == email).FirstOrDefault().Value;
                             if (stud == null) continue;
-                            if (stud.id != 302840558) continue;
+
+                            // for debug purposes - allows to run for asingle student
+                            if (onlyStudent != null)
+                            {
+                                if (int.Parse(onlyStudent) != stud.id) continue;
+                            }
+
                             String folderPath = hw_path +@"\" + stud.id;
                             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
@@ -216,15 +233,18 @@ namespace Code_Downloader
                             wbc.CookieContainer = cc;
                             wbc.DownloadFile(link_to_file.href, filePath);
 
-
+                            Logger.Log(String.Format("After downloading zip file"), hw_name, stud);
                             // Start testing....
                             Type type = types[j];
                             ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
                             HW0 hw = (HW0)ctor.Invoke(new object[] { });
 
+                            Logger.Log(String.Format("Before hw.BuildProject"), hw_name, stud);
+
                             String resulting_exe_path;
                             if (!hw.BuildProject(filePath, out resulting_exe_path))
                             {
+                                Logger.Log(String.Format("hw.BuildProject failed"), hw_name, stud);
                                 grade_box.setAttribute("value", "30");
                                 remarks_box.setAttribute("value", Compiler.errorReason);
                                 stud.Send_Gmail(String.Format("Your last submission of {0} failed to build!!",hw_name), "Hi - " + stud.first_name + "\nSorry but the last project you uploaded to Moodle failed to build. Compilation error was:\n" + Compiler.errorReason + "\n\n\n. Please check your code and upload again!", new List<String>());
@@ -240,9 +260,12 @@ namespace Code_Downloader
                             // 1) get the specific student values...
                             Object[] args = hw.LoadArgs(stud.id);
 
+                            Logger.Log(String.Format("Before Test_HW"), hw_name, stud);
+
                             RunResults rr = hw.Test_HW(args, resulting_exe_path);
                             grade_box.setAttribute("value", rr.grade.ToString());
 
+                            Logger.Log(String.Format("After Test_HW, rr.grade={0}", rr.grade), hw_name, stud);
                             if (rr.grade == 100)
                             {
                                 remarks_box.setAttribute("value", "Perfect");
@@ -254,6 +277,7 @@ namespace Code_Downloader
                                 stud.Send_Gmail(String.Format("Your last submission of {0} was not correct. It run but did not give exactly the desired output", hw_name), rr.errorsAsSingleString(), rr.filesToAttach);
                             }
 
+                            Logger.Log(String.Format("After gmailing, rr.grade={0}", rr.grade), hw_name, stud);
 
                         } // for (int r = 0; r < allTable.rows.length; r++)
 
