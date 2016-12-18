@@ -16,6 +16,11 @@ namespace HWs_Generator
         static String ClassName;
         static void Main(string[] args)
         {
+
+//            GUI3_Form ff = new GUI3_Form();
+//            ff.ShowDialog();
+//            return;
+
             String excel_file_path = args[0];
             ClassName = Environment.GetCommandLineArgs()[1];
 
@@ -40,33 +45,42 @@ namespace HWs_Generator
                     break;
             }
 
-/*
-            Student tl = new Student();
-            tl.first_name = "תמיר";
-            tl.last_name = "לוי";
-            tl.id = 029046117;
-            tl.email = "tamirlevi123@gmail.com";
-            Students.students_dic = new Dictionary<int, StudentsLib.Student>();
-            Students.students_dic[tl.id] = tl;
+            /*
+                        Student tl = new Student();
+                        tl.first_name = "תמיר";
+                        tl.last_name = "לוי";
+                        tl.id = 029046117;
+                        tl.email = "tamirlevi123@gmail.com";
+                        Students.students_dic = new Dictionary<int, StudentsLib.Student>();
+                        Students.students_dic[tl.id] = tl;
 
-            GUI2 hww = new GUI2();
-            Object[] myargs = hww.get_random_args(tl.id);
-            hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
-            return;
-*/
-            //hww.Create_HW(myargs, false);
-            //hww.SaveArgs(myargs);
-
+                        GUI3 hww = new GUI3();
+                        Object[] myargs = hww.get_random_args(tl.id);
+                        hww.Create_DocFile(myargs);
+                        return;
+            */
 
             foreach (Student stud in Students.students_dic.Values)
             {
-                HW2 hww = new HW2();
+                GUI3 hww = new GUI3();
+                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                Object[] myargs = hww.get_random_args(stud.id);
+                hww.Create_DocFile(myargs);
+                hww.SaveArgs(myargs);
+            }
+            return;
+
+            foreach (Student stud in Students.students_dic.Values)
+            {
+                HW3 hww = new HW3();
                 if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
                 Object[] myargs = hww.get_random_args(stud.id);
                 //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
                 hww.Create_HW(myargs, false);
                 hww.SaveArgs(myargs);
+                Console.Clear();
             }
+
             return;
 
             //Students allStudents = new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
@@ -124,18 +138,6 @@ namespace HWs_Generator
 */
             return;
 
-/*
-            foreach (Student stud in Students.students_dic.Values)
-            {
-                GUI1 hww = new GUI1();
-                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
-                Object[] myargs = hww.get_random_args(stud.id);
-                hww.Create_DocFile_By_Creators(myargs, new List<Creators>());
-                //hww.Create_HW(myargs, false);
-                hww.SaveArgs(myargs);
-            }
-            return;
-*/
 
             //Object[] myargs = hww.LoadArgs(tid);
             //                        String studentOutput = File.ReadAllText(@"D:\Tamir\Netanya_ProgrammingA\2017\Students_Submissions\HW3\29046117\4_10_2016_22_05_extracted\Hw3_Arrays_Mine\bin\Debug\GeneratedInput\student_output.txt");

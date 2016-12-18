@@ -641,10 +641,10 @@ namespace HWs_Generator
             pictures_form.ShowDialog();
         }
 
-        public void add_form_picture(Document wordDoc, Form form)
+        public void add_form_picture(Document wordDoc, Control form)
         {
             Bitmap bmp = new Bitmap(form.Width, form.Height);
-            pictures_form.DrawToBitmap(bmp, new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size));
+            form.DrawToBitmap(bmp, new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size));
             bmp.Save("someimage.bmp");
             FileInfo fin = new FileInfo("someimage.bmp");
             Worder.Replace_to_picture(wordDoc, "XXXX", fin.FullName);

@@ -139,10 +139,10 @@ namespace HWs_Generator
 
         public String getRandomString()
         {
-            String s = "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>?             ";
-            int stringLength = r.Next(1, 20);
+            String s = "1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,._+QWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>?             ";
+            int stringLength = r.Next(5, 10);
             String res = String.Empty;
-            for (int i = 0; i < s.Length; i++) res += s[r.Next(0, s.Length)];
+            for (int i = 0; i < stringLength; i++) res += s[r.Next(0, s.Length)];
             return res;
         }
 

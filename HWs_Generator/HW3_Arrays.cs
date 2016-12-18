@@ -262,6 +262,12 @@ namespace HWs_Generator
 
 
             rr = rr + test1_rr + test2_rr + test3_rr;
+            if (rr.grade < 100)
+            {
+                rr.filesToAttach.Add(studentOutputFile);
+                rr.filesToAttach.Add(BenchmarkOutputFile);
+                rr.filesToAttach.Add(randomInputFile);
+            }
             return rr;
         }
 
@@ -300,8 +306,8 @@ namespace HWs_Generator
 
             par1.Range.Underline = WdUnderline.wdUnderlineSingle;
 
-            par1.Range.Text = String.Format("תאריך הגשה אחרון - 11/12/2016 בשעה 23:55");
-            par1.Range.InsertParagraphAfter();
+//            par1.Range.Text = String.Format("תאריך הגשה אחרון - 11/12/2016 בשעה 23:55");
+//            par1.Range.InsertParagraphAfter();
             par1.Range.Underline = WdUnderline.wdUnderlineNone;
 
             par1.Range.Text = "";

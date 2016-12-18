@@ -32,9 +32,29 @@ namespace StudentsLib
             FileInfo file = new FileInfo(path);
             String extractionPath = file.FullName.Substring(0, file.FullName.Length - 4) + "_extracted";
             // unzipping
-            DirectoryInfo din = Directory.CreateDirectory(extractionPath);
+            //DirectoryInfo din = Directory.CreateDirectory(extractionPath);
             //ZipFile.ExtractToDirectory(path,extractionPath);
 
+            String tempShortPath = @"D:\Tamir\ShortPathDir";
+            if (Directory.Exists(tempShortPath))
+            {
+                Directory.Delete(tempShortPath, true);
+            }
+            String tempShortExtraction = tempShortPath + "//" + file.Name.Substring(0, file.Name.Length - 4) + "_extracted";
+            /*
+                        using (Stream stream = File.OpenRead(path))
+                        {
+                            var reader = ReaderFactory.Open(stream);
+                            while (reader.MoveToNextEntry())
+                            {
+                                if (!reader.Entry.IsDirectory)
+                                {
+                                    //Console.WriteLine(reader.Entry.Key);
+                                    reader.WriteEntryToDirectory(extractionPath, ExtractOptions.ExtractFullPath | ExtractOptions.Overwrite);
+                                }
+                            }
+                        }
+            */
             using (Stream stream = File.OpenRead(path))
             {
                 var reader = ReaderFactory.Open(stream);
@@ -43,16 +63,26 @@ namespace StudentsLib
                     if (!reader.Entry.IsDirectory)
                     {
                         //Console.WriteLine(reader.Entry.Key);
-                        reader.WriteEntryToDirectory(extractionPath, ExtractOptions.ExtractFullPath | ExtractOptions.Overwrite);
+                        reader.WriteEntryToDirectory(tempShortExtraction, ExtractOptions.ExtractFullPath | ExtractOptions.Overwrite);
                     }
                 }
             }
+
+            Directory.Move(tempShortExtraction, extractionPath);
+
+            DirectoryInfo din = new DirectoryInfo(extractionPath);
 
             // clean the obj directory...
             DirectoryInfo[] objDins = din.GetDirectories("obj", SearchOption.AllDirectories);
             if (objDins.Length == 1)
             {
-                Directory.Delete(objDins[0].FullName, true);
+                try {
+                    Directory.Delete(objDins[0].FullName, true);
+                }
+                catch (Exception ee)
+                {
+
+                }
                 Thread.Sleep(1000);
             }
 
@@ -60,7 +90,15 @@ namespace StudentsLib
             DirectoryInfo[] binDins = din.GetDirectories("bin", SearchOption.AllDirectories);
             if (objDins.Length == 1)
             {
-                Directory.Delete(binDins[0].FullName, true);
+                try
+                {
+                    Directory.Delete(binDins[0].FullName, true);
+                }
+                catch (Exception ee)
+                {
+
+                }
+                
                 Thread.Sleep(1000);
             }
 

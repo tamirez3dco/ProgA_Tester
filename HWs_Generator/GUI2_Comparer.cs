@@ -264,6 +264,7 @@ namespace HWs_Generator
             if (s_cb.Text != b_cb.Text)
             {
                 int grade_lost = 10;
+                rr.grade -= grade_lost;
                 rr.error_lines.Add(String.Format("Incorrect text on ComboBox. At phase {1}, expected text=\"{2}\", found text=\"{3}\". Minus {0} points",
                     grade_lost,getTestPhaseDesc(),b_cb.Text,s_cb.Text));
             }
@@ -453,12 +454,24 @@ namespace HWs_Generator
                 PictureBox s_pb = (PictureBox)getSingleVisibleControlByType(students_form, typeof(PictureBox));
                 if (s_pb == null)
                 {
-                    int grade_lost = 15;
+                    int grade_lost = 35;
                     rr.grade -= grade_lost;
                     rr.error_lines.Add("Expected pictureBox was not found.");
                     return false;
                 }
                 i_s = s_pb.Image;
+                if (i_s == null)
+                {
+                    i_s = s_pb.BackgroundImage;
+                    if (i_s == null)
+                    {
+                        int grade_lost = 35;
+                        rr.grade -= grade_lost;
+                        rr.error_lines.Add("Expected image was not found in pictureBox.");
+                        return false;
+
+                    }
+                }
                 PictureBox b_pb = (PictureBox)getSingleVisibleControlByType(benchmark_form, typeof(PictureBox));
                 //i_b = b_pb.Image;
             }

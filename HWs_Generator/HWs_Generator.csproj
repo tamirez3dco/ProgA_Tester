@@ -51,6 +51,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CardControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CardControl.Designer.cs">
+      <DependentUpon>CardControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI1.cs" />
     <Compile Include="GUI2.cs" />
     <Compile Include="GUI2_Comparer.cs">
@@ -58,6 +64,25 @@
     </Compile>
     <Compile Include="GUI2_Comparer.Designer.cs">
       <DependentUpon>GUI2_Comparer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI3.cs" />
+    <Compile Include="GUI3_MegaButtonControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI3_MegaButtonControl.Designer.cs">
+      <DependentUpon>GUI3_MegaButtonControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI3_CardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI3_CardForm.Designer.cs">
+      <DependentUpon>GUI3_CardForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI3_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI3_Form.Designer.cs">
+      <DependentUpon>GUI3_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="HW0.cs" />
     <Compile Include="HW1.cs" />
@@ -67,6 +92,14 @@
     <Compile Include="JAVA0.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SpecialButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -108,9 +141,37 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CardControl.resx">
+      <DependentUpon>CardControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI2_Comparer.resx">
       <DependentUpon>GUI2_Comparer.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GUI3_MegaButtonControl.resx">
+      <DependentUpon>GUI3_MegaButtonControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI3_CardForm.resx">
+      <DependentUpon>GUI3_CardForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI3_Form.resx">
+      <DependentUpon>GUI3_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\club.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\daimond.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\hart.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\spade.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
