@@ -57,6 +57,7 @@
     </Compile>
     <Compile Include="Compiler.cs" />
     <Compile Include="Exceler.cs" />
+    <Compile Include="Geometry.cs" />
     <Compile Include="Imaging.cs" />
     <Compile Include="LevenshteinDistance.cs" />
     <Compile Include="Logger.cs" />

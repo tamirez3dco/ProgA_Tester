@@ -32,6 +32,8 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.NetExceptionCatcherTimer = new System.Windows.Forms.Timer(this.components);
+            this.formLoadTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // button1
@@ -54,6 +56,17 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // NetExceptionCatcherTimer
+            // 
+            this.NetExceptionCatcherTimer.Interval = 500;
+            this.NetExceptionCatcherTimer.Tick += new System.EventHandler(this.NetExceptionCatcherTimer_Tick);
+            // 
+            // formLoadTimer
+            // 
+            this.formLoadTimer.Enabled = true;
+            this.formLoadTimer.Interval = 1000;
+            this.formLoadTimer.Tick += new System.EventHandler(this.formLoadTimer_Tick);
+            // 
             // GUI2_Comparer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -73,5 +86,7 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Timer NetExceptionCatcherTimer;
+        private System.Windows.Forms.Timer formLoadTimer;
     }
 }

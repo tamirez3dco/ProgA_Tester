@@ -42,7 +42,7 @@ namespace HWs_Generator
             use_pictureBox = (bool)args[(int)GUI2_ARGS.USE_PICTUREBOX];
         }
 
-        private void GUI2_Comparer_Load(object sender, EventArgs e)
+        private void DoLoad()
         {
             try
             {
@@ -52,7 +52,7 @@ namespace HWs_Generator
             {
                 MessageBox.Show("What the fuck" + exc.Message);
             }
-            
+
             students_form.StartPosition = FormStartPosition.Manual;
             students_form.DesktopLocation = new Point(100, 100);
             students_form.Text = ((int)args[0]).ToString();
@@ -64,6 +64,11 @@ namespace HWs_Generator
             timer1.Tick += Timer1_Test_On_Show;
             timer1.Interval = 1000;
             timer1.Start();
+        }
+
+        private void GUI2_Comparer_Load(object sender, EventArgs e)
+        {
+            
         }
 
         private List<Control> getControlsByType(Form f, Type type, bool screenVisibilty)
@@ -93,7 +98,7 @@ namespace HWs_Generator
         }
         private void CloseAll()
         {
-
+            //return;
             students_form.Close();
             benchmark_form.Close();
 
@@ -250,6 +255,8 @@ namespace HWs_Generator
             timer1.Stop();
             timer1.Tick -= Timer1_Test_On_Show;
 
+            copyFormsToFiles();
+
             bool closeAll = false;
             s_cb = (ComboBox)getSingleVisibleControlByType(students_form, typeof(ComboBox));
             if (s_cb == null)
@@ -269,7 +276,13 @@ namespace HWs_Generator
                     grade_lost,getTestPhaseDesc(),b_cb.Text,s_cb.Text));
             }
 
-            if (closeAll) CloseAll();
+            if (closeAll)
+            {
+                rr.filesToAttach.Add("student_form.jpg");
+                rr.filesToAttach.Add("benchmark_form.jpg");
+                CloseAll();
+                return;
+            }
 
             timer1.Tick += Timer1_Test_SelectFlag;
             timer1.Interval = 250;
@@ -299,6 +312,7 @@ namespace HWs_Generator
 
             phase = TEST_PHASES.TEST_STARTED_CORRECT;
             testStart = DateTime.Now;
+
             prepareCompare();
 
         }
@@ -389,6 +403,7 @@ namespace HWs_Generator
                     if (stud_c == null)
                     {
                         int grade_lost = 15;
+                        rr.grade -= grade_lost;
                         rr.error_lines.Add(String.Format("Could not locate an (expected to be visible) {2} with text \"{3}\" ! At phase {1}. Minus {0} points",
                             grade_lost, getTestPhaseDesc(), name, c.Text));
                         res = false;
@@ -411,13 +426,21 @@ namespace HWs_Generator
                                 grade_lost, getTestPhaseDesc(), name, stud_c.Text, c.Text));
                             res = false;
                         }
-                        if (c.BackColor.ToArgb() != stud_c.BackColor.ToArgb())
+                        int maxColorDiff = Math.Abs(c.BackColor.R - stud_c.BackColor.R);
+                        maxColorDiff = Math.Max(maxColorDiff,Math.Abs(c.BackColor.G - stud_c.BackColor.G));
+                        maxColorDiff = Math.Max(maxColorDiff, Math.Abs(c.BackColor.B - stud_c.BackColor.B));
+                        //if (c.BackColor.ToArgb() != stud_c.BackColor.ToArgb())
+                        if (maxColorDiff > 20)
                         {
-                            int grade_lost = 5;
-                            rr.grade -= grade_lost;
-                            rr.error_lines.Add(String.Format("The control {2} was found unexpectedly with BackColor={3}. Expected BackColor={4} ! At phase {1}. Minus {0} points",
-                                grade_lost, getTestPhaseDesc(), name, stud_c.BackColor.ToArgb(), c.BackColor.ToArgb()));
-                            res = false;
+                            bool BatElMmo_problem = (c.BackColor == SystemColors.Window && stud_c.BackColor == SystemColors.Control);
+                            if (!BatElMmo_problem)
+                            {
+                                int grade_lost = 5;
+                                rr.grade -= grade_lost;
+                                rr.error_lines.Add(String.Format("The control {2} was found unexpectedly with BackColor={3}. Expected BackColor={4} ! At phase {1}. Minus {0} points",
+                                    grade_lost, getTestPhaseDesc(), name, stud_c.BackColor.ToArgb(), c.BackColor.ToArgb()));
+                                res = false;
+                            }
                         }
                     }
                 }
@@ -720,6 +743,22 @@ namespace HWs_Generator
         private void button2_Click(object sender, EventArgs e)
         {
             CompareAll();
+        }
+
+        private void NetExceptionCatcherTimer_Tick(object sender, EventArgs e)
+        {
+            IntPtr exceptionWindowHandle =  WindowsAPI.FindWindow("Microsoft .NET Framework");
+            if (exceptionWindowHandle  != IntPtr.Zero)
+            {
+                MessageBox.Show("Gotcha");
+            }
+        }
+
+        private void formLoadTimer_Tick(object sender, EventArgs e)
+        {
+            formLoadTimer.Stop();
+            NetExceptionCatcherTimer.Start();
+            DoLoad();
         }
 
         private void Timer1_ClickHint(object sender, EventArgs e)

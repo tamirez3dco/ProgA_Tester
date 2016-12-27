@@ -470,739 +470,110 @@ namespace HWs_Generator
 
         public override RunResults test_Hw_by_assembly(object[] args, FileInfo executable)
         {
-            String chopString = "Chop To Correct";
-            int stud_id = (int)args[0];
-            bool hide_dis_chop_button = (bool)args[(int)GUI2_ARGS.HIDE_DIS_CHOP_BUTTON];
-            bool hide_dis_textBox = (bool)args[(int)GUI2_ARGS.HIDE_DIS_TEXTBOX];
-            bool hide_dis_comboBox = (bool)args[(int)GUI2_ARGS.HIDE_DIS_COMBOBOX];
-            Student stud = Students.students_dic[stud_id];
             RunResults rr = new RunResults();
-            Assembly studentApp = Assembly.LoadFile(executable.FullName);
-            Type[] appTypes = studentApp.GetTypes();
 
-            Directory.SetCurrentDirectory(executable.Directory.FullName);
+            try
+            {
+                String chopString = "Chop To Correct";
+                int stud_id = (int)args[0];
+                bool hide_dis_chop_button = (bool)args[(int)GUI2_ARGS.HIDE_DIS_CHOP_BUTTON];
+                bool hide_dis_textBox = (bool)args[(int)GUI2_ARGS.HIDE_DIS_TEXTBOX];
+                bool hide_dis_comboBox = (bool)args[(int)GUI2_ARGS.HIDE_DIS_COMBOBOX];
+                Student stud = Students.students_dic[stud_id];
 
-            // get flags from file system
-            String baseStr = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-            String flagsPath = baseStr + @"\Flags";
-            DirectoryInfo flagsDin = new DirectoryInfo(flagsPath);
-            foreach (FileInfo f in flagsDin.GetFiles("*.png"))
-            {
-                f.Delete();
-            }
-            do
-            {
-                DirectoryInfo allOptionalFlags = new DirectoryInfo(@"D:\Tamir\Netanya_Desktop_App\2017\Patterns_docs\Flags");
-                foreach (FileInfo f in allOptionalFlags.GetFiles("*.png"))
+                Assembly studentApp = Assembly.LoadFile(executable.FullName);
+                Type[] appTypes = studentApp.GetTypes();
+
+                Directory.SetCurrentDirectory(executable.Directory.FullName);
+
+                // get flags from file system
+                String baseStr = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+                String flagsPath = baseStr + @"\Flags";
+                DirectoryInfo flagsDin = new DirectoryInfo(flagsPath);
+                foreach (FileInfo f in flagsDin.GetFiles("*.png"))
                 {
-                    if (r.Next(0, 3) == 0) f.CopyTo(flagsDin.FullName + @"\" + f.Name);
+                    f.Delete();
                 }
-
-            } while (flagsDin.GetFiles("*.png").Length < 3);
-
-            //studentApp.get
-            if (appTypes.Length < 1)
-            {
-                rr.grade = 30;
-                rr.error_lines.Add("No classes in code");
-                return rr;
-            }
-
-            Type son_form = null;
-            foreach (Type t in appTypes)
-            {
-                Type parent_form = t.BaseType;
-                while (parent_form != null && parent_form != typeof(Object))
-                {
-                    if (parent_form == typeof(System.Windows.Forms.Form))
-                    {
-                        son_form = t;
-                        break;
-                    }
-                    parent_form = parent_form.BaseType;
-                }
-            }
-
-
-            if (son_form == null)
-            {
-                rr.grade = 30;
-                rr.error_lines.Add("No Form derivitive available in code");
-                return rr;
-            }
-
-            Type[] constructor_param_types = { };
-            ConstructorInfo desired_constructor = son_form.GetConstructor(constructor_param_types);
-
-            if (desired_constructor == null)
-            {
-                int grade_lost = 50;
-                rr.grade -= grade_lost;
-                rr.error_lines.Add(String.Format("Could not find the empty constructor. Minus {0} points.", grade_lost));
-                return rr;
-            }
-
-            
-            Object[] constructor_params = { };
-            form_to_run = (Form)desired_constructor.Invoke(constructor_params);
-            GUI2.myForm = form_to_run;
-
-            // get my form
-            Assembly myApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\GUI2_Mine.exe");
-            Type myFormType = myApp.GetType("GUI2_Mine.Form1");
-            Type[] myConsTypes = { args.GetType() };
-            ConstructorInfo my_constructor = myFormType.GetConstructor(myConsTypes);
-            Object[] myParams = { args };
-            Form myForm = (Form)my_constructor.Invoke(myParams);
-
-            GUI2_Comparer comp_form = new GUI2_Comparer(form_to_run, myForm, args, rr);
-            comp_form.ShowDialog();
-
-            return rr;
-            ThreadStart ts = new ThreadStart(run_form_to_run);
-            Thread th = new Thread(ts);
-            th.Start();
-
-            int tries = 10;
-            while (!form_to_run.Visible) Thread.Sleep(1000);
-
-            if (!form_to_run.Visible)
-            {
-                int grade_lost = 50;
-                rr.grade -= grade_lost;
-                rr.error_lines.Add(String.Format("Form was never opened. Minus {0} points.", grade_lost));
-                return rr;
-            }
-
-            if (form_to_run.BackColor != SystemColors.Control)
-            {
-                int grade_cost = 25;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("Wrong Background Color on initial state on form. Expected {0} but found {1}. Minus {2} points.", "SystemColors.Control", form_to_run.BackColor.ToString(), grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-
-            // check that labels are not seen or non existent or that text is empty
-            String labelsText = getAllLabeShowingText();
-            if (labelsText != String.Empty)
-            {
-                int grade_lost = 30;
-                rr.grade -= grade_lost;
-                rr.error_lines.Add(String.Format("When form started found text \"{0}\" in Labels that were supposed to be not showing. Minus {1} points.", labelsText, grade_lost));
-            }
-            // check that combo box shows "Choose a country...";
-            List<Control> comboBoxes = ScreenControlsByType(typeof(ComboBox));
-            if (comboBoxes.Count < 1)
-            {
-                int grade_cost = 35;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("Could not find any ComboBox in your Form. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-            if (comboBoxes.Count > 1)
-            {
-                int grade_cost = 35;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("Found more then one ComboBox in your Form. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-            ComboBox cb = (ComboBox)comboBoxes[0];
-            if (!cb.Visible)
-            {
-                int grade_cost = 35;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("Your ComboBox is not Visible when Form launches. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-            if (!cb.Enabled)
-            {
-                int grade_cost = 35;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("Your ComboBox is not Enabled when Form launches. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-            // check items in combobox
-            ComboBox.ObjectCollection items = cb.Items;
-            FileInfo[] files = flagsDin.GetFiles("*.png");
-            if (files.Length != items.Count)
-            {
-                int grade_cost = 25;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("Number of .png files in Flags directory = {1} != {2} = number of items in ComboBox. Minus {0} points.", grade_cost, files.Length , items.Count));
-                form_to_run.Close();
-                return rr;
-            }
-            foreach (FileInfo f in files)
-            {
-                String name = f.Name.Substring(0, f.Name.Length - f.Extension.Length);
-                if (!items.Contains(name)){
-                    int grade_cost = 25;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("Your ComboBox did not have the expected item \"{0}\". Minus {1} points.", name,grade_cost));
-                    form_to_run.Close();
-                    return rr;
-                }
-            }
-            // make sure that control box is off in the form
-            if (form_to_run.ControlBox)
-            {
-                int grade_cost = 10;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("There should be no ControlBox in the form (Minimize//Maximize//Close). Minus {0} points.", grade_cost));
-            }
-
-
-            // check state of all relevant components...
-            // here only the ComboBox should be visible
-            // lets check ComboBox...
-            String expectedCBText = "Choose a country...";
-            if (cb.Text != expectedCBText)
-            {
-                int grade_cost = 10;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("Your ComboBox did not have the expected text \"{1}\". Instead it was showing \"{2}\". Minus {0} points.", grade_cost, expectedCBText, cb.Text));
-            }
-            // check TextBox
-            // check empty textbox
-            List<Control> visibleTextBoxes = getVisibleControlsByType(typeof(TextBox));
-            if (visibleTextBoxes.Count > 1)
-            {
-                int grade_cost = 20;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("At Form first show, found more then one visible TextBox. Found {1} text boxes. Minus {0} points.", grade_cost, visibleTextBoxes.Count));
-                form_to_run.Close();
-                return rr;
-            }
-            if (visibleTextBoxes.Count == 0 && hide_dis_textBox)
-            {
-                int grade_cost = 20;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("At Form first show, found no visible text box. Expected one disabledtext box. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-            //MessageBox.Show("frfr");
-            if (visibleTextBoxes.Count == 1 && !hide_dis_textBox)
-            {
-                int grade_cost = 20;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("At Form first show, found one visible text box. Expected no visible text box. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-            if (visibleTextBoxes.Count == 1 && visibleTextBoxes[0].Enabled && hide_dis_textBox)
-            {
-                int grade_cost = 20;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("At Form first show, found one visible text box ENABLED. Expected one box DISABLED. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-
-            List<Control> visibleButtons = getVisibleControlsByType(typeof(Button));
-            if (visibleButtons.Count > 1)
-            {
-                int grade_cost = 20;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("At Form first show, found more then one Visible buttons. Minus {0} points.", grade_cost));
-                form_to_run.Close();
-                return rr;
-            }
-            if (visibleButtons.Count == 1)
-            {
-                Button b = (Button)visibleButtons[0];
-                if (b.Text != chopString)
-                {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("At Form first show, found a visible button with text=\"{1}\". Expected text=\"{2}\". Minus {0} points.", grade_cost, b.Text, chopString));
-                    form_to_run.Close();
-                    return rr;
-                }
-                if (b.Enabled)
-                {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("At Form first show, found a visible button with text=\"{1}\" to be ENABLED. Minus {0} points.", grade_cost, b.Text));
-                    form_to_run.Close();
-                    return rr;
-
-                }
-            }
-
-            labelsText = getAllLabeShowingText();
-            if (labelsText.Trim() != String.Empty)
-            {
-                int grade_cost = 20;
-                rr.grade -= grade_cost;
-                rr.error_lines.Add(String.Format("At Form first show, found unexpected labels text saying \"{1}\". Minus {0} points.", grade_cost, labelsText));
-                form_to_run.Close();
-                return rr;
-            }
-
-            
-            
-            bool checkTheHintThing = true;
-            for (tries = 0; tries < 2; tries++)
-            {
-                FileInfo selectedFile;
-                String item;
                 do
                 {
-                    selectedFile = files[r.Next(0, files.Length)];
-                    item = selectedFile.Name.Substring(0, selectedFile.Name.Length - selectedFile.Extension.Length);
-                } while (cb.SelectedItem != null && item == cb.SelectedItem.ToString());
-                
-                cb.SelectedItem = item;
-                DateTime timeBefore = DateTime.Now;
-                //MessageBox.Show("");
-                BlockerForm bf = new BlockerForm(500);
-                bf.ShowDialog();
-
-                String allLabelsText = getAllLabeShowingText();
-/* // gave up on messagesw with 0 time
-                if (allLabelsText != "Your time is:" + 0 + " seconds")
-                {
-                    int grade_cost = 10;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item {1} expected Label to have Text=\"Your time is:0 seconds\". Instead found labels having combined text \"{2}\". Minus {0} points.", grade_cost, item, allLabelsText));
-                }
-*/
-                // check image
-                Image image;
-                bool usePictureBox = (bool)args[(int)GUI2_ARGS.USE_PICTUREBOX];
-                PictureBox correctPB = null;
-                if (usePictureBox)
-                {
-                    List<Control> optionalPictureBoxes = ScreenControlsByType(typeof(PictureBox));
-                    List<Control> visiblePBs = new List<Control>();
-                    foreach (Control c in optionalPictureBoxes)
+                    DirectoryInfo allOptionalFlags = new DirectoryInfo(@"D:\Tamir\Netanya_Desktop_App\2017\Patterns_docs\Flags");
+                    foreach (FileInfo f in allOptionalFlags.GetFiles("*.png"))
                     {
-                        if (!isReallyVisible(c)) continue;
-                        visiblePBs.Add(c);
+                        if (r.Next(0, 3) == 0) f.CopyTo(flagsDin.FullName + @"\" + f.Name);
                     }
-                    
-                    if (visiblePBs.Count < 1)
-                    {
-                        int grade_cost = 25;
-                        rr.grade -= grade_cost;
-                        rr.error_lines.Add(String.Format("After clicking on item {1} expected some visible PictureBox but found none. Minus {0} points.", grade_cost, item));
-                        form_to_run.Close();
-                        return rr;
-                    }
-                    if (visiblePBs.Count > 1)
-                    {
-                        int grade_cost = 25;
-                        rr.grade -= grade_cost;
-                        rr.error_lines.Add(String.Format("After clicking on item {1} expected only single visible PictureBox but found {2}. Minus {0} points.", grade_cost, item, visiblePBs.Count));
-                        form_to_run.Close();
-                        return rr;
-                    }
-                    correctPB = (PictureBox)visiblePBs[0];
-                    GUI2.myPb = correctPB;
-                    image = correctPB.Image;
-                }
-                else
-                {
-                    //MessageBox.Show("1a1a1a");
-                    image = form_to_run.BackgroundImage;
-                }
 
-                //MessageBox.Show(String.Format("use_pb={0}, image.size={1}", usePictureBox, image.Size.ToString()));
-                FileInfo origFile = flagsDin.GetFiles(item + ".png")[0];
-                if (origFile == null) MessageBox.Show("(origFile == null)");
-                Image origBitmap = Image.FromFile(origFile.FullName);
-                if (origBitmap == null) MessageBox.Show("(origBitmap == null)");
-                double similarity = StudentsLib.Imaging.getSimilarity(new Bitmap(image), new Bitmap(origBitmap));
-                if (similarity > 5)
-                {
-                    image.Save("imageFound.png");
-                    FileInfo fin = new FileInfo("imageFound.png");
-                    rr.filesToAttach.Add(fin.FullName);
-                    rr.filesToAttach.Add(selectedFile.FullName);
+                } while (flagsDin.GetFiles("*.png").Length < 3);
 
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" expected different image then found. Expected image is attached in file \"{2}\", image found attached in the file \"{3}\". Minus {0} points.", grade_cost, item, selectedFile.Name, fin.Name));
-                    form_to_run.Close();
+                //studentApp.get
+                if (appTypes.Length < 1)
+                {
+                    rr.grade = 30;
+                    rr.error_lines.Add("No classes in code");
                     return rr;
                 }
 
-                // check empty textbox
-                visibleTextBoxes = getVisibleControlsByType(typeof(TextBox));
-                if (visibleTextBoxes.Count > 1)
+                Type son_form = null;
+                foreach (Type t in appTypes)
                 {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found more then one TextBox. Found {2} text boxes. Minus {0} points.", grade_cost, item, visibleTextBoxes.Count));
-                    form_to_run.Close();
-                    return rr;
+                    Type parent_form = t.BaseType;
+                    while (parent_form != null && parent_form != typeof(Object))
+                    {
+                        if (parent_form == typeof(System.Windows.Forms.Form))
+                        {
+                            son_form = t;
+                            break;
+                        }
+                        parent_form = parent_form.BaseType;
+                    }
                 }
-                if (visibleTextBoxes.Count < 1)
+
+
+                if (son_form == null)
                 {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found no TextBox. Minus {0} points.", grade_cost, item));
-                    form_to_run.Close();
-                    return rr;
-                }
-                TextBox correctTextBox = (TextBox)visibleTextBoxes[0];
-                if (!correctTextBox.Enabled)
-                {
-                    int grade_cost = 15;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After choosing riddle \"{1}\" in round {2}, Text box found unexpectedly disabled with text=\"{3}\". Minus {0} points.", grade_cost, 
-                        item, tries, correctTextBox.Text));
-                    form_to_run.Close();
+                    rr.grade = 30;
+                    rr.error_lines.Add("No Form derivitive available in code");
                     return rr;
                 }
 
-                if (correctTextBox.Text != String.Empty)
+                Type[] constructor_param_types = { };
+                ConstructorInfo desired_constructor = son_form.GetConstructor(constructor_param_types);
+
+                if (desired_constructor == null)
                 {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found TextBox to be not empty. Had the text \"{2}\" Minus {0} points.", grade_cost, item, correctTextBox.Text));
-                    form_to_run.Close();
+                    int grade_lost = 50;
+                    rr.grade -= grade_lost;
+                    rr.error_lines.Add(String.Format("Could not find the empty constructor. Minus {0} points.", grade_lost));
                     return rr;
                 }
 
-                if (cb.Visible && !hide_dis_comboBox)
-                {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found ComboBox to be VISIBLE (not expected). Minus {0} points.", grade_cost, item));
-                    form_to_run.Close();
-                    return rr;
-                }
-                if (!cb.Visible && hide_dis_comboBox)
-                {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found ComboBox to be INVISIBLE (not expected). Minus {0} points.", grade_cost, item));
-                    form_to_run.Close();
-                    return rr;
-                }
-                if (cb.Visible && cb.Enabled && hide_dis_comboBox)
-                {
-                    int grade_cost = 20;
-                    rr.grade -= grade_cost;
-                    rr.error_lines.Add(String.Format("After clicking on item \"{1}\" found ComboBox to be ENABLED (not expected). Minus {0} points.", grade_cost, item));
-                    form_to_run.Close();
-                    return rr;
-                }
 
-                correctTextBox.Select();
-                // start keyboarding
-                while (correctTextBox.Text.ToLower() != item.ToLower())
-                {
-                    // try the click for hint thing...
-                    TimeSpan ts_till_now0 = DateTime.Now - timeBefore;
-                    if (r.Next(0,5) == 0 && checkTheHintThing || correctTextBox.Text.Trim() == String.Empty)
-                    {
-                        String textBefore = correctTextBox.Text;
+                Object[] constructor_params = { };
+                form_to_run = (Form)desired_constructor.Invoke(constructor_params);
+                GUI2.myForm = form_to_run;
 
-                        if (usePictureBox) do_event_control("MouseDown",correctPB);
-                        else do_event_control("MouseDown", form_to_run); 
-                        MySleep(2000);
-                        // check that text box holds the complete word
-                        if (correctTextBox.Text != item)
-                        {
-                            int grade_cost = 15;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("MouseDown on {1} did not change TextBox text to {2} as expected. Instead found text \"{3}\". Minus {0} points.", grade_cost, usePictureBox ? "PictureBox":"Form", item, correctTextBox.Text));
-                            checkTheHintThing = false;
-                        }
-                        //MessageBox.Show("fff");
-                        // check that riddle did not pass to solved state
-                        // check that labels are not too long...
-                        ts_till_now0 = DateTime.Now - timeBefore;
-                        labelsText = getAllLabeShowingText();
-                        String expectedLabelText0 = String.Format("Your time is:{0} seconds", (int)ts_till_now0.TotalSeconds);
-                        //MessageBox.Show("labelsText=" + labelsText);
-                        bool shitty_cond = false;
-                        if (ts_till_now0.TotalSeconds <= 2) shitty_cond = labelsText.Contains("solved");
-                        else shitty_cond = !check_time_labels(labelsText, ts_till_now0, ref rr);  
-                        if (shitty_cond)
-                        {
-                            //MessageBox.Show(ts_till_now0.TotalSeconds.ToString());
-                            int grade_cost = 25;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("MouseDown on {1} caused too much of labels text. When text typed was just \"{2}\", expected labels to have \"{3}\", but instead found \"{4}\". Maybe hint mouse down caused solving ? Minus {0} points.", 
-                                grade_cost, usePictureBox ? "PictureBox" : "Form", textBefore, expectedLabelText0, labelsText));
-                            form_to_run.Close();
-                            return rr;
-                        }
+                // get my form
+                Assembly myApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\GUI2_Mine.exe");
+                Type myFormType = myApp.GetType("GUI2_Mine.Form1");
+                Type[] myConsTypes = { args.GetType() };
+                ConstructorInfo my_constructor = myFormType.GetConstructor(myConsTypes);
+                Object[] myParams = { args };
+                Form myForm = (Form)my_constructor.Invoke(myParams);
 
-                        if (usePictureBox) do_event_control("MouseUp", correctPB);
-                        else do_event_control("MouseUp", form_to_run);
-                        MySleep(2000);
-                        if (correctTextBox.Text != textBefore)
-                        {
-                            int grade_cost = 15;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("MouseUp on {1} did not rechange TextBox text back to {2} as expected. Instead found text \"{3}\". Minus {0} points.", grade_cost, usePictureBox ? "PictureBox" : "Form", textBefore, correctTextBox.Text));
-                            checkTheHintThing = false;
-                        }
-                        ts_till_now0 = DateTime.Now - timeBefore;
-                        labelsText = getAllLabeShowingText();
-                        //String expectedLabelText0 = String.Format("Your time is:{0} seconds", (int)ts_till_now0.TotalSeconds);
-                        //MessageBox.Show("labelsText=" + labelsText);
-                        shitty_cond = false;
-                        if (ts_till_now0.TotalSeconds <= 2) shitty_cond = labelsText.Contains("solved");
-                        else shitty_cond = !check_time_labels(labelsText, ts_till_now0, ref rr);
-                        if (shitty_cond)
-                        {
-                            int grade_cost = 25;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("MouseUp on {1} caused too much of labels text. When text typed was just \"{2}\", expected labels to have \"{3}\", but instead found \"{4}\". Maybe hint mouse down caused solving ? Minus {0} points.",
-                                grade_cost, usePictureBox ? "PictureBox" : "Form", textBefore, expectedLabelText0, labelsText));
-                            form_to_run.Close();
-                            return rr;
-                        }
-                    }
-                    TimeSpan ts_till_now1 = DateTime.Now - timeBefore;
-                    int randomWait;
-                    if (ts_till_now1.Milliseconds < 400)
-                    {
-                        randomWait = r.Next(0, 2) * 1000 + (500 - ts_till_now1.Milliseconds);
-                    }else if (ts_till_now1.Milliseconds > 600)
-                    {
-                        randomWait = 1400 - ts_till_now1.Milliseconds + r.Next(0,200);
-                    }
-                    else
-                    {
-                        randomWait = r.Next(0, 2) * 1000 + r.Next(0, 200);
-                    }
+                GUI2_Comparer comp_form = new GUI2_Comparer(form_to_run, myForm, args, rr);
+                comp_form.ShowDialog();
 
-                    bf = new BlockerForm(randomWait);
-                    bf.ShowDialog();
-
-                    TimeSpan ts_till_now = DateTime.Now - timeBefore;
-                    labelsText = getAllLabeShowingText();
-                    //String expectedLabelText = String.Format("Your time is:{0} seconds", (int)ts_till_now.TotalSeconds);
-                    if ((int)ts_till_now.TotalSeconds > 2)
-                    {
-                        if (!check_time_labels(labelsText, ts_till_now, ref rr))
-                        {
-                            form_to_run.Close();
-                            return rr;
-                        }
-                    }
-
-                    if (!correctTextBox.Enabled)
-                    {
-                        int grade_cost = 15;
-                        rr.grade -= grade_cost;
-                        rr.error_lines.Add(String.Format("After waiting {2} seconds, Text box found unexpectedly disabled with text=\"{1}\". Minus {0} points.", grade_cost, correctTextBox.Text, (int)ts_till_now.TotalSeconds));
-                        form_to_run.Close();
-                        return rr;
-                    }
-                    char nextLetter = getRandomChar(); ;
-                    if (r.Next(0, 10) > 0 && correctTextBox.Text.Length < item.Length)
-                    {
-                        char nextCorrectLetter = item[correctTextBox.Text.Length];
-                        nextLetter = nextCorrectLetter;
-                    }
-                    if (r.Next(0, 2) == 0)
-                    {
-                        nextLetter = nextLetter.ToString().ToUpper()[0];
-                    }
-                    String beforeText = correctTextBox.Text;
-                    String expectedText = beforeText + nextLetter;
-                    if (beforeText.Length > 0 && r.Next(0, 10) == 0)
-                    {
-                        expectedText = beforeText.Substring(0, beforeText.Length - 1);
-                        correctTextBox.Text = expectedText;
-                    }
-                    else
-                    {
-                        correctTextBox.Text += nextLetter;
-                    }
-
-                    MySleep(1000);
-                    DateTime timeAfter = DateTime.Now;
-
-                    // check if textBox has the expected text
-                    if (correctTextBox.Text != expectedText)
-                    {
-                        int grade_cost = 20;
-                        rr.grade -= grade_cost;
-                        rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with textBox.Text={2} after clicking {3} found incorrect text to be {4}. Minus {0} points.", grade_cost, item, beforeText, nextLetter, correctTextBox.Text));
-                        form_to_run.Close();
-                        return rr;
-                    }
-
-                    if (correctTextBox.Text.ToLower() == item.ToLower())
-                    {
-                        // check that riddler is in after solution state
-                        TimeSpan timeDiff = timeAfter - timeBefore;
-                        // check labels strings...
-                        int seconds_passed = timeDiff.Seconds;
-                        String labelsString = getAllLabeShowingText();
-                        bool bool1 = false;
-                        String found1 = String.Empty;
-                        for (int i = seconds_passed-1; i <= seconds_passed+1; i++)
-                        {
-                            String expectedlabel1 = timeStarter + i + " seconds";
-                            if (labelsString.Contains(expectedlabel1))
-                            {
-                                bool1 = true;
-                                found1 = expectedlabel1;
-                            }
-                        }
-
-                        bool bool2 = false;
-                        String found2 = String.Empty;
-                        for (int i = seconds_passed - 1; i <= seconds_passed + 1; i++)
-                        {
-                            String expectedlabel2;
-                            if (i < 10) expectedlabel2 = "Horrey, you solved the word " + item + " in " + i + " seconds";
-                            else if (i < 20) expectedlabel2 = "OK, you solved the word " + item + " in " + i + " seconds";
-                            else expectedlabel2 = "Baasa, you solved the word " + item + " in " + i + " seconds";
-                            if (labelsString.Contains(expectedlabel2))
-                            {
-                                bool2 = true;
-                                found2 = expectedlabel2;
-                            }
-                        }
-
-                        if (!bool1)
-                        {
-                            String expectedlabel1 = timeStarter + seconds_passed + " seconds";
-                            int grade_cost = 15;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - could not find timer label with text \"{2}\". Combined text on visible labels found is {3}. Minus {0} points.", grade_cost, item, expectedlabel1, getAllLabeShowingText()));
-                            form_to_run.Close();
-                            return rr;
-                        }
-                        if (!bool2)
-                        {
-                            String expectedlabel2;
-                            if (seconds_passed < 10) expectedlabel2 = "Horrey, you solved the word " + item + " in " + seconds_passed + " seconds";
-                            else if (seconds_passed < 20) expectedlabel2 = "OK, you solved the word " + item + " in " + seconds_passed + " seconds";
-                            else expectedlabel2 = "Baasa, you solved the word " + item + " in " + seconds_passed + " seconds";
-
-                            int grade_cost = 15;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - could not find anouncement label with text \"{2}\". Combined text on visible labels found is {3}. Minus {0} points.", grade_cost, item, expectedlabel2, getAllLabeShowingText()));
-                            form_to_run.Close();
-                            return rr;
-                        }
-                        labelsString = labelsString.Replace(found2, String.Empty);
-                        labelsString = labelsString.Replace(found1, String.Empty);
-                        if (labelsString.Trim() != String.Empty)
-                        {
-                            int grade_cost = 15;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - found unexpected labels text = \"{2}\". Minus {0} points.", grade_cost, item, labelsString));
-                            form_to_run.Close();
-                            return rr;
-                        }
-                        if (!cb.Enabled || !cb.Visible)
-                        {
-                            int grade_cost = 15;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - found ComboBox not showing or not enabled. Minus {0} points.", grade_cost, item));
-                            form_to_run.Close();
-                            return rr;
-                        }
-/*
-                        if (!correctTextBox.Visible || correctTextBox.Enabled)
-                        {
-                            int grade_cost = 15;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After solving correctly riddle \"{1}\" - found textbox not showing or not disabled. Minus {0} points.", grade_cost, item));
-                            form_to_run.Close();
-                            return rr;
-                        }
-*/
-                    }
-
-                    //MessageBox.Show("111");
-
-                    //correct - check that textBox background is white, that correction is enabled/shown
-                    if (item.ToLower().StartsWith(correctTextBox.Text.ToLower()))
-                    {
-                        if (correctTextBox.BackColor != Color.White)
-                        {
-                            int grade_cost = 20;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with correct textBox.Text=\"{2}\" found TextBox background to be not White - but {3}. Minus {0} points.", grade_cost, item, correctTextBox.Text, correctTextBox.BackColor.ToString()));
-                            form_to_run.Close();
-                            return rr;
-
-                        }
-                        Control chopButton = ScreenControlsByText(form_to_run.Controls, chopString);
-                        if (hide_dis_chop_button)
-                        {
-                            if (chopButton == null || !chopButton.Visible || chopButton.Enabled)
-                            {
-                                int grade_cost = 20;
-                                rr.grade -= grade_cost;
-                                rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with correct textBox.Text=\"{2}\" found chopButton to be Enabled or !Visible or null !. Minus {0} points.", grade_cost, item, correctTextBox.Text));
-                                form_to_run.Close();
-                                return rr;
-                            }
-                        }
-                        else
-                        {
-                            if (chopButton != null && chopButton.Visible)
-                            {
-                                int grade_cost = 20;
-                                rr.grade -= grade_cost;
-                                rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with correct textBox.Text=\"{2}\" found chopButton to be Visible !. Minus {0} points.", grade_cost, item, correctTextBox.Text));
-                                form_to_run.Close();
-                                return rr;
-                            }
-                        }
-                    }
-                    else // not correct - check that textBox background is red, that correction is enabled/shown
-                    {
-                        if (correctTextBox.BackColor != Color.Red)
-                        {
-                            int grade_cost = 20;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with incorrect textBox.Text=\"{2}\" found TextBox background to be not Red - but {3}. Minus {0} points.", grade_cost, item, correctTextBox.Text, correctTextBox.BackColor.ToString()));
-                            form_to_run.Close();
-                            return rr;
-
-                        }
-                        Control chopButton = ScreenControlsByText(form_to_run.Controls, chopString);
-                        if (chopButton == null || !chopButton.Visible)
-                        {
-                            int grade_cost = 20;
-                            rr.grade -= grade_cost;
-                            rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with incorrect textBox.Text=\"{2}\" found chopButton to be not Visible !. Minus {0} points.", grade_cost, item, correctTextBox.Text));
-                            form_to_run.Close();
-                            return rr;
-                        }
-
-                        String textBeforeClick = correctTextBox.Text;
-                        if (r.Next(0, 4) == 0)
-                        {
-                            click_control(chopButton);
-                            MySleep(1000);
-
-                            if (!item.ToLower().StartsWith(correctTextBox.Text.ToLower()))
-                            {
-                                int grade_cost = 20;
-                                rr.grade -= grade_cost;
-                                rr.error_lines.Add(String.Format("After clicking on item \"{1}\" and with incorrect textBox.Text=\"{2}\" and then after clicking the chop button found unexpected text in text box=\"{3}\". Minus {0} points.", grade_cost, item, textBeforeClick, correctTextBox.Text));
-                                form_to_run.Close();
-                                return rr;
-                            }
-                        }
-                    }
-                }
+                return rr;
 
             }
-            form_to_run.Close();
-            return rr;
+            catch (Exception exc)
+            {
+                MessageBox.Show(exc.Message);
+                int gradeLost = 40;
+                Logger.Log("Got excpetion on checking. " + exc.Message,this.GetType().Name);
+                rr.grade -= gradeLost;
+                rr.error_lines.Add(String.Format("Recieved the following exception when trying to check your work:{0}",exc.Message));
+                return rr;
+            }
         }
 
         private void add_stack_frame(RunResults rr)

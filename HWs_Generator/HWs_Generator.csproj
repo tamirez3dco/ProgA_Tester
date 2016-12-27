@@ -66,6 +66,12 @@
       <DependentUpon>GUI2_Comparer.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI3.cs" />
+    <Compile Include="GUI3_GateButton_Comparer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI3_GateButton_Comparer.Designer.cs">
+      <DependentUpon>GUI3_GateButton_Comparer.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI3_MegaButtonControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -146,6 +152,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI2_Comparer.resx">
       <DependentUpon>GUI2_Comparer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI3_GateButton_Comparer.resx">
+      <DependentUpon>GUI3_GateButton_Comparer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI3_MegaButtonControl.resx">
       <DependentUpon>GUI3_MegaButtonControl.cs</DependentUpon>

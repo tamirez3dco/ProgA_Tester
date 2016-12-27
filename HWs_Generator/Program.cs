@@ -59,7 +59,7 @@ namespace HWs_Generator
                         hww.Create_DocFile(myargs);
                         return;
             */
-
+/*
             foreach (Student stud in Students.students_dic.Values)
             {
                 GUI3 hww = new GUI3();
@@ -69,10 +69,10 @@ namespace HWs_Generator
                 hww.SaveArgs(myargs);
             }
             return;
-
+*/
             foreach (Student stud in Students.students_dic.Values)
             {
-                HW3 hww = new HW3();
+                HW4 hww = new HW4();
                 if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
                 Object[] myargs = hww.get_random_args(stud.id);
                 //hww.Create_DocFile_By_Creators(myargs, new List<Creators>());

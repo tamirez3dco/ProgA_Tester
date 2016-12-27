@@ -80,6 +80,7 @@ namespace Code_Downloader
                     typeToLinkDict[typeof(HW1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=148355&action=grading";
                     typeToLinkDict[typeof(HW2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=149318&action=grading";
                     typeToLinkDict[typeof(HW3)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=150134&action=grading";
+                    typeToLinkDict[typeof(HW4)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=150507&action=grading";
                     break;
                 case "Java1_2017_Highschool":
                     students = new Students(@"D:\Tamir\Netanya_Java_1\2017\Highschool\Highschool_Class.xlsx");
@@ -263,6 +264,7 @@ namespace Code_Downloader
 
                             Logger.Log(String.Format("Before Test_HW"), hw_name, stud);
 
+
                             RunResults rr = hw.Test_HW(args, resulting_exe_path);
                             grade_box.setAttribute("value", rr.grade.ToString());
 
@@ -275,7 +277,7 @@ namespace Code_Downloader
                             else
                             {
                                 remarks_box.setAttribute("value", rr.errorsAsSingleString());
-                                stud.Send_Gmail(String.Format("Your last submission of {0} was not correct. It run but did not give exactly the desired output", hw_name), rr.errorsAsSingleString(), rr.filesToAttach);
+                                stud.Send_Gmail(String.Format("Your (id={1}) last submission of {0} was not correct (Grade={2}). It run but did not give exactly the desired output", hw_name,stud.id,rr.grade), rr.errorsAsSingleString(), rr.filesToAttach);
                             }
 
                             Logger.Log(String.Format("After gmailing, rr.grade={0}", rr.grade), hw_name, stud);

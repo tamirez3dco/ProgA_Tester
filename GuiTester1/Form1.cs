@@ -94,5 +94,17 @@ namespace GuiTester1
             //                MessageBox.Show("2");
 
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+            GUI3 hww = new GUI3();
+            int tid = 029046117;
+            Object[] thw_args = hww.LoadArgs(tid);
+            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe"));
+            MessageBox.Show(rr.ToString());
+
+
+        }
     }
 }

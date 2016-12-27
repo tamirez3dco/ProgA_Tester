@@ -126,7 +126,7 @@ namespace HWs_Generator
 
     }
 
-    enum SIDE
+    public enum SIDE
     {
         UP,
         DOWN,

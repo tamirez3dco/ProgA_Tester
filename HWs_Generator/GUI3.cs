@@ -8,11 +8,45 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Reflection;
 
 namespace HWs_Generator
 {
-    class GUI3 : GUI2
+    public class GUI3 : GUI2
     {
+        public override RunResults test_Hw_by_assembly(object[] args, FileInfo executable)
+        {
+            RunResults rr = new RunResults();
+
+            try
+            {
+                int stud_id = (int)args[0];
+                Student stud = Students.students_dic[stud_id];
+
+                Assembly studentApp = Assembly.LoadFile(executable.FullName);
+                Directory.SetCurrentDirectory(executable.Directory.FullName);
+
+
+                // get my form
+                Assembly myApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe");
+                GUI3_GateButton_Comparer comp_form = new GUI3_GateButton_Comparer(studentApp,myApp,args, rr);
+                comp_form.ShowDialog();
+
+                return rr;
+
+            }
+            catch (Exception exc)
+            {
+                int gradeLost = 40;
+                Logger.Log("Got excpetion on checking. " + exc.Message, this.GetType().Name);
+                rr.grade -= gradeLost;
+                rr.error_lines.Add(String.Format("Recieved the following exception when trying to check your work:{0}", exc.Message));
+                return rr;
+            }
+
+        }
+
         public override void Create_DocFile(object[] args)
         {
             int id = (int)(args[0]);

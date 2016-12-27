@@ -131,22 +131,6 @@ namespace HWs_Generator
 
             par1.Range.Text = "זיכרו כי, בשלב הזה של הקורס, כל הפונקציות שתכתבו יהיו static.";
             par1.Range.InsertParagraphAfter();
-            
-            /*
-                        par1.Range.Text = "לפני כל סעיף אבקש להדפיס שורה של 10 כוכביות ומספר הסעיף. לדוגמא, לפני הביצוע של סעיף 3 יש להדפיס את השורה:";
-                        par1.Range.InsertParagraphAfter();
-                        par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
-                        par1.Range.Text = "3**********";
-                        par1.Range.InsertParagraphAfter();
-                        par1.Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphRight;
-                        par1.Range.Text = "אם לא ברור, ניתן להסתכל בדוגמת הפלט הנדרש בסוף המסמך.";
-                        par1.Range.InsertParagraphAfter();
-
-                        par1.Range.Underline = WdUnderline.wdUnderlineSingle;
-            */
-            par1.Range.Text = String.Format("תאריך הגשה אחרון - 11/12/2016 בשעה 23:55");
-            par1.Range.InsertParagraphAfter();
-            par1.Range.Underline = WdUnderline.wdUnderlineNone;
 
             par1.Range.Text = "";
             par1.Range.InsertParagraphAfter();
@@ -209,7 +193,13 @@ namespace HWs_Generator
             RunResults rr4 = test_Q4(args, t);
             RunResults rr5 = test_Q5(args, t);
             RunResults rr1 =  test_Q1(args, t);
+            rr = rr1 + rr2 + rr3 + rr4 + rr5;
             return rr;
+        }
+
+        public override RunResults Test_HW(object[] args, string resulting_exe_path)
+        {
+            return test_Hw_by_assembly(args, new FileInfo(resulting_exe_path));
         }
 
         static MethodInfo method_to_run;
@@ -240,7 +230,15 @@ namespace HWs_Generator
             ThreadStart ts = new ThreadStart(ActualMethodWrapper);
             Thread t = new Thread(ts);
             t.Start();
-            Thread.Sleep(milliseconds);
+            int millisElapsed = 0;
+            int millisStep = 300;
+            do
+            {
+                Thread.Sleep(millisStep);
+                if (!t.IsAlive) break;
+                millisElapsed += millisStep;
+            } while (millisElapsed <= milliseconds);
+            //Thread.Sleep(milliseconds);
             if (t.IsAlive)
             {
                 t.Abort();
@@ -337,11 +335,18 @@ namespace HWs_Generator
             }
 
             
-            for (int test = 0; test < 50; test++)
+            for (int test = 0; test < 20; test++)
             {
                 Object[] test_params = new Object[1];
                 Double test_radious = r.NextDouble() * 100;
                 test_params[0] = test_radious;
+
+                if (!VerifyMethodEndsOnTime(m1, test_params, 5000, rr))
+                {
+                    return rr;
+                }
+
+
                 Double retValue = (Double)m1.Invoke(null, test_params);
 
                 Double expected_ret_value = Q1(args,test_radious);
@@ -354,6 +359,24 @@ namespace HWs_Generator
                 }
             }
             return rr;
+        }
+
+        private bool VerifyMethodEndsOnTime(MethodInfo m, object[] test_params, int millisTimeout, RunResults rr)
+        {
+            HW4.method_to_run = m;
+            HW4.method_params_to_run = test_params;
+            bool completed = CallTimedOutMethod(millisTimeout);
+            if (!completed)
+            {
+                int grade_lost = 15;
+                rr.grade -= grade_lost;
+                rr.error_lines.Add("Method \"" + m.Name + "\" did not complete in 10 seconds !! for params:" + ". Minus " + grade_lost + " points");
+                for (int i = 0; i < HW4.method_to_run.GetParameters().Count(); i++)
+                {
+                    rr.error_lines.Add(String.Format("ParamName=\"{0}\" , ParamValue=\"{1}\"", HW4.method_to_run.GetParameters().ElementAt(i).Name, test_params[i]));
+                }
+            }
+            return completed;
         }
 
         MethodInfo q2_method = null;
@@ -423,7 +446,7 @@ namespace HWs_Generator
             }
 
 
-            for (int test = 0; test < 50; test++)
+            for (int test = 0; test < 20; test++)
             {
                 Object[] test_params = new Object[2];
                 int path_length = r.Next(1, 50);
@@ -438,14 +461,21 @@ namespace HWs_Generator
                 test_params[0] = Xs;
                 test_params[1] = Ys;
 
-                HW4.method_to_run = m2;
-                HW4.method_params_to_run = test_params;
-                bool completed = CallTimedOutMethod(10000);
-                if (!completed)
+                /*
+                                HW4.method_to_run = m2;
+                                HW4.method_params_to_run = test_params;
+                                bool completed = CallTimedOutMethod(10000);
+                                if (!completed)
+                                {
+                                    int grade_lost = 15;
+                                    rr.grade -= grade_lost;
+                                    rr.error_lines.Add("Method \"" + method_name + "\" did not complete in 10 seconds !! for params: Xs={" + StringfromDoubleArray(Xs) + "}, Ys={" + StringfromDoubleArray(Ys) + "}. Minus " + grade_lost + " points");
+                                    return rr;
+                                }
+                */
+
+                if (!VerifyMethodEndsOnTime(m2, test_params, 5000, rr))
                 {
-                    int grade_lost = 15;
-                    rr.grade -= grade_lost;
-                    rr.error_lines.Add("Method \"" + method_name + "\" did not complete in 10 seconds !! for params: Xs={" + StringfromDoubleArray(Xs) + "}, Ys={" + StringfromDoubleArray(Ys) + "}. Minus " + grade_lost + " points");
                     return rr;
                 }
 
@@ -648,13 +678,13 @@ stam1:i=10
 
                 String studentAnswer = File.ReadAllText(q5_fileResult);
 
-                RunResults temp_rr = Test_Text(args, expectedAnswer, studentAnswer, "Q4");
+                RunResults temp_rr = Test_Text(args, expectedAnswer, studentAnswer, "Q5", true);
 
                 if (temp_rr.grade < 100)
                 {
                     int actual_points_lost = Math.Min(15, temp_rr.Grade_Lost);
                     rr.grade -= actual_points_lost;
-                    rr.error_lines.Add(String.Format("Your Q4 was not correct. System will not tell you exactly where you got it wrong. Should have lost {0} points. Deducting only {1} points",temp_rr.Grade_Lost, actual_points_lost));
+                    rr.error_lines.Add(String.Format("Your Q5 was not correct. System will not tell you exactly where you got it wrong. Should have lost {0} points. Deducting only {1} points",temp_rr.Grade_Lost, actual_points_lost));
                     rr.error_lines.Add(String.Format("However, system can advise that you had {0} missing lines, {1} minor lines diffs, {2} major line diffs, {3} extra non-blank lines and {4} extra blank//empty lines",
                         temp_rr.changes_counter[(int)TextDiffs.Missing], temp_rr.changes_counter[(int)TextDiffs.Modified_Minor], temp_rr.changes_counter[(int)TextDiffs.Modified_Major], temp_rr.changes_counter[(int)TextDiffs.Extra_line], temp_rr.changes_counter[(int)TextDiffs.Extra_blanks]+ temp_rr.changes_counter[(int)TextDiffs.Extra_Empty]));
                 }
@@ -947,7 +977,7 @@ stam1:i=10
             }
 
 
-            for (int test = 0; test < 50; test++)
+            for (int test = 0; test < 20; test++)
             {
                 Object[] test_params = new Object[4];
                 Double test_x1 = r.NextDouble() * 100;
@@ -959,6 +989,30 @@ stam1:i=10
                 test_params[params_placer["x2"]] = test_x2;
                 test_params[params_placer["y2"]] = test_y2;
 
+                if (!VerifyMethodEndsOnTime(m2, test_params, 5000, rr))
+                {
+                    return rr;
+                }
+/*
+                HW4.method_to_run = m2;
+                HW4.method_params_to_run = test_params;
+                bool completed = CallTimedOutMethod(10000);
+                if (!completed)
+                {
+                    int grade_lost = 15;
+                    rr.grade -= grade_lost;
+                    String tempErrorLine = "Method \"" + method_name + "\" did not complete in 10 seconds !! for params:";
+                    for (int i = 0; i < HW4.method_to_run.GetParameters().Count(); i++)
+                    {
+                        tempErrorLine += String.Format("ParamName=\"{0}\"", HW4.method_to_run.GetParameters().ElementAt(i).Name);
+                        tempErrorLine += String.Format("ParamValue=\"{0}\"", test_params[i]);
+                    }
+                    tempErrorLine += ". Minus " + grade_lost + " points";
+                    rr.error_lines.Add(tempErrorLine);
+                    return rr;
+                }
+*/
+
                 Double retValue = (Double)m2.Invoke(null, test_params);
 
                 Double expected_ret_value = Q2(args, test_x1, test_y1, test_x2, test_y2);
@@ -966,7 +1020,7 @@ stam1:i=10
                 {
                     int grade_lost = 10;
                     rr.grade -= grade_lost;
-                    rr.error_lines.Add(String.Format("Method \"{0}\" returned wrong value for params: x1={1}, y1={2}, x2={3}, y2={4}. Expected value of {5} and actually returned value {6}. Minus {4} points",
+                    rr.error_lines.Add(String.Format("Method \"{0}\" returned wrong value for params: x1={1}, y1={2}, x2={3}, y2={4}. Expected value of {5} and actually returned value {6}. Minus {7} points",
                         m2.Name, test_x1,test_y1,test_x2,test_y2, expected_ret_value, retValue, grade_lost));
                     return rr;
                 }

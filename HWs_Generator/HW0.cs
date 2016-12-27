@@ -14,6 +14,8 @@ using System.Threading;
 using DiffPlex.DiffBuilder;
 using DiffPlex;
 using DiffPlex.DiffBuilder.Model;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace HWs_Generator
 {
@@ -87,6 +89,7 @@ namespace HWs_Generator
             Object[] res = new Object[tokens.Length];
             for (int i = 0; i < tokens.Length; i++)
             {
+                //if (Color.parse)
                 try
                 {
                     res[i] = int.Parse(tokens[i]);
@@ -98,6 +101,7 @@ namespace HWs_Generator
             }
             return res;
         }
+
 
         public void print_square(int size)
         {
@@ -124,9 +128,22 @@ namespace HWs_Generator
 
         public virtual Object[] LoadArgs(int id)
         {
-            String studentArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.txt";
-            String readText = File.ReadAllText(studentArgsFilePath);
-            return ObjArrayFromString(readText);
+            String studenBinarytArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.bin";
+            if (File.Exists(studenBinarytArgsFilePath))
+            {
+                IFormatter formatter = new BinaryFormatter();
+                object[] objs;
+                using (Stream stream = new FileStream(studenBinarytArgsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)){
+                     objs = (object[])formatter.Deserialize(stream);
+                }
+                return objs;
+            }
+            else
+            {
+                String studentArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.txt";
+                String readText = File.ReadAllText(studentArgsFilePath);
+                return ObjArrayFromString(readText);
+            }
         }
 
         public void SaveArgs(Object[] args)
@@ -134,7 +151,15 @@ namespace HWs_Generator
             int id = (int)(args[0]);
             String studentArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.txt";
             if (File.Exists(studentArgsFilePath)) File.Delete(studentArgsFilePath);
-            File.WriteAllText(studentArgsFilePath,StringfromObjArray(args));
+            File.WriteAllText(studentArgsFilePath, StringfromObjArray(args));
+
+            String studentBinaryArgsFilePath = Students_Hws_dirs + "\\" + id.ToString() + "_args.bin";
+            if (File.Exists(studentBinaryArgsFilePath)) File.Delete(studentBinaryArgsFilePath);
+            IFormatter formatter = new BinaryFormatter();
+            using (Stream stream = new FileStream(studentBinaryArgsFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                formatter.Serialize(stream, args);
+            }
         }
 
         public String getRandomString()
@@ -212,9 +237,12 @@ namespace HWs_Generator
         }
 
 
-        public virtual RunResults Test_Text(Object[] args, String expectedText, String studentText, String prefix)
+        public virtual RunResults Test_Text(Object[] args, String expectedText, String studentText, String prefix, bool ignreInnerSpaces)
         {
             RunResults rr = new RunResults();
+            String[] tokenizer = { "\n" };
+            String[] tempExpected = expectedText.Split(tokenizer,StringSplitOptions.None);
+            String[] tempStudent = studentText.Split(tokenizer, StringSplitOptions.None);
 
             SideBySideDiffBuilder diffBuilder = new SideBySideDiffBuilder(new Differ());
             var model = diffBuilder.BuildDiffModel(expectedText ?? string.Empty, studentText ?? string.Empty);
@@ -230,6 +258,13 @@ namespace HWs_Generator
                     case ChangeType.Modified:
                         // check if minor diff
 
+                        if (ignreInnerSpaces)
+                        {
+                            if (dp.Text.ToLower().Replace(" ","") == model.OldText.Lines[i].Text.ToLower().Replace(" ", ""))
+                            {
+                                continue;
+                            }
+                        }
                         bool minorDiff = (dp.Text.ToLower().Trim() == model.OldText.Lines[i].Text.ToLower().Trim());
                         if (minorDiff)
                         {

@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -164,73 +166,59 @@ namespace StamConsoleTester
         {
             System.Windows.Forms.Application.Run(formtoshow);
         }
+
+        public static Object[] ObjArrayFromString_GUI3(String s)
+        {
+            String[] tokeenizer = { "," };
+            String[] tokens = s.Split(tokeenizer, StringSplitOptions.RemoveEmptyEntries);
+            Object[] res = new Object[tokens.Length];
+            res[(int)GUI3_ARGS.ID] = int.Parse(tokens[(int)GUI3_ARGS.ID]);
+            String colorStr = tokens[(int)GUI3_ARGS.GATE_DIS_COLOR];
+            String[] tokenizer = { "[", " ", "]" };
+            String[] miniTokens = colorStr.Split(tokenizer, StringSplitOptions.RemoveEmptyEntries);
+            res[(int)GUI3_ARGS.GATE_DIS_COLOR] = Color.FromName(miniTokens[1]);
+            res[(int)GUI3_ARGS.GATE_BUTTON_SIDE] = Enum.Parse(typeof(SIDE),tokens[(int)GUI3_ARGS.GATE_BUTTON_SIDE]);
+            res[(int)GUI3_ARGS.GATE_PIX_WIDTH] = int.Parse(tokens[(int)GUI3_ARGS.GATE_PIX_WIDTH]);
+            res[(int)GUI3_ARGS.MEGA_PATTERN] = int.Parse(tokens[(int)GUI3_ARGS.MEGA_PATTERN]);
+            return res;
+        }
+
+        static private void doshit(String s)
+        {
+            s = s + "w";
+        }
         static void Main(string[] args)
         {
 /*
-            double simi = Imaging.getSimilarity(
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Sweeden.png")));
-            simi = Imaging.getSimilarity(
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Spain.png")));
-            simi = Imaging.getSimilarity(
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Brasil.png")));
-            simi = Imaging.getSimilarity(
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Canada.png")));
-            simi = Imaging.getSimilarity(
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Great Britain.png")));
-            simi = Imaging.getSimilarity(
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\United States.png")));
-            simi = Imaging.getSimilarity(
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\bin\Debug\System.Windows.Forms.PictureBox.png")),
-                new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI2_Mine\GUI2_Mine\Flags\Israel.png")));
+            new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
+            HW4 hww = new HW4();
+            int tid = 301763967;
+            Object[] thw_args = hww.LoadArgs(tid);
+            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(
+                @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI2\301763967\23_12_2016_10_00_extracted\HW2\HW2\bin\Debug\HW2.exe"));
+            MessageBox.Show(rr.ToString());
+            MessageBox.Show(rr.ToString());
+            return;
 */
-            //String res_path;
-            //Compiler.BuildZippedProject(@"D:\Tamir\Temp\WindowsFormsApplication1.7z", out res_path);
-
-
-
+                        new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+                        GUI3 hww = new GUI3();
+                        int tid = 301763967;
+                        //String resulting_exe_path;
+                        //Compiler.BuildZippedProject(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\312441710\13_11_2016_14_37.zip", out resulting_exe_path);
+                        //Object[] thw_args = hww.get_random_args(tid);
+                        Object[] thw_args = hww.LoadArgs(tid);
+                        RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe"));
+                        MessageBox.Show(rr.ToString());
+                        MessageBox.Show(rr.ToString());
+                        return;
             /*
-                        Console.ReadKey();
-                        test3();
+                        Students students = new Students();
+                        int tid = 317883007;
+                        HW2 hww = new HW2();
+                        Object[] myargs = hww.LoadArgs(tid);
+                        RunResults rr = hww.Test_HW(myargs, @"D:\Tamir\Temp\14_10_2016_21_43_extracted\ConsoleApplication3\ConsoleApplication3\bin\Debug\ConsoleApplication3.exe");
                         return;
             */
-            /*
-                        while (true)
-                        {
-                            INPUT[] inputs = new INPUT[2];
-                            inputs[0].type = (int)(WindowsAPI.MOUSEEVENTF_LEFTDOWN | WindowsAPI.MOUSEEVENTF_ABSOLUTE | WindowsAPI.MOUSEEVENTF_LEFTUP);
-                            inputs[0].mi.dx = 100;
-                            inputs[0].mi.dy = 100;
-                            WindowsAPI.SendInput(1, inputs, System.Runtime.InteropServices.Marshal.SizeOf(inputs[0]));
-            DoMouseClick(100, 100);
-                Thread.Sleep(7000);
-            }
-            */
-            new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
-            GUI2 hww = new GUI2();
-            int tid = 66117466;
-            //String resulting_exe_path;
-            //Compiler.BuildZippedProject(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\312441710\13_11_2016_14_37.zip", out resulting_exe_path);
-            //Object[] thw_args = hww.get_random_args(tid);
-            Object[] thw_args = hww.LoadArgs(tid);
-            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Temp\temp3\1_12_2016_05_15_extracted\HW2\HW2\bin\Debug\HW2.exe"));
-            MessageBox.Show(rr.ToString());
-            MessageBox.Show(rr.ToString());
-            return;
-
-/*
-            Students students = new Students();
-            int tid = 317883007;
-            HW2 hww = new HW2();
-            Object[] myargs = hww.LoadArgs(tid);
-            RunResults rr = hww.Test_HW(myargs, @"D:\Tamir\Temp\14_10_2016_21_43_extracted\ConsoleApplication3\ConsoleApplication3\bin\Debug\ConsoleApplication3.exe");
-            return;
-*/
             //testSomething();
             //return;
 
@@ -243,9 +231,9 @@ namespace StamConsoleTester
             StudentsLib.Students.students_dic[tl.id] = tl;
             //StudentsLib.Students
             FileInfo fin = new FileInfo(@"D:\Tamir\Netanya_ProgrammingA\2017\TempSolutions\HW4_Mine\HW4_Mine\bin\Debug\HW4_Mine.exe");
-            HW4 hw4 = new HW4();
-            Object[] myargs = hw4.LoadArgs(tl.id);
-            hw4.test_Hw_by_assembly(myargs, fin);
+            GUI3 hw = new GUI3();
+            Object[] myargs = hw.LoadArgs(tl.id);
+            RunResults rr4 = hw.test_Hw_by_assembly(myargs, fin);
             //Object[] argsTest = hw4.get_random_args(tl.id);
             //hw3.Create_DocFile_By_Creators(argsTest, new List<Creators>());
 
