@@ -189,18 +189,30 @@ namespace StamConsoleTester
         }
         static void Main(string[] args)
         {
+            /*
+                        new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
+                        HW4 hww = new HW4();
+                        int tid = 301763967;
+                        Object[] thw_args = hww.LoadArgs(tid);
+                        RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(
+                            @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI2\301763967\23_12_2016_10_00_extracted\HW2\HW2\bin\Debug\HW2.exe"));
+                        MessageBox.Show(rr.ToString());
+                        MessageBox.Show(rr.ToString());
+                        return;
+            */
 /*
-            new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
-            HW4 hww = new HW4();
-            int tid = 301763967;
-            Object[] thw_args = hww.LoadArgs(tid);
-            RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(
-                @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI2\301763967\23_12_2016_10_00_extracted\HW2\HW2\bin\Debug\HW2.exe"));
-            MessageBox.Show(rr.ToString());
-            MessageBox.Show(rr.ToString());
-            return;
+            String tempBin = @"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\results.bin";
+            if (File.Exists(tempBin))
+            {
+                IFormatter formatter = new BinaryFormatter();
+                List<GUI3_GateButton_Comparer.GuiResults> ress;
+                using (Stream stream = new FileStream(tempBin, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    ress = (List<GUI3_GateButton_Comparer.GuiResults>)formatter.Deserialize(stream);
+                }
+            }
 */
-                        new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+                new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
                         GUI3 hww = new GUI3();
                         int tid = 301763967;
                         //String resulting_exe_path;

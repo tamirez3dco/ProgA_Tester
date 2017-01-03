@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace HWs_Generator
 {
@@ -30,8 +32,22 @@ namespace HWs_Generator
 
                 // get my form
                 Assembly myApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe");
-                GUI3_GateButton_Comparer comp_form = new GUI3_GateButton_Comparer(studentApp,myApp,args, rr);
+                GUI3_GateButton_Comparer comp_form = new GUI3_GateButton_Comparer(myApp,args, rr);
                 comp_form.ShowDialog();
+                //File.Move(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\results.bin","benchmark.bin");
+                IFormatter formatter = new BinaryFormatter();
+                List<GUI3_GateButton_Comparer.GuiResults> ress;
+                using (Stream stream = new FileStream(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\results.bin",
+                    FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    ress = (List<GUI3_GateButton_Comparer.GuiResults>)formatter.Deserialize(stream);
+                }
+
+                // student control
+                Assembly studApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe");
+                GUI3_GateButton_Comparer stud_form = new GUI3_GateButton_Comparer(studentApp, ress, rr);
+                stud_form.ShowDialog();
+                File.Move("results.bin", "student.bin");
 
                 return rr;
 

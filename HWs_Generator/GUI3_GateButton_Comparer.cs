@@ -7,8 +7,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -42,11 +45,20 @@ namespace HWs_Generator
 
         RunResults rr;
         object[] args;
-        Assembly studAssembly, benchAssembly;
-        public GUI3_GateButton_Comparer(Assembly studAssembly, Assembly benchAssembly, object[] args, RunResults rr)
+        Assembly studAssembly;
+        List<GuiResults> expectedGuirrs = null;
+        public GUI3_GateButton_Comparer(Assembly studAssembly, List<GuiResults> expectedGuirs, RunResults rr)
         {
             this.studAssembly = studAssembly;
-            this.benchAssembly = benchAssembly;
+            this.args = null;
+            this.rr = rr;
+            this.expectedGuirrs = expectedGuirs;
+            InitializeComponent();
+        }
+
+        public GUI3_GateButton_Comparer(Assembly myAssembly, object[] args, RunResults rr)
+        {
+            this.studAssembly = myAssembly;
             this.args = args;
             this.rr = rr;
             InitializeComponent();
@@ -88,20 +100,24 @@ namespace HWs_Generator
         }
         Control studControl, benchControl;
 
-        enum MoveState
+        public enum MoveState
         {
             INIT,
             STARTED,
             FINISHED
         }
-        class GuiResults
+
+        [Serializable]
+        public class GuiResults
         {
             public Point destination;
             public Bitmap formAtDestination;
             public bool clicked;
-            public String remarks;
+            public String remarks = String.Empty;
             public MoveState moveState;
         }
+
+
         Point start;
         PointF current;
         Point end;
@@ -112,7 +128,7 @@ namespace HWs_Generator
         int stop = 0;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (stop++ > 100)
+            if (stop++ > 1000)
             {
                 timer1.Stop();
                 return;
@@ -223,28 +239,54 @@ namespace HWs_Generator
         private void clickTimer_Tick(object sender, EventArgs e)
         {
             clickTimer.Stop();
-            if (pointsCounter > 20) return;
+            if (pointsCounter > 20)
+            {
+                String resultOutputPath = "results.bin";
+                if (File.Exists(resultOutputPath)) File.Delete(resultOutputPath);
+                IFormatter formatter = new BinaryFormatter();
+                using (Stream stream = new FileStream(resultOutputPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    formatter.Serialize(stream, guiResults);
+                }
+                this.Close();
+                return;
+            }
 
-            // set new destination
-            Point from = end;
+            Point from = end, to;
             start = end;
 
-            Rectangle rect;
-            Control childAt = GetChildAtPoint(end);
-            Debug.WriteLine("childAt({0} is {1}", end, childAt);
-            if (childAt != studControl) rect = insideRectangles[r.Next(0, insideRectangles.Count)];
-            else rect = outsideRectangles[r.Next(0, outsideRectangles.Count)];
-            double dist;
-            Point to;
-            do
+            // set new destination
+            if (expectedGuirrs == null)
             {
-                dist = 99;
-                to = chooseRandomPointIsideRect(rect);
-                Segment s = new Segment(from, to);
-                foreach (PointF kodkod in studPoints)
-                    dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
-                Debug.WriteLine("to=" + to + ", dist=" + dist);
-            } while (dist < 3);
+
+                Rectangle rect;
+                Control childAt = GetChildAtPoint(end);
+                Debug.WriteLine("childAt({0} is {1}", end, childAt);
+                if (childAt != studControl)
+                {
+                    rect = insideRectangles[r.Next(0, insideRectangles.Count)];
+                    Debug.WriteLine("Chose insode rect" + rect);
+                }
+                else
+                {
+                    rect = outsideRectangles[r.Next(0, outsideRectangles.Count)];
+                    Debug.WriteLine("Chose outode rect" + rect);
+                }
+                double dist;
+                do
+                {
+                    dist = 99;
+                    to = chooseRandomPointIsideRect(rect);
+                    Segment s = new Segment(from, to);
+                    foreach (PointF kodkod in studPoints)
+                        dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
+                    Debug.WriteLine("to=" + to + ", dist=" + dist);
+                } while (dist < 3);
+            }
+            else
+            {
+                to = expectedGuirrs[pointsCounter].destination;                
+            }
 
             sendCursor(from, to);
         }
@@ -285,16 +327,23 @@ namespace HWs_Generator
             Rectangle rect = insideRectangles[r.Next(0, insideRectangles.Count)];
             double dist;
             Point to;
-            do
+            if (expectedGuirrs == null)
             {
-                dist = 99;
-                to = chooseRandomPointIsideRect(rect);
-                Segment s = new Segment(from, to);
-                foreach (PointF kodkod in studPoints)
-                    dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
-                Debug.WriteLine("to=" + to + ", dist=" + dist);
-            } while (dist < 3);
-            
+                do
+                {
+                    dist = 99;
+                    to = chooseRandomPointIsideRect(rect);
+                    Segment s = new Segment(from, to);
+                    foreach (PointF kodkod in studPoints)
+                        dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
+                    Debug.WriteLine("to=" + to + ", dist=" + dist);
+                } while (dist < 3);
+            }
+            else
+            {
+                to = expectedGuirrs[0].destination;
+            }
+
             sendCursor(from, to);
 
         }
