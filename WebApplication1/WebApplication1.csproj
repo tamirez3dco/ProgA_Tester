@@ -710,6 +710,9 @@
     <Content Include="App_Data\ProgrammingA_2017\HW4\34563262.docx" />
     <Content Include="App_Data\ProgrammingA_2017\HW4\39400817.docx" />
     <Content Include="App_Data\ProgrammingA_2017\HW4\39783626.docx" />
+    <Content Include="App_Data\EDP\GUI1\205500978.docx" />
+    <Content Include="App_Data\EDP\GUI2\205500978.docx" />
+    <Content Include="App_Data\EDP\GUI3\205500978.docx" />
     <None Include="Properties\PublishProfiles\ShanaB-Summer-HWs.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />

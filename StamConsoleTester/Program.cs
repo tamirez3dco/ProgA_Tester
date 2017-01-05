@@ -189,48 +189,50 @@ namespace StamConsoleTester
         }
         static void Main(string[] args)
         {
-            /*
-                        new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
-                        HW4 hww = new HW4();
-                        int tid = 301763967;
-                        Object[] thw_args = hww.LoadArgs(tid);
-                        RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(
-                            @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI2\301763967\23_12_2016_10_00_extracted\HW2\HW2\bin\Debug\HW2.exe"));
-                        MessageBox.Show(rr.ToString());
-                        MessageBox.Show(rr.ToString());
-                        return;
-            */
 /*
-            String tempBin = @"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\results.bin";
-            if (File.Exists(tempBin))
+            double[] ds = new double[10];
+            try
             {
-                IFormatter formatter = new BinaryFormatter();
-                List<GUI3_GateButton_Comparer.GuiResults> ress;
-                using (Stream stream = new FileStream(tempBin, FileMode.Open, FileAccess.Read, FileShare.Read))
+                
+                for (int i = 0; i < ds.Length; i++)
                 {
-                    ress = (List<GUI3_GateButton_Comparer.GuiResults>)formatter.Deserialize(stream);
+                    System.Drawing.Rectangle cropper = new System.Drawing.Rectangle(8, 8, 84, 54);
+                    Bitmap buttonBenc = new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI3\306221870\4_01_2017_14_52_extracted\HW3\HW3\bin\Debug\ob_benchmark_" + i + ".png"));
+                    Bitmap buttonStud = new Bitmap(Bitmap.FromFile(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI3\306221870\4_01_2017_14_52_extracted\HW3\HW3\bin\Debug\ob_student_" + i + ".png"));
+                    Bitmap ob_no_borders_stud = Imaging.CropImage(buttonStud, cropper);
+                    Bitmap ob_no_borders_bench = Imaging.CropImage(buttonBenc, cropper);
+                    double buttonNBSimilarity = Imaging.getSimilarity(ob_no_borders_stud, ob_no_borders_bench);
+
+                    ds[i] = buttonNBSimilarity;
+
                 }
             }
+            catch (Exception e)
+            {
+
+            }
 */
-                new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
+
+/*
+            new Students(@"D:\Tamir\Netanya_Desktop_App\2017\Shana_B_2017.xlsx");
                         GUI3 hww = new GUI3();
-                        int tid = 301763967;
+                        int tid = 66117466;
                         //String resulting_exe_path;
                         //Compiler.BuildZippedProject(@"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions\GUI1\312441710\13_11_2016_14_37.zip", out resulting_exe_path);
                         //Object[] thw_args = hww.get_random_args(tid);
                         Object[] thw_args = hww.LoadArgs(tid);
-                        RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe"));
+                        RunResults rr = hww.test_Hw_by_assembly(thw_args, new FileInfo(@"D:\Downloads\Tar3_066117466\Tar3_066117466\Tar3_066117466\bin\Debug\Tar3_066117466.exe"));
                         MessageBox.Show(rr.ToString());
                         MessageBox.Show(rr.ToString());
                         return;
-            /*
-                        Students students = new Students();
-                        int tid = 317883007;
-                        HW2 hww = new HW2();
+*/
+            
+                        new Students(@"D:\Tamir\Netanya_ProgrammingA\2017\Programming_A_Semester_A_2017.xlsx");
+                        int tid = 308087410;
+                        HW3 hww = new HW3();
                         Object[] myargs = hww.LoadArgs(tid);
                         RunResults rr = hww.Test_HW(myargs, @"D:\Tamir\Temp\14_10_2016_21_43_extracted\ConsoleApplication3\ConsoleApplication3\bin\Debug\ConsoleApplication3.exe");
                         return;
-            */
             //testSomething();
             //return;
 
@@ -244,7 +246,7 @@ namespace StamConsoleTester
             //StudentsLib.Students
             FileInfo fin = new FileInfo(@"D:\Tamir\Netanya_ProgrammingA\2017\TempSolutions\HW4_Mine\HW4_Mine\bin\Debug\HW4_Mine.exe");
             GUI3 hw = new GUI3();
-            Object[] myargs = hw.LoadArgs(tl.id);
+            //Object[] myargs = hw.LoadArgs(tl.id);
             RunResults rr4 = hw.test_Hw_by_assembly(myargs, fin);
             //Object[] argsTest = hw4.get_random_args(tl.id);
             //hw3.Create_DocFile_By_Creators(argsTest, new List<Creators>());

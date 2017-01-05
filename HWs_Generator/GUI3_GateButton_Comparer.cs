@@ -64,7 +64,7 @@ namespace HWs_Generator
             InitializeComponent();
         }
 
-        private Type getClosestTypeByNameProximity(Assembly asm, String expectedName)
+        public static  Type getClosestTypeByNameProximity(Assembly asm, String expectedName)
         {
             Type[] allTypes = asm.GetTypes();
             String[] allTypeNames = new string[allTypes.Length];
@@ -82,12 +82,17 @@ namespace HWs_Generator
             lastMovePoints = new List<PointF>();
             diff = new Size(-1 * this.PointToClient(this.Location).X, -1 * this.PointToClient(this.Location).Y);
             lastMovePoints.Add(from + diff);
+            
+            current = start = from;
+            end = to;
             guiResults.Add(new GuiResults());
             guiResults.Last().destination = end;
             guiResults.Last().moveState = MoveState.INIT;
-            current = start = from;
-            end = to;
-            dir = new SizeF( ((float)end.X - from.X) / 10, ((float)end.Y - from.Y) / 10);
+
+
+            dir = new SizeF( ((float)end.X - from.X), ((float)end.Y - from.Y));
+            float dirSize = (float)Math.Sqrt(dir.Width * dir.Width + dir.Height * dir.Height);
+            dir.Width /= dirSize; dir.Height /= dirSize;
             Console.WriteLine("1)dir=" + dir);
 
             Cursor.Position = PointToScreen(from);
@@ -143,7 +148,6 @@ namespace HWs_Generator
             {
                 timer1.Stop();
                 GuiResults gr = guiResults.Last();
-                gr.destination = Cursor.Position;
                 gr.moveState = MoveState.FINISHED;
                 gr.clicked = false;
                 Bitmap bmp = new Bitmap(Width,Height);
@@ -157,14 +161,22 @@ namespace HWs_Generator
                 p.Width = 2;
                 g.DrawLines(p, lastMovePoints.ToArray());
                 gr.formAtDestination = bmp;
-                bmp.Save(pointsCounter + ".png", ImageFormat.Png);
+                if (expectedGuirrs == null) bmp.Save("benchmark_" + pointsCounter + ".png", ImageFormat.Png);
+                else bmp.Save("student_" + pointsCounter + ".png", ImageFormat.Png);
+
+                Bitmap onlyButton = new Bitmap(studControl.Width, studControl.Height);
+                studControl.DrawToBitmap(onlyButton, new Rectangle(0, 0, studControl.Width, studControl.Height));
+                if (expectedGuirrs == null) onlyButton.Save("ob_benchmark_" + pointsCounter + ".png", ImageFormat.Png);
+                else onlyButton.Save("ob_student_" + pointsCounter + ".png", ImageFormat.Png);
+
                 pointsCounter++;
                 clickTimer.Start();
                 LeftMouseClick(Cursor.Position.X,Cursor.Position.Y);
                 return;
             }
 
-            if (dist < 20 && (Math.Abs(dir.Width) + Math.Abs(dir.Height) > 7))
+            double dirdist = Math.Sqrt(dir.Width * dir.Width + dir.Height * dir.Height);
+            if (dist < 2 * dirdist && dirdist > 3)
             {
                 float dx = ((float)end.X - current.X)/ 5;
                 float dy = ((float)end.Y - current.Y)/ 5;
@@ -239,7 +251,8 @@ namespace HWs_Generator
         private void clickTimer_Tick(object sender, EventArgs e)
         {
             clickTimer.Stop();
-            if (pointsCounter > 20)
+            if ((pointsCounter > 10 && clickedOnce) ||
+                (expectedGuirrs != null && pointsCounter == expectedGuirrs.Count))
             {
                 String resultOutputPath = "results.bin";
                 if (File.Exists(resultOutputPath)) File.Delete(resultOutputPath);
@@ -307,10 +320,21 @@ namespace HWs_Generator
         {
             guiResults = new List<GuiResults>();
             Type ctrlType = getClosestTypeByNameProximity(studAssembly, expectedControlName);
-            ConstructorInfo emptyCons = ctrlType.GetConstructor(new Type[0]);
-            studControl = (Control)emptyCons.Invoke(new Object[0]);
-            studControl.Location = new Point(200, 150);
-            studControl.Size = new Size(70, 70);
+
+            if (args == null)
+            {
+                ConstructorInfo emptyCons = ctrlType.GetConstructor(new Type[0]);
+                studControl = (Control)emptyCons.Invoke(new Object[0]);
+            }
+            else
+            {
+                Type[] ts = { typeof(object[]) };
+                ConstructorInfo emptyCons = ctrlType.GetConstructor(ts);
+                Object[] pars = {args };
+                studControl = (Control)emptyCons.Invoke(pars);
+            }
+            studControl.Location = new Point(50, 50);
+            studControl.Size = new Size(100, 70);
             studControl.Text = "AutoTest";
             studControl.Name = "StudButton";
             studControl.Click += StudControl_Click;
@@ -337,7 +361,7 @@ namespace HWs_Generator
                     foreach (PointF kodkod in studPoints)
                         dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
                     Debug.WriteLine("to=" + to + ", dist=" + dist);
-                } while (dist < 3);
+                } while (dist < 5);
             }
             else
             {
@@ -348,8 +372,68 @@ namespace HWs_Generator
 
         }
 
+        private void GUI3_GateButton_Comparer_Load(object sender, EventArgs e)
+        {
+
+            guiResults = new List<GuiResults>();
+            Type ctrlType = getClosestTypeByNameProximity(studAssembly, expectedControlName);
+
+            if (args == null)
+            {
+                ConstructorInfo emptyCons = ctrlType.GetConstructor(new Type[0]);
+                studControl = (Control)emptyCons.Invoke(new Object[0]);
+            }
+            else
+            {
+                Type[] ts = { typeof(object[]) };
+                ConstructorInfo emptyCons = ctrlType.GetConstructor(ts);
+                Object[] pars = { args };
+                studControl = (Control)emptyCons.Invoke(pars);
+            }
+            studControl.Location = new Point(50, 50);
+            studControl.Size = new Size(100, 70);
+            studControl.Text = "Auto Test";
+            studControl.Font = new Font(studControl.Font.FontFamily, 20);
+            studControl.Name = "StudButton";
+            studControl.Click += StudControl_Click;
+            studPoints = new List<PointF>();
+            studPoints.Add(new PointF(studControl.Left, studControl.Top));
+            studPoints.Add(new PointF(studControl.Left, studControl.Bottom));
+            studPoints.Add(new PointF(studControl.Right, studControl.Top));
+            studPoints.Add(new PointF(studControl.Right, studControl.Bottom));
+            this.Controls.Add(studControl);
+
+            Point from = new Point(1, 1);
+            insideRectangles = CreateInsideRectangles();
+            outsideRectangles = CreateOutRectangles();
+            Rectangle rect = insideRectangles[r.Next(0, insideRectangles.Count)];
+            double dist;
+            Point to;
+            if (expectedGuirrs == null)
+            {
+                do
+                {
+                    dist = 99;
+                    to = chooseRandomPointIsideRect(rect);
+                    Segment s = new Segment(from, to);
+                    foreach (PointF kodkod in studPoints)
+                        dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
+                    Debug.WriteLine("to=" + to + ", dist=" + dist);
+                } while (dist < 5);
+            }
+            else
+            {
+                to = expectedGuirrs[0].destination;
+            }
+
+            sendCursor(from, to);
+
+        }
+
+        bool clickedOnce = false;
         private void StudControl_Click(object sender, EventArgs e)
         {
+            clickedOnce = true;
             guiResults.Last().clicked = true;
         }
     }

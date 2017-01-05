@@ -45,6 +45,17 @@ namespace HWs_Generator
                     break;
             }
 
+            foreach (Student stud in Students.students_dic.Values)
+            {
+                GUI3 hww = new GUI3();
+                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                Object[] myargs = hww.get_random_args(stud.id);
+                hww.Create_DocFile_By_Creators(myargs,null);
+                hww.SaveArgs(myargs);
+            }
+            return;
+
+
             /*
                         Student tl = new Student();
                         tl.first_name = "תמיר";
@@ -59,17 +70,17 @@ namespace HWs_Generator
                         hww.Create_DocFile(myargs);
                         return;
             */
-/*
-            foreach (Student stud in Students.students_dic.Values)
-            {
-                GUI3 hww = new GUI3();
-                if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
-                Object[] myargs = hww.get_random_args(stud.id);
-                hww.Create_DocFile(myargs);
-                hww.SaveArgs(myargs);
-            }
-            return;
-*/
+            /*
+                        foreach (Student stud in Students.students_dic.Values)
+                        {
+                            GUI1 hww = new GUI1();
+                            if (File.Exists(hww.Students_Hws_dirs + "\\" + stud.id.ToString() + ".docx")) continue;
+                            Object[] myargs = hww.get_random_args(stud.id);
+                            hww.Create_DocFile(myargs);
+                            hww.SaveArgs(myargs);
+                        }
+                        return;
+            */
             foreach (Student stud in Students.students_dic.Values)
             {
                 HW4 hww = new HW4();

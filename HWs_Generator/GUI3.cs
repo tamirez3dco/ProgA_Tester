@@ -26,29 +26,127 @@ namespace HWs_Generator
                 int stud_id = (int)args[0];
                 Student stud = Students.students_dic[stud_id];
 
+                Assembly myApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe");
                 Assembly studentApp = Assembly.LoadFile(executable.FullName);
                 Directory.SetCurrentDirectory(executable.Directory.FullName);
+                String[] filesToDelete = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.png");
+                foreach (String s in filesToDelete) File.Delete(s);
+
+                filesToDelete = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.bin");
+                foreach (String s in filesToDelete) File.Delete(s);
 
 
                 // get my form
-                Assembly myApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe");
-                GUI3_GateButton_Comparer comp_form = new GUI3_GateButton_Comparer(myApp,args, rr);
+                GUI3_GateButton_Comparer comp_form = new GUI3_GateButton_Comparer(myApp, args, rr);
                 comp_form.ShowDialog();
                 //File.Move(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\results.bin","benchmark.bin");
+                File.Move("results.bin", "myoutput.bin");
+
                 IFormatter formatter = new BinaryFormatter();
                 List<GUI3_GateButton_Comparer.GuiResults> ress;
-                using (Stream stream = new FileStream(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\results.bin",
+                using (Stream stream = new FileStream(@"myoutput.bin",
                     FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     ress = (List<GUI3_GateButton_Comparer.GuiResults>)formatter.Deserialize(stream);
                 }
 
+
+
                 // student control
-                Assembly studApp = Assembly.LoadFile(@"D:\Tamir\Netanya_Desktop_App\2017\My_Solutions\GUI3_Mine\GUI3_Mine\bin\Debug\GUI3_Mine.exe");
                 GUI3_GateButton_Comparer stud_form = new GUI3_GateButton_Comparer(studentApp, ress, rr);
                 stud_form.ShowDialog();
-                File.Move("results.bin", "student.bin");
 
+                List<GUI3_GateButton_Comparer.GuiResults> studsGuirs = new List<GUI3_GateButton_Comparer.GuiResults>();
+                using (Stream stream = new FileStream(@"results.bin",
+                    FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    studsGuirs = (List<GUI3_GateButton_Comparer.GuiResults>)formatter.Deserialize(stream);
+                }
+
+                int i = 0;
+                bool proceedToQ2 = true; ;
+                for (; i < studsGuirs.Count; i++)
+                {
+                    if (studsGuirs[i].clicked && !ress[i].clicked)
+                    {
+                        proceedToQ2 = false;
+                        int gradeLost = 20;
+                        rr.grade -= gradeLost;
+                        rr.error_lines.Add(String.Format("Clicking mismatch at image # {0}. GateButton mistakenly clicked. Minus {1} points", i, gradeLost));
+                        break;
+                    }
+                    if (!studsGuirs[i].clicked && ress[i].clicked)
+                    {
+                        proceedToQ2 = false;
+                        int gradeLost = 20;
+                        rr.grade -= gradeLost;
+                        rr.error_lines.Add(String.Format("Clicking mismatch at image # {0}. GateButton was not clicked as expected. Minus {1} points", i, gradeLost));
+                        break;
+                    }
+                    Bitmap studs = new Bitmap(Bitmap.FromFile("student_" + i + ".png"));
+                    Bitmap bench = new Bitmap(Bitmap.FromFile("benchmark_" + i + ".png"));
+                    double formSimilarity = Imaging.getSimilarity(studs, bench);
+
+                    Bitmap ob_studs = new Bitmap(Bitmap.FromFile("ob_student_" + i + ".png"));
+                    Bitmap ob_bench = new Bitmap(Bitmap.FromFile("ob_benchmark_" + i + ".png"));
+                    System.Drawing.Rectangle cropper = new System.Drawing.Rectangle(8, 8, 84, 54);
+                    Bitmap ob_no_borders_stud = Imaging.CropImage(ob_studs, cropper);
+                    Bitmap ob_no_borders_bench = Imaging.CropImage(ob_bench, cropper);
+                    double buttonNBSimilarity = Imaging.getSimilarity(ob_no_borders_stud, ob_no_borders_bench);
+
+                    bool minorDiffFound = false;
+                    if (Math.Abs(formSimilarity) > 3)
+                    {
+                        if (buttonNBSimilarity > 1)
+                        {
+                            proceedToQ2 = false;
+                            int gradeLost = 20;
+                            rr.grade -= gradeLost;
+                            rr.error_lines.Add(String.Format("GateButton does not look as expected at image # {0}. Look at atched pictures to understand the diff. Minus {1} points", i, gradeLost));
+                            break;
+                        }
+                        else
+                        {
+                            int gradeLost = 10;
+                            if (minorDiffFound) gradeLost = 1;
+                            rr.grade -= gradeLost;
+                            rr.error_lines.Add(String.Format("GateButton does not look as expected at image # {0}. Looks like some visible mismatch around the edges. Look at atched pictures to understand the diff. Minus {1} points", i, gradeLost));
+                            minorDiffFound = true;
+                        }
+                    }
+
+                }
+
+                if (i < studsGuirs.Count)
+                {
+                    for (int k = 0; k <= i; k++)
+                    {
+                        String fileName = "benchmark_" + k + ".png";
+                        FileInfo fin = new FileInfo(fileName);
+                        rr.filesToAttach.Add(fin.FullName);
+                    }
+                    for (int k = 0; k <= i; k++)
+                    {
+                        String fileName = "student_" + k + ".png";
+                        FileInfo fin = new FileInfo(fileName);
+                        rr.filesToAttach.Add(fin.FullName);
+                    }
+
+                    rr.error_lines.Insert(0, "Checking of your GateButton failed!!. Attached are images of your button (in files called student_*.png) and the benchmark button (in files called benchmark_*.png)");
+                    if (!proceedToQ2)
+                    {
+                        int gradeLost = 30;
+                        rr.grade -= gradeLost;
+                        rr.error_lines.Insert(1,String.Format( "Due to GateButton mistakes - checker did not continue to check Q2 (The MegaButton). Minus {0} points",gradeLost));
+                        return rr;
+                    }
+                }
+
+                rr.error_lines.Add("Starting checking of your MegaButton - Q2");
+
+                // Starting MEGA checking
+                GUI3_MegaButton_Comparer mbc = new GUI3_MegaButton_Comparer(myApp, studentApp, args, rr);               
+                mbc.ShowDialog();
                 return rr;
 
             }
@@ -63,6 +161,10 @@ namespace HWs_Generator
 
         }
 
+        public override void Create_DocFile_By_Creators(Object[] args, List<Creators> creators)
+        {
+            Create_DocFile(args);
+        }
         public override void Create_DocFile(object[] args)
         {
             int id = (int)(args[0]);

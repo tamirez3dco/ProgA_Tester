@@ -207,16 +207,17 @@ namespace HWs_Generator
             }
             String[] student_tokens = studentText.Split(tokenizer, StringSplitOptions.RemoveEmptyEntries);
             String[] benchmark_tokens = benchmarkText.Split(tokenizer, StringSplitOptions.RemoveEmptyEntries);
-
+            int studCounter = 0;
             RunResults test1_rr = new RunResults();
             if (studentText.Contains(tokenizer[0])){
-                test1_rr = Test_Q1(args, student_tokens[0], benchmark_tokens[0]);
+                test1_rr = Test_Q1(args, student_tokens[studCounter], benchmark_tokens[0]);
                 if (test1_rr.grade < 70)
                 {
                     int grades_to_add = 70 - test1_rr.grade;
                     test1_rr.grade += grades_to_add;
                     test1_rr.error_lines.Add(String.Format("Q1 - Adding {0} points to ensure at most 30 pts are taken off Q1", grades_to_add));
                 }
+                studCounter++;
             }
             else
             {
@@ -227,13 +228,14 @@ namespace HWs_Generator
             RunResults test2_rr = new RunResults();
             if (studentText.Contains(tokenizer[1]))
             {
-                test2_rr = Test_Q2(args, student_tokens[1], benchmark_tokens[1]);
+                test2_rr = Test_Q2(args, student_tokens[studCounter], benchmark_tokens[1]);
                 if (test2_rr.grade < 70)
                 {
                     int grades_to_add = 70 - test2_rr.grade;
                     test2_rr.grade += grades_to_add;
                     test2_rr.error_lines.Add(String.Format("Q2 - Adding {0} points to ensure at most 30 pts are taken off Q2", grades_to_add));
                 }
+                studCounter++;
 
             }
             else
@@ -245,13 +247,14 @@ namespace HWs_Generator
             RunResults test3_rr = new RunResults();
             if (studentText.Contains(tokenizer[2]))
             {
-                test3_rr = Test_Q3(args, student_tokens[2], benchmark_tokens[2]);
+                test3_rr = Test_Q3(args, student_tokens[studCounter], benchmark_tokens[2]);
                 if (test3_rr.grade < 70)
                 {
                     int grades_to_add = 70 - test3_rr.grade;
                     test3_rr.grade += grades_to_add;
                     test3_rr.error_lines.Add(String.Format("Q3 - Adding {0} points to ensure at most 30 pts are taken off Q3", grades_to_add));
                 }
+                studCounter++;
             }
             else
             {

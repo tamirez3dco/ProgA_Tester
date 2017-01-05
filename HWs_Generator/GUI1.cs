@@ -650,6 +650,7 @@ namespace HWs_Generator
             Worder.Replace_to_picture(wordDoc, "XXXX", fin.FullName);
 
         }
+
         public override void Create_DocFile_By_Creators(Object[] args, List<Creators> creators)
         {
             int id = (int)(args[0]);

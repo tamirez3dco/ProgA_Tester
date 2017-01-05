@@ -162,7 +162,7 @@ namespace HWs_Generator
             }
         }
 
-        public String getRandomString()
+        public static String getRandomString()
         {
             String s = "1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,._+QWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>?             ";
             int stringLength = r.Next(5, 10);

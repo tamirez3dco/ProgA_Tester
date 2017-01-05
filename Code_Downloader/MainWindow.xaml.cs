@@ -70,6 +70,7 @@ namespace Code_Downloader
                     hw_entire_class_path = @"D:\Tamir\Netanya_Desktop_App\2017\Students_Submissions";
                     typeToLinkDict[typeof(GUI1)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=143956&action=grading";
                     typeToLinkDict[typeof(GUI2)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=148559&action=grading";
+                    typeToLinkDict[typeof(GUI3)] = @"http://el1.netanya.ac.il/mod/assign/view.php?id=150188&action=grading";
                     break;
                 case "ProgrammingA_2017":
                     //Logger.Log("Into ProgrammingA_2017","***");
