@@ -69,92 +69,111 @@ namespace HWs_Generator
         PropertyInfo benchTimeProp, studTimeProp;
         public bool GetReady()
         {
-            // myMegaChecker
-            bench_GateType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(benchApp, "GateButton");
-            bench_MegaType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(benchApp, "MegaButton");
-            ConstructorInfo benchBanai = bench_MegaType.GetConstructor(new Type[] { typeof(object[]) });
-            benchCtrl = (Control)benchBanai.Invoke(new object[] { args });
-            benchTimeProp = bench_MegaType.GetProperty("Time");
-            benchTimeProp.SetValue(benchCtrl, timeValue);
-            benchCtrl.Dock = DockStyle.Fill;
-            bench_mbcForm = new Form();
-            bench_mbcForm.Controls.Add(benchCtrl);
+            Cursor.Position = new Point(1000, 1000);
 
-
-            MethodInfo benchMi = this.GetType().GetMethod("benchMegaClicked", BindingFlags.NonPublic | BindingFlags.Instance);
-            EventInfo benchEvent = bench_MegaType.GetEvent("MegaClick");
-            Type t1 = benchEvent.EventHandlerType;
-            Delegate handler = Delegate.CreateDelegate(t1, this, benchMi);
-            benchEvent.AddEventHandler(benchCtrl,handler);
-
-            MethodInfo benchFlushMi = this.GetType().GetMethod("benchMegaFlushed", BindingFlags.NonPublic | BindingFlags.Instance);
-            EventInfo benchFlushEvent = bench_MegaType.GetEvent("MegaFlushed");
-            Type t11 = benchFlushEvent.EventHandlerType;
-            Delegate Flushhandler = Delegate.CreateDelegate(t11, this, benchFlushMi);
-            benchFlushEvent.AddEventHandler(benchCtrl, Flushhandler);
-
-            bench_mbcForm.Text = "Benchmark";
-            bench_mbcForm.Show();
-
-            benchTB = (TextBox)(GetAllVisibleControlsByType(benchCtrl, typeof(TextBox))[0]);
-            benchGateButtons = GetAllVisibleControlsByType(benchCtrl, bench_GateType);
-            foreach (Control c in benchGateButtons)
+            try
             {
-                c.BackColor = Color.White;
-                c.ForeColor = Color.Black;
-                c.Padding = c.Margin = new Padding(0, 0, 0, 0);
+                // myMegaChecker
+                bench_GateType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(benchApp, "GateButton");
+                bench_MegaType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(benchApp, "MegaButton");
+                ConstructorInfo benchBanai = bench_MegaType.GetConstructor(new Type[] { typeof(object[]) });
+                benchCtrl = (Control)benchBanai.Invoke(new object[] { args });
+                benchTimeProp = bench_MegaType.GetProperty("Time");
+                benchTimeProp.SetValue(benchCtrl, timeValue);
+                benchCtrl.Dock = DockStyle.Fill;
+                bench_mbcForm = new Form();
+                bench_mbcForm.Controls.Add(benchCtrl);
+
+
+                MethodInfo benchMi = this.GetType().GetMethod("benchMegaClicked", BindingFlags.NonPublic | BindingFlags.Instance);
+                EventInfo benchEvent = bench_MegaType.GetEvent("MegaClick");
+                Type t1 = benchEvent.EventHandlerType;
+                Delegate handler = Delegate.CreateDelegate(t1, this, benchMi);
+                benchEvent.AddEventHandler(benchCtrl, handler);
+
+                MethodInfo benchFlushMi = this.GetType().GetMethod("benchMegaFlushed", BindingFlags.NonPublic | BindingFlags.Instance);
+                EventInfo benchFlushEvent = bench_MegaType.GetEvent("MegaFlushed");
+                Type t11 = benchFlushEvent.EventHandlerType;
+                Delegate Flushhandler = Delegate.CreateDelegate(t11, this, benchFlushMi);
+                benchFlushEvent.AddEventHandler(benchCtrl, Flushhandler);
+
+                bench_mbcForm.Text = "Benchmark";
+                bench_mbcForm.Show();
+
+                benchTB = (TextBox)(GetAllVisibleControlsByType(benchCtrl, typeof(TextBox))[0]);
+                benchGateButtons = GetAllVisibleControlsByType(benchCtrl, bench_GateType);
+                foreach (Control c in benchGateButtons)
+                {
+                    c.BackColor = Color.White;
+                    c.ForeColor = Color.Black;
+                    c.Padding = c.Margin = new Padding(0, 0, 0, 0);
+                    //                MethodInfo mouseLeave = bench_GateType.GetMethod("OnMouseLeave", BindingFlags.NonPublic | BindingFlags.Instance);
+                    //                Object[] pars = { new EventArgs() };
+                    //                mouseLeave.Invoke(c, pars);
+
+                }
+
+                // stud Mega Checker
+                stud_GateType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(studApp, "GateButton");
+                stud_MegaType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(studApp, "MegaButton");
+                ConstructorInfo studBanai = stud_MegaType.GetConstructor(new Type[0]);
+                studCtrl = (Control)studBanai.Invoke(new object[0]);
+                studCtrl.Dock = DockStyle.Fill;
+                stud_mbcForm = new Form();
+                stud_mbcForm.Controls.Add(studCtrl);
+                stud_mbcForm.Text = "Student - " + (int)args[0];
+                stud_mbcForm.SetDesktopLocation(bench_mbcForm.DesktopLocation.X + bench_mbcForm.Width + 10, bench_mbcForm.DesktopLocation.Y);
+                stud_mbcForm.StartPosition = FormStartPosition.Manual;
+                studTimeProp = stud_MegaType.GetProperty("Time");
+                if (studTimeProp == null)
+                {
+                    int gradeLost = 20;
+                    rr.grade -= gradeLost;
+                    rr.error_lines.Add(String.Format("Could not find Property \"Time\" in your MegaButton. Minus {0} points", gradeLost));
+                    return false;
+                }
+                studTimeProp.SetValue(studCtrl, timeValue);
+                studGateButtons = new List<Control>();
+
+                MethodInfo studMi = this.GetType().GetMethod("studMegaClicked", BindingFlags.NonPublic | BindingFlags.Instance);
+                EventInfo studEvent = stud_MegaType.GetEvent("MegaClick");
+                Type t2 = studEvent.EventHandlerType;
+                Delegate handler2 = Delegate.CreateDelegate(t2, this, studMi);
+                studEvent.AddEventHandler(studCtrl, handler2);
+
+
+                stud_mbcForm.Show();
+
+                List<Control> optiobalTextBoxes = GetAllVisibleControlsByType(studCtrl, typeof(TextBox));
+                if (optiobalTextBoxes.Count < 1)
+                {
+                    int gradeLost = 20;
+                    rr.grade -= gradeLost;
+                    rr.error_lines.Add(String.Format("Could not find a visible TextBox in your MegaButton. Minus {0} points", gradeLost));
+                    return false;
+                }
+                studTB = (TextBox)optiobalTextBoxes[0];
+                studGateButtons = GetAllVisibleControlsByType(studCtrl, stud_GateType);
+                foreach (Control c in studGateButtons)
+                {
+                    c.BackColor = Color.White;
+                    c.ForeColor = Color.Black;
+                    c.Padding = c.Margin = new Padding(0, 0, 0, 0);
+                }
+                before = DateTime.Now;
+                operations.Add("Starting test with Time property=" + timeValue);
+
+                Cursor.Position = new Point(1000, 1000);
+                return true;
+
             }
-
-            // stud Mega Checker
-            stud_GateType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(studApp, "GateButton");
-            stud_MegaType = GUI3_GateButton_Comparer.getClosestTypeByNameProximity(studApp, "MegaButton");
-            ConstructorInfo studBanai = stud_MegaType.GetConstructor(new Type[0]);
-            studCtrl = (Control)studBanai.Invoke(new object[0]);
-            studCtrl.Dock = DockStyle.Fill;
-            stud_mbcForm = new Form();
-            stud_mbcForm.Controls.Add(studCtrl);
-            stud_mbcForm.Text = "Student - " + (int)args[0];
-            stud_mbcForm.SetDesktopLocation(bench_mbcForm.DesktopLocation.X + bench_mbcForm.Width + 10, bench_mbcForm.DesktopLocation.Y);
-            stud_mbcForm.StartPosition = FormStartPosition.Manual;
-            studTimeProp = stud_MegaType.GetProperty("Time");
-            if (studTimeProp == null)
+            catch (Exception e)
             {
-                int gradeLost = 20;
+                int gradeLost = 30;
                 rr.grade -= gradeLost;
-                rr.error_lines.Add(String.Format("Could not find Property \"Time\" in your MegaButton. Minus {0} points", gradeLost));
+                rr.error_lines.Add(String.Format("Some terrible exception happened while testing your app. Exception is:{1}. Therefore, could not continue with test. Minus {0} points.", gradeLost, e.Message));
                 return false;
             }
-            studTimeProp.SetValue(studCtrl, timeValue);
-            studGateButtons = new List<Control>();
-
-            MethodInfo studMi = this.GetType().GetMethod("studMegaClicked", BindingFlags.NonPublic | BindingFlags.Instance);
-            EventInfo studEvent = stud_MegaType.GetEvent("MegaClick");
-            Type t2 = studEvent.EventHandlerType;
-            Delegate handler2 = Delegate.CreateDelegate(t2, this, studMi);
-            studEvent.AddEventHandler(studCtrl, handler2);
-
-
-            stud_mbcForm.Show();
-
-            List<Control> optiobalTextBoxes = GetAllVisibleControlsByType(studCtrl, typeof(TextBox));
-            if (optiobalTextBoxes.Count < 1)
-            {
-                int gradeLost = 20;
-                rr.grade -= gradeLost;
-                rr.error_lines.Add(String.Format("Could not find a visible TextBox in your MegaButton. Minus {0} points", gradeLost));
-                return false;
-            }
-            studTB = (TextBox)optiobalTextBoxes[0];
-            studGateButtons = GetAllVisibleControlsByType(studCtrl, stud_GateType);
-            foreach (Control c in studGateButtons)
-            {
-                c.BackColor = Color.White;
-                c.ForeColor = Color.Black;
-                c.Padding = c.Margin = new Padding(0, 0, 0, 0);
-            }
-            before = DateTime.Now;
-            operations.Add("Starting test with Time property=" + timeValue);
-            return true;
         }
 
         private void benchMegaClicked(object sender, EventArgs e)
@@ -288,6 +307,7 @@ namespace HWs_Generator
 
             if (stepsCounter++ > 20 && benchMegaFlushes > 0 && benchMegaClicks > 0)
             {
+                CloseAll();
                 return;
             }
             switch (r.Next(0, 5))
@@ -462,7 +482,8 @@ namespace HWs_Generator
             if (!GetReady())
             {
                 //MessageBox.Show("GetReady failed!!!");
-                this.Close();
+                CloseAll();
+                return;
             }
 
             timer1.Tick += timer1_Resize;

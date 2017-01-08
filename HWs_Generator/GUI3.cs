@@ -54,7 +54,13 @@ namespace HWs_Generator
 
                 // student control
                 GUI3_GateButton_Comparer stud_form = new GUI3_GateButton_Comparer(studentApp, ress, rr);
-                stud_form.ShowDialog();
+                if (stud_form.ShowDialog() == DialogResult.Abort)
+                {
+                    int gradeLost = 30;
+                    rr.grade -= gradeLost;
+                    rr.error_lines.Insert(1, String.Format("Due to GateButton error on Q1 - checker did not continue to check Q2 (The MegaButton). Minus {0} points", gradeLost));
+                    return rr;
+                }
 
                 List<GUI3_GateButton_Comparer.GuiResults> studsGuirs = new List<GUI3_GateButton_Comparer.GuiResults>();
                 using (Stream stream = new FileStream(@"results.bin",
@@ -65,6 +71,8 @@ namespace HWs_Generator
 
                 int i = 0;
                 bool proceedToQ2 = true; ;
+                bool attachQ1Photos = false;
+                bool minorDiffFound = false;
                 for (; i < studsGuirs.Count; i++)
                 {
                     if (studsGuirs[i].clicked && !ress[i].clicked)
@@ -73,6 +81,7 @@ namespace HWs_Generator
                         int gradeLost = 20;
                         rr.grade -= gradeLost;
                         rr.error_lines.Add(String.Format("Clicking mismatch at image # {0}. GateButton mistakenly clicked. Minus {1} points", i, gradeLost));
+                        attachQ1Photos = true;
                         break;
                     }
                     if (!studsGuirs[i].clicked && ress[i].clicked)
@@ -81,6 +90,7 @@ namespace HWs_Generator
                         int gradeLost = 20;
                         rr.grade -= gradeLost;
                         rr.error_lines.Add(String.Format("Clicking mismatch at image # {0}. GateButton was not clicked as expected. Minus {1} points", i, gradeLost));
+                        attachQ1Photos = true;
                         break;
                     }
                     Bitmap studs = new Bitmap(Bitmap.FromFile("student_" + i + ".png"));
@@ -94,7 +104,6 @@ namespace HWs_Generator
                     Bitmap ob_no_borders_bench = Imaging.CropImage(ob_bench, cropper);
                     double buttonNBSimilarity = Imaging.getSimilarity(ob_no_borders_stud, ob_no_borders_bench);
 
-                    bool minorDiffFound = false;
                     if (Math.Abs(formSimilarity) > 3)
                     {
                         if (buttonNBSimilarity > 1)
@@ -103,29 +112,31 @@ namespace HWs_Generator
                             int gradeLost = 20;
                             rr.grade -= gradeLost;
                             rr.error_lines.Add(String.Format("GateButton does not look as expected at image # {0}. Look at atched pictures to understand the diff. Minus {1} points", i, gradeLost));
+                            attachQ1Photos = true;
                             break;
                         }
                         else
                         {
                             int gradeLost = 10;
-                            if (minorDiffFound) gradeLost = 1;
+                            if (minorDiffFound) continue;
                             rr.grade -= gradeLost;
                             rr.error_lines.Add(String.Format("GateButton does not look as expected at image # {0}. Looks like some visible mismatch around the edges. Look at atched pictures to understand the diff. Minus {1} points", i, gradeLost));
+                            attachQ1Photos = true;
                             minorDiffFound = true;
                         }
                     }
 
                 }
 
-                if (i < studsGuirs.Count)
+                if (attachQ1Photos == true)
                 {
-                    for (int k = 0; k <= i; k++)
+                    for (int k = 0; k <= Math.Min(i, studsGuirs.Count - 1); k++)
                     {
                         String fileName = "benchmark_" + k + ".png";
                         FileInfo fin = new FileInfo(fileName);
                         rr.filesToAttach.Add(fin.FullName);
                     }
-                    for (int k = 0; k <= i; k++)
+                    for (int k = 0; k <= Math.Min(i, studsGuirs.Count - 1); k++)
                     {
                         String fileName = "student_" + k + ".png";
                         FileInfo fin = new FileInfo(fileName);

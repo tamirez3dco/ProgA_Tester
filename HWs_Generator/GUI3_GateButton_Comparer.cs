@@ -133,8 +133,9 @@ namespace HWs_Generator
         int stop = 0;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (stop++ > 1000)
+            if (stop++ > 10000)
             {
+                Debug.Write("Stopped over too many steps!!!");
                 timer1.Stop();
                 return;
             }
@@ -374,59 +375,71 @@ namespace HWs_Generator
 
         private void GUI3_GateButton_Comparer_Load(object sender, EventArgs e)
         {
-
-            guiResults = new List<GuiResults>();
-            Type ctrlType = getClosestTypeByNameProximity(studAssembly, expectedControlName);
-
-            if (args == null)
+            try
             {
-                ConstructorInfo emptyCons = ctrlType.GetConstructor(new Type[0]);
-                studControl = (Control)emptyCons.Invoke(new Object[0]);
-            }
-            else
-            {
-                Type[] ts = { typeof(object[]) };
-                ConstructorInfo emptyCons = ctrlType.GetConstructor(ts);
-                Object[] pars = { args };
-                studControl = (Control)emptyCons.Invoke(pars);
-            }
-            studControl.Location = new Point(50, 50);
-            studControl.Size = new Size(100, 70);
-            studControl.Text = "Auto Test";
-            studControl.Font = new Font(studControl.Font.FontFamily, 20);
-            studControl.Name = "StudButton";
-            studControl.Click += StudControl_Click;
-            studPoints = new List<PointF>();
-            studPoints.Add(new PointF(studControl.Left, studControl.Top));
-            studPoints.Add(new PointF(studControl.Left, studControl.Bottom));
-            studPoints.Add(new PointF(studControl.Right, studControl.Top));
-            studPoints.Add(new PointF(studControl.Right, studControl.Bottom));
-            this.Controls.Add(studControl);
+                guiResults = new List<GuiResults>();
+                Type ctrlType = getClosestTypeByNameProximity(studAssembly, expectedControlName);
 
-            Point from = new Point(1, 1);
-            insideRectangles = CreateInsideRectangles();
-            outsideRectangles = CreateOutRectangles();
-            Rectangle rect = insideRectangles[r.Next(0, insideRectangles.Count)];
-            double dist;
-            Point to;
-            if (expectedGuirrs == null)
-            {
-                do
+                if (args == null)
                 {
-                    dist = 99;
-                    to = chooseRandomPointIsideRect(rect);
-                    Segment s = new Segment(from, to);
-                    foreach (PointF kodkod in studPoints)
-                        dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
-                    Debug.WriteLine("to=" + to + ", dist=" + dist);
-                } while (dist < 5);
-            }
-            else
-            {
-                to = expectedGuirrs[0].destination;
-            }
+                    ConstructorInfo emptyCons = ctrlType.GetConstructor(new Type[0]);
+                    studControl = (Control)emptyCons.Invoke(new Object[0]);
+                }
+                else
+                {
+                    Type[] ts = { typeof(object[]) };
+                    ConstructorInfo emptyCons = ctrlType.GetConstructor(ts);
+                    Object[] pars = { args };
+                    studControl = (Control)emptyCons.Invoke(pars);
+                }
+                studControl.Location = new Point(50, 50);
+                studControl.Size = new Size(100, 70);
+                studControl.Text = "Auto Test";
+                studControl.Font = new Font(studControl.Font.FontFamily, 20);
+                studControl.Name = "StudButton";
+                studControl.Click += StudControl_Click;
+                studPoints = new List<PointF>();
+                studPoints.Add(new PointF(studControl.Left, studControl.Top));
+                studPoints.Add(new PointF(studControl.Left, studControl.Bottom));
+                studPoints.Add(new PointF(studControl.Right, studControl.Top));
+                studPoints.Add(new PointF(studControl.Right, studControl.Bottom));
+                this.Controls.Add(studControl);
 
-            sendCursor(from, to);
+                Point from = new Point(1, 1);
+                insideRectangles = CreateInsideRectangles();
+                outsideRectangles = CreateOutRectangles();
+                Rectangle rect = insideRectangles[r.Next(0, insideRectangles.Count)];
+                double dist;
+                Point to;
+                if (expectedGuirrs == null)
+                {
+                    do
+                    {
+                        dist = 99;
+                        to = chooseRandomPointIsideRect(rect);
+                        Segment s = new Segment(from, to);
+                        foreach (PointF kodkod in studPoints)
+                            dist = Math.Min(dist, Segment.dist_Point_to_Segment(kodkod, s));
+                        Debug.WriteLine("to=" + to + ", dist=" + dist);
+                    } while (dist < 5);
+                }
+                else
+                {
+                    to = expectedGuirrs[0].destination;
+                }
+
+                sendCursor(from, to);
+
+            }
+            catch (Exception exc)
+            {
+                int gradeLost = 30;
+                rr.grade -= gradeLost;
+                rr.error_lines.Add(String.Format("Some terrible exception happened while initializing your GateButton test. Exception is:{1}. Therefore, could not continue with test. Minus {0} points.", gradeLost, exc.Message));
+                this.DialogResult = DialogResult.Abort;
+                return;
+
+            }
 
         }
 
